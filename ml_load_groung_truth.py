@@ -7,15 +7,17 @@ from utils import load_yaml
 
 class GroundTruthLoad:
     """
-    The Ground Truth data object which contains features to:
-     * counter the JSON low-level data
-     * Todo: create logger object
+        The Ground Truth data object which contains features to:
+         * counter the JSON low-level data
+         * Todo: create logger object
 
-     Attributes:
-            class_to_search (str):The target class to search from the ground truth data (e.g. danceability)
-    """
-    def __init__(self, class_to_search):
-        self.class_to_search = class_to_search
+         Attributes:
+        """
+    def __init__(self):
+        """
+        Todo: description
+        """
+        self.class_to_evaluate = ''
         self.path_app = ''
         self.ground_truth_data = {}
         self.labeled_tracks = {}
@@ -30,6 +32,7 @@ class GroundTruthLoad:
     def get_path_app(self):
         """
         Finds the path of the folder that the application is located.
+        :return:
         """
         self.path_app = os.path.abspath(os.getcwd())
         print('Current path:', self.path_app)
@@ -39,11 +42,13 @@ class GroundTruthLoad:
         """
         Loads the the ground truth file.
         * The directory with the dataset should be located inside the app folder location.
+        :return:
         """
         config_data = load_yaml()
         self.dataset_dir = config_data.get('ground_truth_directory')
+        self.class_to_evaluate = config_data.get('class_name_train')
         with open(os.path.join(self.path_app, '{}/{}/metadata/groundtruth.yaml'.format(
-                self.dataset_dir, self.class_to_search)), 'r') as stream:
+                self.dataset_dir, self.class_to_evaluate)), 'r') as stream:
             try:
                 self.ground_truth_data = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
@@ -53,12 +58,10 @@ class GroundTruthLoad:
         """
         Creates the pandas DataFrame with the tracks.
         Todo: more comments
-        Returns:
-            Pandas DataFrame / None: a DataFrame with the tracks included in the ground truth yaml file
-                                                containing the track name, the path to load the JSON low-level data, the
-                                                label, etc. Else, it returns None.
+        :return:
+        DataFrame or None: a DataFrame with the tracks included in the ground truth yaml file containing the track name,
+        the path to load the JSON low-level data, the label, etc. Else, it returns None.
         """
-
         self.labeled_tracks = self.ground_truth_data['groundTruth']
         # the class name from the ground truth data that is the target
         self.class_name = self.ground_truth_data['className']
@@ -103,13 +106,15 @@ class GroundTruthLoad:
 
     def check_ground_truth_data(self):
         """
-        Todo:
+        Todo: description
+        :return:
         """
         pprint(self.ground_truth_data)
 
     def check_ground_truth_info(self):
         """
-        Todo:
+        Todo: description
+        :return:
         """
         len(self.ground_truth_data['groundTruth'].keys())
         print('Ground truth data class/target:', self.ground_truth_data['className'])
@@ -119,6 +124,7 @@ class GroundTruthLoad:
     def check_df_info(self):
         """
         Prints information about the Pandas DataFrame that is generated from the ground truth data.
+        :return:
         """
         print('Check the length of the dictionary from where the DF is created:', len(self.tracks))
         print('Tracks DataFrame:')
@@ -129,6 +135,7 @@ class GroundTruthLoad:
     def check_tracks_folders(self):
         """
         Todo: function explanation docstring
+        :return:
         """
         if len(self.labeled_tracks.keys()) is not 0:
             folders = []
@@ -145,6 +152,7 @@ class GroundTruthLoad:
         """
         Prints the JSON low-level data that is contained inside the dataset directory (the dataset
         directory is declared in configuration file).
+        :return:
         """
         counter = 0
         for root, dirs, files in os.walk(os.path.join(self.path_app, self.dataset_dir)):
@@ -156,6 +164,6 @@ class GroundTruthLoad:
 
 
 if __name__ == '__main__':
-    ground_truth = GroundTruthLoad(class_to_search='danceability')
+    ground_truth = GroundTruthLoad()
     print()
     print(ground_truth.create_df_tracks())

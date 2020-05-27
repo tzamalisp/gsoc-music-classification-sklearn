@@ -4,14 +4,14 @@ from pprint import pprint
 from utils import load_yaml, FindCreateDirectory
 import tensorflow
 from tensorflow.keras.utils import to_categorical
-from sklearn.preprocessing import Imputer
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 # saving the ML model to pickle file and load it
 import pickle
-from sklearn.externals import joblib
+# from sklearn.externals import joblib
 
 config_data = load_yaml()
 
@@ -45,6 +45,11 @@ def export_label_data(df_full):
 
 
 def remove_unnecessary_columns(df):
+    """
+
+    :param df:
+    :return:
+    """
     # remove unnecessary columns that will not be exploited by the training phase
     columns_to_remove = config_data.get("remove_columns")
     # append the targeted class (i.e. the y values)
@@ -59,6 +64,11 @@ def remove_unnecessary_columns(df):
 
 
 def enumerate_categorical_values(df_feats_ml):
+    """
+
+    :param df_feats_ml:
+    :return:
+    """
     print("DF categorical columns:")
     print(df_feats_ml.select_dtypes(include=["object"]).columns)
     df_cat = df_feats_ml[config_data.get("enumeration_columns")]
@@ -79,7 +89,7 @@ def pipeline_numerical(df_num_attr):
     Todo: Pipeline
     """
     pipeline = Pipeline([
-        ("imputer", Imputer(strategy="mean")),
+        ("imputer", SimpleImputer(strategy='mean')),
         ("std_scaler", StandardScaler),
         ("pca_reducer", PCA(n_components=config_data.get("pca_n_components"))),
     ])

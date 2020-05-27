@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import collections
 from ml_load_groung_truth import GroundTruthLoad
+from utils import DfChecker
 
 
 def flatten_dict_full(dictionary, sep="_"):
@@ -37,6 +38,8 @@ class FeaturesDf:
     """
     def __init__(self, df_tracks):
         self.df_tracks = df_tracks
+        self.list_feats_tracks = []
+        self.counter_items_transformed = 0
         self.df_feats_tracks = pd.DataFrame()
         self.df_full_tracks = pd.DataFrame()
 
@@ -46,12 +49,13 @@ class FeaturesDf:
         """
         Creates the low-level DataFrame. Cleans also the low-level data from the unnecessary features before creating
         the DF.
+
+        :return:
+        DataFrame: low-level features Daa=taFrame from all the tracks in the collection.
         """
-        list_feats_tracks = []
+        # clear the list if it not empty
+        self.list_feats_tracks.clear()
 
-        list_feats_tracks.clear()  # clear the list if it not empty
-
-        counter_items_transformed = 0
         for index, row in self.df_tracks.iterrows():
             f = open(row['track_path'])
             data_feats_item = json.load(f)
@@ -66,56 +70,51 @@ class FeaturesDf:
             data_feats_item = flatten_dict_full(data_feats_item)
 
             # append to a full tracks features pandas df
-            list_feats_tracks.append(dict(data_feats_item))
+            self.list_feats_tracks.append(dict(data_feats_item))
 
-            counter_items_transformed += 1
+            self.counter_items_transformed += 1
 
-        print('Items parsed and transformed:', counter_items_transformed)
-        # The type of the dictionary's keys list is: <class 'dict_keys'>
-        print('Type of the List of features keys:', type(list_feats_tracks[0].keys()))
         # The dictionary's keys list is transformed to type <class 'list'>
-        self.df_feats_tracks = pd.DataFrame(list_feats_tracks, columns=list(list_feats_tracks[0].keys()))
+        self.df_feats_tracks = pd.DataFrame(self.list_feats_tracks, columns=list(self.list_feats_tracks[0].keys()))
+
+        return self.df_feats_tracks
+
+    def check_processing_info(self):
+        """
+        Prints some information about the low-level data to DataFrame transformation step and its middle processes.
+        :return:
+        """
+        print('Items parsed and transformed:', self.counter_items_transformed)
+        # The type of the dictionary's keys list is: <class 'dict_keys'>
+        print('Type of the list of features keys:', type(self.list_feats_tracks[0].keys()))
+        # The dictionary's keys list is transformed to type <class 'list'>
+        print('Confirm the type of list transformation of features keys', type(list(self.list_feats_tracks[0].keys())))
 
     def concatenate_dfs(self):
         """
         :return:
         DataFrame: The tracks with all the ground truth data and the corresponding low-level data flattened.
         """
-        print('Tracks DataFrame columns:', self.df_tracks.columns)
         self.df_tracks.drop(labels=['track_path'], axis=1, inplace=True)
         self.df_full_tracks = pd.concat([self.df_tracks, self.df_feats_tracks], axis=1)
         return self.df_full_tracks
 
-    def check_feats_df_info(self):
-        """
-        Todo: description
-        :return:
-        """
-        print('Features DataFrame head:')
-        print(self.df_feats_tracks.head())
-        print()
-        print('Information:')
-        print(self.df_feats_tracks.info())
-        print()
-        print('Shape:')
-        print(self.df_feats_tracks.shape)
-
-    def check_full_df_info(self):
-        """
-        Todo: description
-        :return:
-        """
-        print('Full tracks DataFrame head:')
-        print(self.df_full_tracks.head())
-        print()
-        print('Information:')
-        print(self.df_full_tracks.info())
-        print()
-        print('Shape:')
-        print(self.df_full_tracks.shape)
-
 
 if __name__ == '__main__':
-    gt_data = GroundTruthLoad()
-    feat_data = FeaturesDf(gt_data.create_df_tracks())
-    feat_data.check_feats_df_info()
+    #
+    df_gt_data = GroundTruthLoad().create_df_tracks()
+    df_feat_data = FeaturesDf(df_tracks=df_gt_data)
+    df_full = df_feat_data.concatenate_dfs()
+
+    # df GT data info
+    print('GROUND TRUTH INFO:')
+    checker = DfChecker(df_check=df_gt_data)
+    checker.check_df_info()
+
+    print()
+    print()
+
+    # df full info
+    print('CONCATENATE DF INFO:')
+    checker = DfChecker(df_check=df_full)
+    checker.check_df_info()

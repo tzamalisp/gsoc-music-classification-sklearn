@@ -1,3 +1,4 @@
+from utils import load_yaml, FindCreateDirectory
 from ml_load_groung_truth import GroundTruthLoad
 from ml_load_low_level import FeaturesDf
 from utils import DfChecker
@@ -6,17 +7,14 @@ from ml_preprocessing import remove_unnecessary_columns
 from ml_preprocessing import enumerate_categorical_values
 from ml_preprocessing import scaling
 from ml_preprocessing import dimensionality_reduction
-
-from sklearn.model_selection import train_test_split
-from sklearn import datasets
-from sklearn.svm import SVC
-from sklearn.model_selection import cross_val_score
-
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import confusion_matrix, classification_report
+from ml_preprocessing import split_to_train_test
+from ml_model import TrainModel
+from ml_model import Evaluation
 
 
 def main():
+    config_data = load_yaml()
+
     df_gt_data = GroundTruthLoad().create_df_tracks()
     print()
     print()
@@ -40,17 +38,12 @@ def main():
     # labels (y)
     label_data = export_label_data(df_full)
 
-    # define the length of parameters
-    parameters_grid = {'kernel': ['poly', 'rbf'],
-                       'C': [0.1, 1, 10, 100, 3, 5, 7, 9, 11],
-                       'gamma': [1, 0.1, 0.01, 0.001, 3, 5, 7, 9, 11],
-                       'class_weight': ['balanced', None]
-                       }
+    train_feats, test_feats, train_labels, test_labels = split_to_train_test(feats_pca, label_data)
 
-    svm = SVC(gamma="auto", probability=True)
-    gsvc_pca = GridSearchCV(estimator=svm, param_grid=parameters_grid, cv=5)
-    gsvc_pca.fit(feats_pca, label_data)
-    print(gsvc_pca.best_score_)
+    model_trained = TrainModel(config=config_data, features=feats_pca, labels=label_data).train_grid_search()
+
+    eval_model = Evaluation(model=model_trained, x_data=test_feats, y_data=test_labels, model_name="SVM GridSearch")
+    eval_model.model_evaluation()
 
 
 def example(argument):

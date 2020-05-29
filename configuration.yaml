@@ -2,13 +2,13 @@ ground_truth_directory: acousticbrainz-datasets
 class_name_train: danceability
 # train kind: svm, deep_learning, supervised_lb
 train_kind: svm
-enumeration_columns:
-  - tonal_chords_key
-  - tonal_chords_scale
-  - tonal_key_key
-  - tonal_key_scale
+enumeration_columns: ['tonal_chords_key', 'tonal_chords_scale', 'tonal_key_key', 'tonal_key_scale']
 # remove the unnecessary DF columns before training (it will also be deleted the class name column)
-remove_columns:
-  - json_directory
-  - track
+remove_columns: ['json_directory',  'track']
 pca_n_components: .95
+grid_kernel: ['poly', 'rbf']
+grid_gamma: [0.001, 0.01, 0.1, 1, 3, 5, 7, 9, 10, 11, 100]
+grid_C: [0.001, 0.01, 0.1, 1, 3, 5, 7, 9, 10, 11, 100]
+grid_class_weight: ['balanced', null]
+k-fold: 5
+exports_directory: exports

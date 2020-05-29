@@ -9,9 +9,10 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
 # saving the ML model to pickle file and load it
 import pickle
-# from sklearn.externals import joblib
+import joblib
 
 config_data = load_yaml()
 
@@ -25,7 +26,7 @@ def export_label_data(df_full):
     class_to_evaluate = config_data.get("class_name_train")
     label_data = df_full[class_to_evaluate]
     # svm can handle string data
-    if config_data.get("train_kind") == "svm":
+    if config_data.get("train_kind") == "svm" or config_data.get("train_kind") == "grid_svm":
         label_data = label_data
         print(label_data.head())
     # Tensorflow can handle numpy ndarray arrays
@@ -104,7 +105,7 @@ def scaling(feat_data):
     feat_data_normalized = scaler.transform(feat_data)
 
     # save the scaler
-    exports_dir = FindCreateDirectory("exports").inspect_directory()
+    exports_dir = FindCreateDirectory(config_data.get("exports_directory")).inspect_directory()
     scaler_save_path = os.path.join(exports_dir, "scaler.pkl")
     pickle.dump(scaler, open(scaler_save_path, "wb"))
 
@@ -116,8 +117,13 @@ def dimensionality_reduction(feat_data):
     pca.fit(feat_data)
     feat_data_pca = pca.transform(feat_data)
     # save the pca transformer
-    exports_dir = FindCreateDirectory("exports").inspect_directory()
+    exports_dir = FindCreateDirectory(config_data.get("exports_directory")).inspect_directory()
     pca_save_path = os.path.join(exports_dir, "pca_transformer.pkl")
     pickle.dump(pca, open(pca_save_path, "wb"))
 
     return feat_data_pca
+
+
+def split_to_train_test(x_data, y_data):
+    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.33, random_state=42)
+    return x_train, x_test, y_train, y_test

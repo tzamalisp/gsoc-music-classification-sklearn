@@ -53,6 +53,16 @@ def main():
     print(gsvc_pca.best_score_)
 
 
+def example(argument):
+    """
+
+    :param argument:
+    :return:
+    """
+    value = argument
+    return value
+
+
 if __name__ == "__main__":
     main()
 

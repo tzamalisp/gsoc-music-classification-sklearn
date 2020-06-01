@@ -1,14 +1,14 @@
 import os
 import pandas as pd
+import numpy as np
 from utils import load_yaml, FindCreateDirectory
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import confusion_matrix, classification_report
-import numpy as np
-import matplotlib.pyplot as plt
-
-
+from sklearn.model_selection import train_test_split
+# Neural Networks
+import tensorflow as tf
+from tensorflow import keras
 
 
 class TrainModel:
@@ -21,11 +21,77 @@ class TrainModel:
         """
         Todo: SVM training
         """
+        svm = SVC(gamma="auto", probability=True)
+        svm.fit(self.features, self.labels)
+
+        return svm
 
     def train_neural_network(self):
         """
         Todo: Neural Network training
         """
+        print("Type of features:", type(self.features))
+
+        early_stopping = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
+        checkpoint = keras.callbacks.ModelCheckpoint(os.path.join(os.getcwd(), "exports", "nn_model.h5"),
+                                                     monitor='val_acc',
+                                                     verbose=1,
+                                                     save_best_only=True,
+                                                     mode='max'
+                                                     )
+        # # transform to np array
+        # self.features = self.features.values
+        # print("Type of features:", type(self.features))
+        x_train, x_test, y_train, y_test = train_test_split(self.features,
+                                                            self.labels,
+                                                            test_size=0.33,
+                                                            random_state=42)
+        instance = x_train[0]
+        print('Instance X_train shape:', instance.shape)
+        instance_label = y_train[0]
+        print("Instance y_train shape:", instance_label.shape)
+        model = keras.Sequential([
+            keras.layers.Flatten(input_shape=instance.shape),
+            keras.layers.Dense(instance.shape[0], activation='relu'),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(instance_label.shape[0])
+        ])
+
+        # Summary of the ConvNet model.
+        print('Summary of the model:')
+        model.summary()
+
+        model.compile(optimizer='adam',
+                      loss="categorical_crossentropy",
+                      metrics=["accuracy"]
+                      )
+        model.fit(self.features,
+                  self.labels,
+                  batch_size=32,
+                  epochs=100,
+                  callbacks=[early_stopping, checkpoint],
+                  validation_split=0.2
+                  )
+        scores = model.evaluate(x=x_test,
+                                y=y_test,
+                                verbose=1
+                                )
+        print("Test loss: ", scores[0])
+        print("Test accuracy: ", scores[1])
 
     def train_grid_search(self):
         """
@@ -41,7 +107,8 @@ class TrainModel:
                            "class_weight": self.config.get("grid_class_weight")
                            }
         svm = SVC(gamma="auto", probability=True)
-        grid = GridSearchCV(estimator=svm, param_grid=parameters_grid, cv=5)
+        # n_jobs --> -1, means using all processors of the CPU when training the model. The defaults None: means 1
+        grid = GridSearchCV(estimator=svm, param_grid=parameters_grid, cv=5, n_jobs=self.config.get("parallel_jobs"))
         grid.fit(self.features, self.labels)
         print("Best Score:")
         print(grid.best_score_)
@@ -56,110 +123,6 @@ class TrainModel:
 
     def train_randomized_search(self):
         """
-        Todo: GridSearch training
+        Todo: RandomizedSearch training
         """
 
-
-class Evaluation:
-    def __init__(self, model, x_data, y_data, model_name):
-        self.model = model
-        self.x_data = x_data
-        self.y_data = y_data
-        self.model_name = model_name
-
-    def model_evaluation(self):
-        """A function to compute the evaluation based on
-        Parameters:
-        model: the model to run predictions
-        X_data (numpy array): the test data to provide predictions from
-        y_data (pd.Series or numpy array): the labels data
-        model_name (str): The name of the model that will be evaluated
-
-        """
-        print("Model to evaluate:", self.model_name)
-        print("Features shape:", self.x_data.shape)
-        print("Labels shape:", self.y_data.shape)
-        print("Model classes:", self.model.classes_)
-        print()
-
-        # predictions
-        print("PREDICTIONS - {}".format(self.model_name))
-        predictions = self.model.predict(self.x_data)
-        print("{} - Confusion matrix:".format(self.model_name))
-        print(confusion_matrix(self.y_data, predictions))
-        print("Confusion Matrix: Each class in Percent of recall.")
-        cm = confusion_matrix(self.y_data, predictions)
-        cm = (cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]) * 100
-        print(cm)
-        print("Type of CM:", type(cm))
-        print()
-        print("Classification Report:")
-        print(classification_report(self.y_data, predictions))
-        print()
-
-        print("PROBABILITIES - {}".format(self.model_name))
-        # probabilities for each prediction
-        prob_predictions = self.model.predict_proba(self.x_data)
-        prob_predictions = prob_predictions * 100  # multiply * 100 for better resutls
-        # df_prob_gsvc_pca_test.drop(df.index, inplace=True)  # if DF exists, empty it
-        df_prob_predictions = pd.DataFrame(prob_predictions)
-        print("Head of the predictions probabilities DF:")
-        print(df_prob_predictions.head())
-        print()
-        # transform the predictions and the test data for the
-        # DF concatenation with the probabilities DF
-        series_predictions = pd.Series(predictions)
-        y_data_reindexed = self.y_data.reset_index(drop=True)
-        print("Type of the re-indexed y_data:", type(y_data_reindexed))
-        print()
-        # concatenate
-        df_prob_predictions = pd.concat([df_prob_predictions, series_predictions, y_data_reindexed],
-                                        axis=1, ignore_index=False)
-
-        df_prob_predictions.columns = ["prob_pred_dance", "prob_pred_not_dance", "prediction", "true"]
-        print("Final DF:")
-        print(df_prob_predictions.head())
-        print()
-
-        print("MEAN ACCURACIES IN THE PROBABILITIES PREDICTIONS - {}".format(self.model_name))
-        tp_values = []
-        tn_values = []
-        fp_values = []
-        fn_values = []
-
-        for index, row in df_prob_predictions.iterrows():
-            if row["true"] == row["prediction"]:
-                if row["prediction"] == "danceable":
-                    tp_values.append(row["prob_pred_dance"])
-                elif row["prediction"] == "not_danceable":
-                    tn_values.append(row["prob_pred_not_dance"])
-            if row["true"] != row["prediction"]:
-                if row["prediction"] == "danceable":
-                    fn_values.append(row["prob_pred_dance"])
-                elif row["prediction"] == "not_danceable":
-                    fp_values.append(row["prob_pred_not_dance"])
-
-        # TP
-        if len(tp_values) is 0:
-            tp_mean = 0.0
-        else:
-            tp_mean = sum(tp_values) / len(tp_values)
-        print("TP mean:", tp_mean)
-        # FP
-        if len(fp_values) is 0:
-            fp_mean = 0.0
-        else:
-            fp_mean = sum(fp_values) / len(fp_values)
-        print("FP mean:", fp_mean)
-        # TN
-        if len(tn_values) is 0:
-            tn_mean = 0.0
-        else:
-            tn_mean = sum(tn_values) / len(tn_values)
-        print("TN mean:", tn_mean)
-        # FN
-        if len(fn_values) is 0:
-            fn_mean = 0.0
-        else:
-            fn_mean = sum(fn_values) / len(fn_values)
-        print("FN mean:", fn_mean)

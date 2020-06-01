@@ -9,41 +9,104 @@ from ml_preprocessing import scaling
 from ml_preprocessing import dimensionality_reduction
 from ml_preprocessing import split_to_train_test
 from ml_model import TrainModel
-from ml_model import Evaluation
+from ml_evaluation import Evaluation
+import time
+from datetime import datetime
 
 
 def main():
     config_data = load_yaml()
-
-    df_gt_data = GroundTruthLoad().create_df_tracks()
+    print("Dataset/class for evaluation:", config_data.get("class_name_train"))
+    print("Kind of training:", config_data.get("train_kind"))
+    print()
+    print("LOAD GROUND TRUTH")
+    df_gt_data = GroundTruthLoad(config_data).create_df_tracks()
     print()
     print()
-
+    print("LOAD LOW LEVEL and FLATTEN THEM")
     df_full = FeaturesDf(df_tracks=df_gt_data).concatenate_dfs()
     print(df_full.head())
     print(df_full.shape)
-
-    y = export_label_data(df_full)
+    print()
+    print()
+    print("EXPORTING LABELS")
+    y = export_label_data(df_full, config_data)
     print(type(y))
+    print()
+    print()
 
     # remove no-useful columns
-    df_ml = remove_unnecessary_columns(df_full)
+    print("REMOVE NO USEFUL FEATURES")
+    df_ml = remove_unnecessary_columns(df_full, config_data)
+    print()
+    print()
+
     # enumerate categorical data
-    df_ml_num = enumerate_categorical_values(df_ml)
+    print("FEATURES ENUMERATION")
+    df_ml_num = enumerate_categorical_values(df_ml, config_data)
+    print()
+    print()
+
     # scale the data
-    feats_scaled = scaling(df_ml_num)
+    print("SCALING")
+    feats_scaled = scaling(df_ml_num, config_data)
+    print()
+    print()
+
     # pca apply
-    feats_pca = dimensionality_reduction(feats_scaled)
+    print("PCA")
+    feats_pca = dimensionality_reduction(feats_scaled, config_data)
+    print()
+    print()
 
     # labels (y)
-    label_data = export_label_data(df_full)
+    print("EXPORT LABEL DATA (str, one-hot, encoded)")
+    label_data = export_label_data(df_full, config_data)
+    print()
+    print()
 
+    # train/test split
+    print("TRAIN/TEST SPLIT")
     train_feats, test_feats, train_labels, test_labels = split_to_train_test(feats_pca, label_data)
 
-    model_trained = TrainModel(config=config_data, features=feats_pca, labels=label_data).train_grid_search()
+    print()
+    print()
 
-    eval_model = Evaluation(model=model_trained, x_data=test_feats, y_data=test_labels, model_name="SVM GridSearch")
+    # Model train
+    print("MODEL TRAINING")
+    print("Starting training time calculation..")
+    start = time.time()
+    print("Start time:", datetime.now())
+    if config_data.get("train_kind") == "grid_svm":
+        model_trained = TrainModel(config=config_data,
+                                   features=feats_pca,
+                                   labels=label_data
+                                   ).train_grid_search()
+    elif config_data.get("train_kind") == "svm":
+        model_trained = TrainModel(config=config_data,
+                                   features=feats_pca,
+                                   labels=label_data
+                                   ).train_svm()
+    elif config_data.get("train_kind") == "deep_learning":
+        model_trained = TrainModel(config=config_data,
+                                   features=feats_pca,
+                                   labels=label_data
+                                   ).train_neural_network()
+    print()
+    end = time.time()
+    print("End time:", datetime.now())
+    print()
+    print()
+
+    # Model evaluation
+    print("MODEL EVALUATION")
+    eval_model = Evaluation(config=config_data,
+                            model=model_trained,
+                            x_data=test_feats,
+                            y_data=test_labels)
     eval_model.model_evaluation()
+    print()
+    print("Train time:", end - start)
 
 
 def example(argument):

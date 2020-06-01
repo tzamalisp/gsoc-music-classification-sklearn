@@ -3,6 +3,7 @@ import pandas as pd
 import collections
 from ml_load_groung_truth import GroundTruthLoad
 from utils import DfChecker
+from utils import load_yaml
 
 
 def flatten_dict_full(dictionary, sep="_"):
@@ -55,9 +56,11 @@ class FeaturesDf:
         """
         # clear the list if it not empty
         self.list_feats_tracks.clear()
-
         for index, row in self.df_tracks.iterrows():
+            # print(row['track_path'])
             f = open(row['track_path'])
+            # data_feats_item = {}
+            # if f:
             data_feats_item = json.load(f)
 
             # remove unnecessary features data
@@ -96,19 +99,34 @@ class FeaturesDf:
         DataFrame: The tracks with all the ground truth data and the corresponding low-level data flattened.
         """
         self.df_tracks.drop(labels=['track_path'], axis=1, inplace=True)
+        print("CONCATENATING")
+        print("TRACKS SHAPE:", self.df_tracks.shape)
+        print("LOW LEVEL:", self.df_feats_tracks.shape)
+
         self.df_full_tracks = pd.concat([self.df_tracks, self.df_feats_tracks], axis=1)
+        print("FULL:", self.df_full_tracks.shape)
         return self.df_full_tracks
 
 
 if __name__ == '__main__':
+    print("LOW LEVEL DF LOAD SCRIPT")
     #
-    df_gt_data = GroundTruthLoad().create_df_tracks()
+    config_data = load_yaml()
+    df_gt_data = GroundTruthLoad(config_data).create_df_tracks()
+    print(df_gt_data.shape)
     df_feat_data = FeaturesDf(df_tracks=df_gt_data)
+
     df_full = df_feat_data.concatenate_dfs()
 
     # df GT data info
     print('GROUND TRUTH INFO:')
     checker = DfChecker(df_check=df_gt_data)
+    checker.check_df_info()
+    print()
+    print()
+    # df GT data info
+    print('FEATURES DF INFO:')
+    checker = DfChecker(df_check=df_feat_data.create_low_level_df())
     checker.check_df_info()
 
     print()

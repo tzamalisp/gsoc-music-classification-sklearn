@@ -15,23 +15,22 @@ import pickle
 import joblib
 
 
-def export_label_data(df_full, config):
+def export_label_data(df, class_name, config):
     """
 
-    :param df_full:
+    :param df:
+    :param class_name:
     :param config:
     :return:
     """
-    class_to_evaluate = config.get("class_name_train")
-    if class_to_evaluate.startswith("timbre"):
-        class_to_evaluate = "timbre"
-    label_data = df_full[class_to_evaluate]
+    print("EXPORT TARGET:", class_name)
+    label_data = df[class_name]
     # svm can handle string data
     if config.get("train_kind") == "svm" or config.get("train_kind") == "grid_svm":
         label_data = label_data
         print("Label Data:")
         print(label_data.head())
-        print("Unique labels - values:", label_data.value_counts())
+        print("Unique labels - values:\n", label_data.value_counts())
     # TensorFlow can handle numpy ndarray arrays
     elif config.get("train_kind") == "deep_learning":
         lb_encoder = LabelEncoder()
@@ -50,21 +49,24 @@ def export_label_data(df_full, config):
     return label_data
 
 
-def remove_unnecessary_columns(df, config):
+def remove_unnecessary_columns(df, class_name, config):
     """
 
     :param df:
+    :param class_name:
     :param config:
     :return:
     """
     # remove unnecessary columns that will not be exploited by the training phase
-    columns_to_remove = config.get("remove_columns")
+    columns_to_remove = []
+    # columns_to_remove.append(col for col in config["remove_columns"])
+    for col in config["remove_columns"]:
+        columns_to_remove.append(col)
+    print("COLUMNS TO REMOVE BEFORE ADDING THE CLASS:", columns_to_remove)
     # append the targeted class (i.e. the y values)
-    class_to_evaluate = config.get("class_name_train")
-    if class_to_evaluate.startswith("timbre"):
-        class_to_evaluate = "timbre"
-    columns_to_remove.append(class_to_evaluate)
-    print("Columns that will be removed::", columns_to_remove)
+    print("CLASS NAME TO REMOVE FROM THIS DF:", class_name)
+    columns_to_remove.append(class_name)
+    print("Columns that will be removed:", columns_to_remove)
     df_feats_ml = df.drop(labels=columns_to_remove, axis=1)
     print("DF with ML features only:")
     print(df_feats_ml.shape)
@@ -77,6 +79,7 @@ def enumerate_categorical_values(df_feats_ml, config):
     """
 
     :param df_feats_ml:
+    :param config:
     :return:
     """
     print("DF categorical columns:")
@@ -96,7 +99,10 @@ def enumerate_categorical_values(df_feats_ml, config):
 
 def pipeline_numerical(df_num_attr, config):
     """
-    Todo: Pipeline
+
+    :param df_num_attr:
+    :param config:
+    :return:
     """
     pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy='mean')),
@@ -110,7 +116,6 @@ def pipeline_numerical(df_num_attr, config):
 
 def scaling(feat_data, config):
     """
-
     :param feat_data:
     :param config:
     :return:

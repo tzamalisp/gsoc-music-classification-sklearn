@@ -3,9 +3,35 @@ import yaml
 import pandas as pd
 from pprint import pprint
 from utils import DfChecker
-from utils import load_yaml
+from utils import load_yaml, FindCreateDirectory
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+
+
+class ListGroundTruthFiles:
+    def __init__(self, config):
+        self.config = config
+        self.path_app = ""
+        self.dataset_dir = ""
+        self.class_dir = ""
+        self.get_path_app()
+
+    def get_path_app(self):
+        """
+        Finds the path of the folder that the application is located.
+        :return:
+        """
+        self.path_app = os.getcwd()
+        print("Current path:", self.path_app)
+        print("Type:", type(self.path_app))
+
+    def list_gt_filenames(self):
+        self.dataset_dir = self.config.get("ground_truth_directory")
+        self.class_dir = self.config.get("class_dir")
+        path = os.path.join(self.path_app, self.dataset_dir, self.class_dir, "metadata")
+        ground_truth_list = [filename for filename in os.listdir(os.path.join(path))
+                             if filename.startswith("groundtruth")]
+        return ground_truth_list
 
 
 class GroundTruthLoad:
@@ -16,14 +42,14 @@ class GroundTruthLoad:
 
          Attributes:
         """
-    def __init__(self, config):
+    def __init__(self, config, gt_filename):
         """
         Todo: description
         """
         self.config = config
-        self.class_to_evaluate = ""
+        self.gt_filename = gt_filename
+        self.class_dir = ""
         self.path_app = ""
-        self.class_name_path = ""
         self.ground_truth_data = {}
         self.labeled_tracks = {}
         self.class_name = ""
@@ -34,30 +60,27 @@ class GroundTruthLoad:
         self.load_local_ground_truth()
         # self.create_df_tracks()
 
-    def get_path_app(self):
-        """
-        Finds the path of the folder that the application is located.
-        :return:
-        """
-        self.path_app = os.path.abspath(os.getcwd())
-        print("Current path:", self.path_app)
-        print("Type:", type(self.path_app))
-
     def load_local_ground_truth(self):
         """
         Loads the the ground truth file.
         * The directory with the dataset should be located inside the app folder location.
         :return:
         """
-        self.path_app = os.path.abspath(os.getcwd())
+        # self.path_app = os.path.abspath(os.getcwd())
+        self.path_app = os.getcwd()
         self.dataset_dir = self.config.get("ground_truth_directory")
-        self.class_to_evaluate = self.config.get("class_name_train")
-        with open(os.path.join(self.path_app, "{}/{}/metadata/groundtruth.yaml".format(
-                self.dataset_dir, self.class_to_evaluate)), "r") as stream:
+        self.class_dir = self.config.get("class_dir")
+        with open(os.path.join(self.path_app, "{}/{}/metadata/{}".format(
+                self.dataset_dir, self.class_dir, self.gt_filename)), "r") as stream:
             try:
                 self.ground_truth_data = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
+
+    def export_class_name(self):
+        self.class_name = self.ground_truth_data["className"]
+        print("EXPORT CLASS NAME:", self.class_name)
+        return self.class_name
 
     def create_df_tracks(self):
         """
@@ -68,17 +91,14 @@ class GroundTruthLoad:
         the path to load the JSON low-level data, the label, etc. Else, it returns None.
         """
         self.labeled_tracks = self.ground_truth_data["groundTruth"]
-        # the class name from the ground truth data that is the target
+        print("GROUND TRUTH DICTIONARY LENGTH:", len(self.labeled_tracks))
         self.class_name = self.ground_truth_data["className"]
-        if self.class_name == "timbre":
-            self.class_name_path = "timbre_bright_dark"
-        else:
-            self.class_name_path = self.class_name
+        # the class name from the ground truth data that is the target
         print('APP:', self.path_app)
         print('DATASET-DIR', self.dataset_dir)
-        print('CLASS NAME PATH', self.class_name_path)
+        print('CLASS NAME PATH', self.class_dir)
         # the path to the "features" directory that contains the rest of the low-level data sub-directories
-        path_features = os.path.join(self.path_app, self.dataset_dir, self.class_name_path, "features")
+        path_features = os.path.join(self.path_app, self.dataset_dir, self.class_dir, "features")
         print("PATHHHH", path_features)
         # check if the "features" directory is empty or contains the "mp3" or the "orig" sub-directory
         low_level_dir = ""
@@ -97,7 +117,7 @@ class GroundTruthLoad:
         # print which directory contains the low-level sub-directories (if exist)
         print("Low-level directory name that contains the data:", low_level_dir)
         # path to the low-level data sub-directories
-        path_low_level = os.path.join(self.path_app, self.dataset_dir, self.class_name_path, "features", low_level_dir)
+        path_low_level = os.path.join(self.path_app, self.dataset_dir, self.class_dir, "features", low_level_dir)
         # create a list with dictionaries that contain the information from each track in
         if low_level_dir != "":
             for key, value in self.labeled_tracks.items():
@@ -128,9 +148,15 @@ class GroundTruthLoad:
                 print("Re-index the tracks DF..")
                 self.df_tracks = self.df_tracks.reset_index(drop=True)
             else:
-                print("There are no NULL values values found.")
-            self.df_tracks.to_csv(os.path.join(self.config.get("exports_directory"),
-                                               "tracks_csv", "df_{}.csv".format(self.config.get("class_name_train"))))
+                print("There are no NULL values found.")
+            if self.config.get("tracks_in_csv_format") != "":
+                tracks_csv_dir = FindCreateDirectory(self.config.get("tracks_in_csv_format")).inspect_directory()
+                self.df_tracks.to_csv(os.path.join(tracks_csv_dir, "df_{}.csv".format(self.class_name)))
+            else:
+                print("No directory to export tracks to csv is specified in the configuration file.")
+            print("DF INFO:")
+            print(self.df_tracks.info())
+            print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)
             return self.df_tracks
 
         else:
@@ -186,13 +212,23 @@ class GroundTruthLoad:
 
 
 if __name__ == "__main__":
-    print("GROUND TRUTH LOAD SCRIPT")
     config_data = load_yaml()
-    df_gt_data = GroundTruthLoad(config_data).create_df_tracks()
-    print()
-    print()
 
-    # df GT data info
-    print("CHECK THE GT DF INFO:")
-    checker = DfChecker(df_check=df_gt_data)
-    checker.check_df_info()
+    gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()
+    print(gt_files_list)
+    print("GROUND TRUTH LOAD SCRIPT")
+    for gt_file in gt_files_list:
+        gt_data = GroundTruthLoad(config_data, gt_file)
+        df_fg_data = gt_data.create_df_tracks()
+        class_name = gt_data.export_class_name()
+        print("DF_tracks:")
+        print(df_fg_data.head())
+        print()
+        print("CLASS:", class_name)
+        print()
+        print()
+    #
+    # # df GT data info
+    # print("CHECK THE GT DF INFO:")
+    # checker = DfChecker(df_check=df_gt_data)
+    # checker.check_df_info()

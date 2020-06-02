@@ -61,7 +61,7 @@ class FeaturesDf:
             f = open(row['track_path'])
             # data_feats_item = {}
             # if f:
-            data_feats_item = json.load(f)
+            data_feats_item = json.load(f, strict=False)
 
             # remove unnecessary features data
             if 'metadata' in data_feats_item:
@@ -79,7 +79,7 @@ class FeaturesDf:
 
         # The dictionary's keys list is transformed to type <class 'list'>
         self.df_feats_tracks = pd.DataFrame(self.list_feats_tracks, columns=list(self.list_feats_tracks[0].keys()))
-
+        print("COLUMNS CONTAIN OBJECTS", self.df_feats_tracks.select_dtypes(include=['object']).columns)
         return self.df_feats_tracks
 
     def check_processing_info(self):
@@ -99,12 +99,15 @@ class FeaturesDf:
         DataFrame: The tracks with all the ground truth data and the corresponding low-level data flattened.
         """
         self.df_tracks.drop(labels=['track_path'], axis=1, inplace=True)
+        print()
+        print()
         print("CONCATENATING")
         print("TRACKS SHAPE:", self.df_tracks.shape)
         print("LOW LEVEL:", self.df_feats_tracks.shape)
 
         self.df_full_tracks = pd.concat([self.df_tracks, self.df_feats_tracks], axis=1)
         print("FULL:", self.df_full_tracks.shape)
+        print("COLUMNS CONTAIN OBJECTS", self.df_full_tracks.select_dtypes(include=['object']).columns)
         return self.df_full_tracks
 
 
@@ -112,27 +115,27 @@ if __name__ == '__main__':
     print("LOW LEVEL DF LOAD SCRIPT")
     #
     config_data = load_yaml()
-    df_gt_data = GroundTruthLoad(config_data).create_df_tracks()
+    df_gt_data = GroundTruthLoad(config_data, "groundtruth.yaml").create_df_tracks()
     print(df_gt_data.shape)
     df_feat_data = FeaturesDf(df_tracks=df_gt_data)
 
-    df_full = df_feat_data.concatenate_dfs()
-
-    # df GT data info
-    print('GROUND TRUTH INFO:')
-    checker = DfChecker(df_check=df_gt_data)
-    checker.check_df_info()
-    print()
-    print()
-    # df GT data info
-    print('FEATURES DF INFO:')
-    checker = DfChecker(df_check=df_feat_data.create_low_level_df())
-    checker.check_df_info()
-
-    print()
-    print()
-
-    # df full info
-    print('CONCATENATE DF INFO:')
-    checker = DfChecker(df_check=df_full)
-    checker.check_df_info()
+    # df_full = df_feat_data.concatenate_dfs()
+    #
+    # # df GT data info
+    # print('GROUND TRUTH INFO:')
+    # checker = DfChecker(df_check=df_gt_data)
+    # checker.check_df_info()
+    # print()
+    # print()
+    # # df GT data info
+    # print('FEATURES DF INFO:')
+    # checker = DfChecker(df_check=df_feat_data.create_low_level_df())
+    # checker.check_df_info()
+    #
+    # print()
+    # print()
+    #
+    # # df full info
+    # print('CONCATENATE DF INFO:')
+    # checker = DfChecker(df_check=df_full)
+    # checker.check_df_info()

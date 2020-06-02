@@ -1,5 +1,5 @@
 from utils import load_yaml, FindCreateDirectory
-from ml_load_groung_truth import GroundTruthLoad
+from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
 from ml_load_low_level import FeaturesDf
 from utils import DfChecker
 from ml_preprocessing import export_label_data
@@ -14,60 +14,70 @@ import time
 from datetime import datetime
 
 
-def main():
+def project_ground_truth():
     config_data = load_yaml()
-    print("Dataset/class for evaluation:", config_data.get("class_name_train"))
+    print("Dataset/class for evaluation:", config_data.get("class_dir"))
     print("Kind of training:", config_data.get("train_kind"))
     print()
+    gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()
+    print(gt_files_list)
     print("LOAD GROUND TRUTH")
-    df_gt_data = GroundTruthLoad(config_data).create_df_tracks()
-    print()
-    print()
+    for gt_file in gt_files_list:
+        print("YAML FILE TO PROCESS:", gt_file)
+        gt_data = GroundTruthLoad(config_data, gt_file)
+        individual_df_gt_data = gt_data.create_df_tracks()
+        class_to_model = gt_data.export_class_name()
+        print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
+        print()
+        print()
+        model_training(df_gt_data=individual_df_gt_data, class_train=class_to_model, config=config_data)
+        print()
+        print()
+        print()
+        print()
+
+
+def model_training(df_gt_data, class_train, config):
     print("LOAD LOW LEVEL and FLATTEN THEM")
     df_full = FeaturesDf(df_tracks=df_gt_data).concatenate_dfs()
     print(df_full.head())
     print(df_full.shape)
     print()
     print()
-    print("EXPORTING LABELS")
-    y = export_label_data(df_full, config_data)
-    print(type(y))
+    # labels (y)
+    print("EXPORT LABEL/TARGET DATA (str, one-hot, encoded)")
+    label_data = export_label_data(df=df_full, class_name=class_train, config=config)
+    print("Type of target data:", type(label_data))
     print()
     print()
 
     # remove no-useful columns
     print("REMOVE NO USEFUL FEATURES")
-    df_ml = remove_unnecessary_columns(df_full, config_data)
+    df_ml = remove_unnecessary_columns(df=df_full, class_name=class_train, config=config)
     print()
     print()
 
     # enumerate categorical data
     print("FEATURES ENUMERATION")
-    df_ml_num = enumerate_categorical_values(df_ml, config_data)
+    df_ml_num = enumerate_categorical_values(df_feats_ml=df_ml, config=config)
     print()
     print()
 
     # scale the data
     print("SCALING")
-    feats_scaled = scaling(df_ml_num, config_data)
+    feats_scaled = scaling(feat_data=df_ml_num, config=config)
     print()
     print()
 
     # pca apply
     print("PCA")
-    feats_pca = dimensionality_reduction(feats_scaled, config_data)
-    print()
-    print()
-
-    # labels (y)
-    print("EXPORT LABEL DATA (str, one-hot, encoded)")
-    label_data = export_label_data(df_full, config_data)
+    feats_pca = dimensionality_reduction(feat_data=feats_scaled, config=config)
     print()
     print()
 
     # train/test split
     print("TRAIN/TEST SPLIT")
-    train_feats, test_feats, train_labels, test_labels = split_to_train_test(feats_pca, label_data)
+    train_feats, test_feats, train_labels, test_labels = split_to_train_test(x_data=feats_pca, y_data=label_data)
 
     print()
     print()
@@ -77,20 +87,23 @@ def main():
     print("Starting training time calculation..")
     start = time.time()
     print("Start time:", datetime.now())
-    if config_data.get("train_kind") == "grid_svm":
-        model_trained = TrainModel(config=config_data,
+    if config.get("train_kind") == "grid_svm":
+        model_trained = TrainModel(config=config,
                                    features=feats_pca,
-                                   labels=label_data
+                                   labels=label_data,
+                                   class_name=class_train
                                    ).train_grid_search()
-    elif config_data.get("train_kind") == "svm":
-        model_trained = TrainModel(config=config_data,
+    elif config.get("train_kind") == "svm":
+        model_trained = TrainModel(config=config,
                                    features=feats_pca,
-                                   labels=label_data
+                                   labels=label_data,
+                                   class_name=class_train
                                    ).train_svm()
-    elif config_data.get("train_kind") == "deep_learning":
-        model_trained = TrainModel(config=config_data,
+    elif config.get("train_kind") == "deep_learning":
+        model_trained = TrainModel(config=config,
                                    features=feats_pca,
-                                   labels=label_data
+                                   labels=label_data,
+                                   class_name=class_train
                                    ).train_neural_network()
     print()
     end = time.time()
@@ -100,10 +113,11 @@ def main():
 
     # Model evaluation
     print("MODEL EVALUATION")
-    eval_model = Evaluation(config=config_data,
+    eval_model = Evaluation(config=config,
                             model=model_trained,
                             x_data=test_feats,
-                            y_data=test_labels)
+                            y_data=test_labels,
+                            class_name=class_train)
     eval_model.model_evaluation()
     print()
     print("Train time:", end - start)
@@ -120,5 +134,4 @@ def example(argument):
 
 
 if __name__ == "__main__":
-    main()
-
+    project_ground_truth()

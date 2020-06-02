@@ -12,10 +12,11 @@ from tensorflow import keras
 
 
 class TrainModel:
-    def __init__(self, config, features, labels):
+    def __init__(self, config, features, labels, class_name):
         self.config = config
         self.features = features
         self.labels = labels
+        self.class_name = class_name
 
     def train_svm(self):
         """
@@ -118,6 +119,22 @@ class TrainModel:
         print()
         print("Best parameters:")
         print(grid.best_params_)
+
+        exports_dir = FindCreateDirectory(self.config.get("grid_results_directory")).inspect_directory()
+        with open(os.path.join(exports_dir, "{}.txt".format(self.class_name)), 'w+') as file:
+            file.write('Grid Score - {}:'.format(self.class_name))
+            file.write("\n")
+            file.write("\n")
+            file.write("Best Score:")
+            file.write(str(grid.best_score_))
+            file.write("\n")
+            file.write("\n")
+            file.write("Best model:")
+            file.write(str(grid.best_estimator_))
+            file.write("\n")
+            file.write("\n")
+            file.write("Best parameters:")
+            file.write(str(grid.best_params_))
 
         return grid
 

@@ -8,11 +8,12 @@ from datetime import datetime
 
 
 class Evaluation:
-    def __init__(self, config, model, x_data, y_data):
+    def __init__(self, config, model, x_data, y_data, class_name):
         self.config = config
         self.model = model
         self.x_data = x_data
         self.y_data = y_data
+        self.class_name = class_name
 
     def model_evaluation(self):
         """
@@ -23,11 +24,8 @@ class Evaluation:
         y_data (pd.Series or numpy array): the labels data
         config.get("train_kind") (str): The name of the model that will be evaluated
         """
-        class_to_evaluate = self.config.get("class_name_train")
-        if class_to_evaluate.startswith("timbre"):
-            class_to_evaluate = "timbre"
         print("Model to evaluate:", self.config.get("train_kind"))
-        print("Class to evaluate:", class_to_evaluate)
+        print("Class to evaluate:", self.class_name)
         print("Features shape:", self.x_data.shape)
         print("Labels shape:", self.y_data.shape)
         print("Model classes:", self.model.classes_)
@@ -69,17 +67,17 @@ class Evaluation:
         # concatenate
         df_prob_predictions = pd.concat([df_prob_predictions, df_predictions, y_data_re_indexed],
                                         axis=1, ignore_index=False)
-        print("AAAAAAAAAAAAAA")
+        print("DF BEFORE COLUMN TRANSFORMATION")
         print(df_prob_predictions.head())
         # df_class_columns = []
         # for item in self.model.classes_:
         #     df_class_columns.append(item)
         # df_class_columns.append("prediction")
         # df_class_columns.append("true")
-        df_prob_predictions.rename(columns={class_to_evaluate: "true"}, inplace=True)
+        df_prob_predictions.rename(columns={self.class_name: "true"}, inplace=True)
         # df_prob_predictions.columns = ["prob_pred_dance", "prob_pred_not_dance", "prediction", "true"]
         # df_prob_predictions.columns = df_class_columns
-        print("Final DF of predictions:")
+        print("FINAL DF AFTER COLUMN TRANSFORMATION:")
         print(df_prob_predictions.head())
         print()
 
@@ -109,7 +107,7 @@ class Evaluation:
         exports_dir = FindCreateDirectory(self.config.get("evaluations_directory")).inspect_directory()
 
         with open(os.path.join(exports_dir,
-                               "{}_{}_classification_report.txt".format(self.config.get("class_name_train"),
+                               "{}_{}_classification_report.txt".format(self.class_name,
                                                                         self.config.get("train_kind"))), 'w+') as file:
             file.write('Classification Report:')
             file.write(str(classification_report(self.y_data, predictions)))

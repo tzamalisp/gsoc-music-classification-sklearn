@@ -10,6 +10,10 @@ from sklearn.decomposition import PCA
 
 class ListGroundTruthFiles:
     def __init__(self, config):
+        """
+
+        :param config:
+        """
         self.config = config
         self.path_app = ""
         self.dataset_dir = ""
@@ -26,6 +30,10 @@ class ListGroundTruthFiles:
         print("Type:", type(self.path_app))
 
     def list_gt_filenames(self):
+        """
+
+        :return:
+        """
         self.dataset_dir = self.config.get("ground_truth_directory")
         self.class_dir = self.config.get("class_dir")
         path = os.path.join(self.path_app, self.dataset_dir, self.class_dir, "metadata")
@@ -44,7 +52,9 @@ class GroundTruthLoad:
         """
     def __init__(self, config, gt_filename):
         """
-        Todo: description
+
+        :param config:
+        :param gt_filename:
         """
         self.config = config
         self.gt_filename = gt_filename
@@ -78,6 +88,10 @@ class GroundTruthLoad:
                 print(exc)
 
     def export_class_name(self):
+        """
+
+        :return:
+        """
         self.class_name = self.ground_truth_data["className"]
         print("EXPORT CLASS NAME:", self.class_name)
         return self.class_name

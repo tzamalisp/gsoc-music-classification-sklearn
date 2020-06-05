@@ -9,6 +9,14 @@ from datetime import datetime
 
 class Evaluation:
     def __init__(self, config, model, x_data, y_data, class_name):
+        """
+
+        :param config:
+        :param model: the model to run predictions
+        :param x_data: (numpy array) the test data to provide predictions from
+        :param y_data: (pd.Series or numpy array) the labels data
+        :param class_name: (str) The name of the model that will be evaluated
+        """
         self.config = config
         self.model = model
         self.x_data = x_data
@@ -17,12 +25,8 @@ class Evaluation:
 
     def model_evaluation(self):
         """
-        A function to compute the evaluation based on
-        Parameters:
-        model: the model to run predictions
-        X_data (numpy array): the test data to provide predictions from
-        y_data (pd.Series or numpy array): the labels data
-        config.get("train_kind") (str): The name of the model that will be evaluated
+        A function to compute the evaluation
+        :return:
         """
         print("Model to evaluate:", self.config.get("train_kind"))
         print("Class to evaluate:", self.class_name)

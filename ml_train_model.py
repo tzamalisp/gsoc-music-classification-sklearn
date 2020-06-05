@@ -37,6 +37,13 @@ def project_ground_truth():
         print()
 
 
+def project_acousticbrainz():
+    """
+
+    :return:
+    """
+
+
 def model_training(df_gt_data, class_train, config):
     print("LOAD LOW LEVEL and FLATTEN THEM")
     df_full = FeaturesDf(df_tracks=df_gt_data).concatenate_dfs()

@@ -24,6 +24,7 @@ class DfChecker:
     def __init__(self, df_check):
         """
 
+        :param df_check:
         """
         self.df_check = df_check
 

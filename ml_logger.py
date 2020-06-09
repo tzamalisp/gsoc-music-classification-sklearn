@@ -1,3 +1,13 @@
+"""
+This file consists of the LoggerSetup class that is used for logging.
+
+Here, the LoggerSetup and its embedded setup_logger() method set up a new logger object with the related configurations.
+
+    Typical usage example:
+
+    logging_object = LoggerSetup(logger_name, logging_file_location, level_of_logging)
+    logger = logging_object.setup_logger()
+"""
 import logging
 import os
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -10,15 +20,21 @@ if not os.path.exists(os.path.join(current_d, 'log')):
 
 
 class LoggerSetup:
-    """
+    """It sets up a logging object.
 
+    Attributes:
+        name: The name of the logger.
+        log_file: The path of the logging file export.
+        level: An integer that defines the logging level.
     """
-    def __init__(self, name, log_file, level):
+    def __init__(self, name, log_file, level=1):
         """
+        Inits the logger object with the corresponding parameters.
 
-        :param name:
-        :param log_file:
-        :param level:
+        Args:
+            name (str): The name of the logger.
+            log_file (str): The path the logging exports will be exported.
+            level (int): The level of the logging. Defaults to 1.
         """
         self.name = name
         self.log_file = log_file
@@ -27,7 +43,9 @@ class LoggerSetup:
 # def setup_logger(name, log_file, level=logging.INFO):
     def setup_logger(self):
         """
-        Function to setup as many loggers as you want
+        Function to set up as many loggers as you want. It exports the logging results to a file
+        in the relevant path that is determined by the configuration file.
+
         :return:
         """
         handler = logging.FileHandler(self.log_file, mode='w')

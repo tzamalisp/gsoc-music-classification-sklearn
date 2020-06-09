@@ -8,6 +8,9 @@ from datetime import datetime
 
 
 class Evaluation:
+    """
+
+    """
     def __init__(self, config, model, x_data, y_data, class_name):
         """
 

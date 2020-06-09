@@ -12,7 +12,17 @@ from tensorflow import keras
 
 
 class TrainModel:
+    """
+    Todo: Commenting
+    """
     def __init__(self, config, features, labels, class_name):
+        """
+
+        :param config:
+        :param features:
+        :param labels:
+        :param class_name:
+        """
         self.config = config
         self.features = features
         self.labels = labels
@@ -20,7 +30,8 @@ class TrainModel:
 
     def train_svm(self):
         """
-        Todo: SVM training
+
+        :return:
         """
         svm = SVC(gamma="auto", probability=True)
         svm.fit(self.features, self.labels)
@@ -29,7 +40,8 @@ class TrainModel:
 
     def train_neural_network(self):
         """
-        Todo: Neural Network training
+
+        :return:
         """
         print("Type of features:", type(self.features))
 
@@ -96,7 +108,8 @@ class TrainModel:
 
     def train_grid_search(self):
         """
-        Todo: GridSearch training
+        Todo: Commenting
+        :return:
         """
         print("Train an ML model with GridSearchCV")
         print("Training..")
@@ -141,5 +154,6 @@ class TrainModel:
     def train_randomized_search(self):
         """
         Todo: RandomizedSearch training
+        :return:
         """
 

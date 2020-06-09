@@ -10,15 +10,26 @@ if not os.path.exists(os.path.join(current_d, 'log')):
 
 
 class LoggerSetup:
+    """
+
+    """
     def __init__(self, name, log_file, level):
+        """
+
+        :param name:
+        :param log_file:
+        :param level:
+        """
         self.name = name
         self.log_file = log_file
         self.level = level
 
 # def setup_logger(name, log_file, level=logging.INFO):
     def setup_logger(self):
-        """Function setup as many loggers as you want"""
-
+        """
+        Function to setup as many loggers as you want
+        :return:
+        """
         handler = logging.FileHandler(self.log_file, mode='w')
         handler.setFormatter(formatter)
 

@@ -9,6 +9,9 @@ from sklearn.decomposition import PCA
 
 
 class ListGroundTruthFiles:
+    """
+
+    """
     def __init__(self, config):
         """
 

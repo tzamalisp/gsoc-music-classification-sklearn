@@ -15,6 +15,10 @@ from datetime import datetime
 
 
 def project_ground_truth():
+    """
+
+    :return:
+    """
     config_data = load_yaml()
     print("Dataset/class for evaluation:", config_data.get("class_dir"))
     print("Kind of training:", config_data.get("train_kind"))
@@ -45,6 +49,13 @@ def project_acousticbrainz():
 
 
 def model_training(df_gt_data, class_train, config):
+    """
+
+    :param df_gt_data:
+    :param class_train:
+    :param config:
+    :return:
+    """
     print("LOAD LOW LEVEL and FLATTEN THEM")
     df_full = FeaturesDf(df_tracks=df_gt_data).concatenate_dfs()
     print(df_full.head())

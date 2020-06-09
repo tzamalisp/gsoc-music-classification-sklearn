@@ -4,6 +4,7 @@ import os
 def load_yaml():
     """
     Todo: add comments, docstring info, etc.
+    :return:
     """
     try:
         import yaml
@@ -21,6 +22,9 @@ def load_yaml():
 
 
 class DfChecker:
+    """
+
+    """
     def __init__(self, df_check):
         """
 
@@ -48,10 +52,21 @@ class DfChecker:
 
 
 class FindCreateDirectory:
+    """
+
+    """
     def __init__(self, directory):
+        """
+
+        :param directory:
+        """
         self.directory = directory
 
     def inspect_directory(self):
+        """
+
+        :return:
+        """
         # find dynamically the current script directory
         path_app = os.path.join(os.path.abspath(os.getcwd()))
         full_path = os.path.join(path_app, self.directory)

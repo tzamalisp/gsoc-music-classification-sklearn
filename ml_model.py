@@ -10,6 +10,7 @@ from sklearn.model_selection import KFold
 # Neural Networks
 import tensorflow as tf
 from tensorflow import keras
+import time
 
 
 class TrainModel:
@@ -128,10 +129,16 @@ class TrainModel:
                            "class_weight": self.config.get("grid_class_weight")
                            }
         svm = SVC(gamma="auto", probability=True)
-        # To be used within GridSearch (5 in your case)
+        # get the seed from the config
+        seed = self.config["random_seed"]
+        # if not seed specified in the config or is None (null), get the current clock value
+        # in case of clock value, convert to integer, because numpy.random.RandomState instance cannot handle float
+        if seed is None or seed is "":
+            seed = int(time.time())
+        # To be used within GridSearch
         inner_cv = KFold(n_splits=self.config["k_fold"],
                          shuffle=self.config["shuffle"],
-                         random_state=self.config["random_seed"]
+                         random_state=seed
                          )
         # n_jobs --> -1, means using all processors of the CPU when training the model. The default is None --> means 1
         grid = GridSearchCV(estimator=svm,

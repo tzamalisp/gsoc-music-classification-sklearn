@@ -10,13 +10,19 @@ Here, the LoggerSetup and its embedded setup_logger() method set up a new logger
 """
 import logging
 import os
+from utils import load_yaml, FindCreateDirectory
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
+# load yaml configuration file to a dict
+config_data = load_yaml()
 # If log directory does not exist, create one
 current_d = os.getcwd()
-print(current_d)
-if not os.path.exists(os.path.join(current_d, 'log')):
-    os.makedirs(os.path.join(current_d, 'log'))
+if config_data["log_directory"] is None or config_data["log_directory"] is None:
+    if not os.path.exists(os.path.join(current_d, "logs_dir")):
+        os.makedirs(os.path.join(current_d, "logs_dir"))
+        log_path = os.path.join(current_d, "logs_dir")
+else:
+    log_path = FindCreateDirectory(config_data["log_directory"]).inspect_directory()
 
 
 class LoggerSetup:
@@ -48,7 +54,7 @@ class LoggerSetup:
 
         :return:
         """
-        handler = logging.FileHandler(self.log_file, mode='w')
+        handler = logging.FileHandler(os.path.join(log_path, self.log_file), mode='w')
         handler.setFormatter(formatter)
 
         logger_object = logging.getLogger(self.name)

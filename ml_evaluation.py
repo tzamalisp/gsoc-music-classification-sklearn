@@ -63,9 +63,12 @@ class Evaluation:
 
         """
         # logging
-        logs_dir = FindCreateDirectory(self.config.get("log_directory")).inspect_directory()
-        path_logger = os.path.join(logs_dir, "evaluation.log")
-        log_eval = LoggerSetup(name="evaluation_logger", log_file=path_logger, level=self.config.get("logging_level"))
+        # logs_dir = FindCreateDirectory(self.config.get("log_directory")).inspect_directory()
+        # path_logger = os.path.join(logs_dir, "evaluation.log")
+        log_eval = LoggerSetup(name="evaluation_logger",
+                               log_file="evaluation.log",
+                               level=self.config.get("logging_level")
+                               )
         logger_eval = log_eval.setup_logger()
 
         logger_eval.info("Model to evaluate: {}".format(self.config.get("train_kind")))
@@ -145,7 +148,7 @@ class Evaluation:
                 mean_report = "{} - Mean: {}".format(item, mean_value)
                 logger_eval.info(mean_report)
                 report_list.append(mean_report)
-            logger_eval.info("Next class")
+            logger_eval.info("Next class:")
         exports_dir = FindCreateDirectory(self.config.get("evaluations_directory")).inspect_directory()
         print("Creating report file..")
         with open(os.path.join(exports_dir,

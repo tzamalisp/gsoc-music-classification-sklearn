@@ -6,6 +6,7 @@ from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 # Neural Networks
 import tensorflow as tf
 from tensorflow import keras
@@ -127,8 +128,17 @@ class TrainModel:
                            "class_weight": self.config.get("grid_class_weight")
                            }
         svm = SVC(gamma="auto", probability=True)
-        # n_jobs --> -1, means using all processors of the CPU when training the model. The defaults None: means 1
-        grid = GridSearchCV(estimator=svm, param_grid=parameters_grid, cv=5, n_jobs=self.config.get("parallel_jobs"))
+        # To be used within GridSearch (5 in your case)
+        inner_cv = KFold(n_splits=self.config["k_fold"],
+                         shuffle=self.config["shuffle"],
+                         random_state=self.config["random_seed"]
+                         )
+        # n_jobs --> -1, means using all processors of the CPU when training the model. The default is None --> means 1
+        grid = GridSearchCV(estimator=svm,
+                            param_grid=parameters_grid,
+                            cv=inner_cv,
+                            n_jobs=self.config.get("parallel_jobs")
+                            )
         grid.fit(self.features, self.labels)
         print("Best Score:")
         print(grid.best_score_)

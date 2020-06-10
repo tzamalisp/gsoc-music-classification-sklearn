@@ -115,9 +115,15 @@ class TrainModel:
         print("Training..")
         print()
         # define the length of parameters
+        c_params = self.config.get("grid_C")
+        c_params = [2 ** x for x in c_params]  # 2**x
+        print("C values: {}".format(c_params))
+        gamma_params = self.config.get("grid_gamma")
+        gamma_params = [2 ** x for x in gamma_params]  # 2**x
+        print("Gamma values: {}".format(gamma_params))
         parameters_grid = {"kernel": self.config.get("grid_kernel"),
-                           "C": self.config.get("grid_C"),
-                           "gamma": self.config.get("grid_gamma"),
+                           "C": c_params,
+                           "gamma": gamma_params,
                            "class_weight": self.config.get("grid_class_weight")
                            }
         svm = SVC(gamma="auto", probability=True)

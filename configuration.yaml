@@ -5,13 +5,14 @@ ground_truth_directory: acousticbrainz-datasets
 # classes with features online: genre_dortmund, genre_electronic, genre_tzanetakis, ismir04_rhythm,
 class_dir: danceability
 # train kind: grid_svm, svm, deep_learning, supervised_lb
-train_kind: grid_svm
+train_kind: svm
 enumeration_columns: ['tonal_chords_key', 'tonal_chords_scale', 'tonal_key_key', 'tonal_key_scale']
 # remove the unnecessary DF columns before training (it will also be deleted the class name column)
 remove_columns: ['json_directory',  'track']
 exports_directory: exports
 evaluations_directory: evaluations
 tracks_in_csv_format: tracks_csv
+delete_logs: True
 # logs directory
 log_directory: logs
 logging_level: 0

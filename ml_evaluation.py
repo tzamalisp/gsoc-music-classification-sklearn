@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from utils import FindCreateDirectory
 from datetime import datetime
 from ml_logger import LoggerSetup
+from datetime import datetime
 
 
 class Evaluation:
@@ -150,10 +151,14 @@ class Evaluation:
                 report_list.append(mean_report)
             logger_eval.info("Next class:")
         exports_dir = FindCreateDirectory(self.config.get("evaluations_directory")).inspect_directory()
+        # take current date and convert to string
+        now = datetime.now()
+        datetime_str = now.strftime("%Y-%m-%d")
         print("Creating report file..")
         with open(os.path.join(exports_dir,
-                               "{}_{}_classification_report.txt".format(self.class_name,
-                                                                        self.config.get("train_kind"))), 'w+') as file:
+                               "{}_{}_{}.txt".format(self.class_name,
+                                                     self.config.get("train_kind"),
+                                                     datetime_str)), 'w+') as file:
             file.write('Classification Report:')
             file.write(str(classification_report(self.y_data, predictions)))
             file.write('\n')

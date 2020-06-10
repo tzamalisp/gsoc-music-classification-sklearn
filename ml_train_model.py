@@ -1,3 +1,4 @@
+import os
 from utils import load_yaml, FindCreateDirectory
 from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
 from ml_load_low_level import FeaturesDf
@@ -32,6 +33,16 @@ def project_ground_truth():
         individual_df_gt_data = gt_data.create_df_tracks()
         class_to_model = gt_data.export_class_name()
         print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
+        # delete logs for specific model and class on a new run
+        if config_data["delete_logs"] is True:
+            dir_name = os.path.join(os.getcwd(), "evaluations")
+            evaluations_list = os.listdir(dir_name)
+            for item in evaluations_list:
+                if item.endswith(".txt"):
+                    if item.startswith("{}_{}".format(class_to_model, config_data["train_kind"])):
+                        os.remove(os.path.join(dir_name, item))
+            print("Previous evaluation deleted successfully.")
+
         print()
         print()
         model_training(df_gt_data=individual_df_gt_data, class_train=class_to_model, config=config_data)

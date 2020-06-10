@@ -3,7 +3,7 @@ ground_truth_directory: acousticbrainz-datasets
 # classes with features locally: danceability, gender, genre_rosamerica, moods_claurier, moods_mirex, timbre_bright_dark
 # classes with features locally: tonal_atonal, voice_instrumental
 # classes with features online: genre_dortmund, genre_electronic, genre_tzanetakis, ismir04_rhythm,
-class_dir: danceability
+class_dir: voice_instrumental
 # train kind: grid_svm, svm, deep_learning, supervised_lb
 train_kind: svm
 enumeration_columns: ['tonal_chords_key', 'tonal_chords_scale', 'tonal_key_key', 'tonal_key_scale']

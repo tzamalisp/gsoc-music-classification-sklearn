@@ -4,6 +4,7 @@ import collections
 from ml_load_groung_truth import GroundTruthLoad
 from utils import DfChecker
 from utils import load_yaml
+import random
 
 
 def flatten_dict_full(dictionary, sep="_"):
@@ -30,6 +31,15 @@ def flatten_dict_full(dictionary, sep="_"):
     return obj
 
 
+def shuffle_data(df_data, config):
+    df_data_cols = df_data.columns
+    data_values = df_data.values
+    random.seed(a=config.get("random_seed"))
+    random.shuffle(data_values)
+    df_data_shuffle = pd.DataFrame(data=data_values, columns=df_data_cols)
+    return df_data_shuffle
+
+
 class FeaturesDf:
     """
     Features DataFrame object by the JSON low-level data.
@@ -37,8 +47,9 @@ class FeaturesDf:
             df_tracks (Pandas DataFrame): The tracks DataFrame that contains the track name, track low-level path,
                                         label, etc.
     """
-    def __init__(self, df_tracks):
+    def __init__(self, df_tracks, config):
         self.df_tracks = df_tracks
+        self.config = config
         self.list_feats_tracks = []
         self.counter_items_transformed = 0
         self.df_feats_tracks = pd.DataFrame()
@@ -108,6 +119,7 @@ class FeaturesDf:
         self.df_full_tracks = pd.concat([self.df_tracks, self.df_feats_tracks], axis=1)
         print("FULL:", self.df_full_tracks.shape)
         print("COLUMNS CONTAIN OBJECTS", self.df_full_tracks.select_dtypes(include=['object']).columns)
+        self.df_full_tracks = shuffle_data(df_data=self.df_full_tracks, config=self.config)
         return self.df_full_tracks
 
 
@@ -117,8 +129,12 @@ if __name__ == '__main__':
     config_data = load_yaml()
     df_gt_data = GroundTruthLoad(config_data, "groundtruth.yaml").create_df_tracks()
     print(df_gt_data.shape)
-    df_feat_data = FeaturesDf(df_tracks=df_gt_data)
+    df_feat_data = FeaturesDf(df_tracks=df_gt_data, config=config_data).concatenate_dfs()
 
+    print("HEAD")
+    print(df_feat_data.head(20))
+    print("TAIL")
+    print(df_feat_data.tail(20))
     # df_full = df_feat_data.concatenate_dfs()
     #
     # # df GT data info

@@ -68,7 +68,7 @@ def model_training(df_gt_data, class_train, config):
     :return:
     """
     print("LOAD LOW LEVEL and FLATTEN THEM")
-    df_full = FeaturesDf(df_tracks=df_gt_data).concatenate_dfs()
+    df_full = FeaturesDf(df_tracks=df_gt_data, config=config).concatenate_dfs()
     print(df_full.head())
     print(df_full.shape)
     print()
@@ -83,6 +83,8 @@ def model_training(df_gt_data, class_train, config):
     # remove no-useful columns
     print("REMOVE NO USEFUL FEATURES")
     df_ml = remove_unnecessary_columns(df=df_full, class_name=class_train, config=config)
+    print("SHAPE DF ML SHAPE: {}".format(df_ml.shape))
+    print("TYPE DF ML SHAPE: {}".format(type(df_ml)))
     print()
     print()
 
@@ -93,14 +95,17 @@ def model_training(df_gt_data, class_train, config):
     print()
 
     # scale the data
-    print("SCALING")
     feats_scaled = scaling(feat_data=df_ml_num, config=config)
+    print("SHAPE FEATS SCALED: {}".format(feats_scaled.shape))
+    print("TYPE FEATS SCALED: {}".format(type(feats_scaled)))
     print()
     print()
 
     # pca apply
     print("PCA")
     feats_pca = dimensionality_reduction(feat_data=feats_scaled, config=config)
+    print("SHAPE FEATS PCA: {}".format(feats_pca.shape))
+    print("TYPE FEATS PCA: {}".format(type(feats_pca)))
     print()
     print()
 

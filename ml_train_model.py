@@ -21,6 +21,8 @@ def project_ground_truth():
     :return:
     """
     config_data = load_yaml()
+    if config_data["gaia_imitation"] is True:
+        print("GAIA IMITATION MODE is ON")
     print("Dataset/class for evaluation:", config_data.get("class_dir"))
     print("Kind of training:", config_data.get("train_kind"))
     print()
@@ -68,9 +70,10 @@ def model_training(df_gt_data, class_train, config):
     :return:
     """
     print("LOAD LOW LEVEL and FLATTEN THEM")
-    df_full = FeaturesDf(df_tracks=df_gt_data, config=config).concatenate_dfs()
-    print(df_full.head())
-    print(df_full.shape)
+    df_full = FeaturesDf(df_tracks=df_gt_data, class_name=class_train, config=config).concatenate_dfs()
+    # print("DF full:")
+    # print(df_full.head())
+    print("DF full shape: {}".format(df_full.shape))
     print()
     print()
     # labels (y)

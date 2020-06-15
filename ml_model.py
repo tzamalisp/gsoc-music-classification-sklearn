@@ -135,11 +135,19 @@ class TrainModel:
         # in case of clock value, convert to integer, because numpy.random.RandomState instance cannot handle float
         if seed is None or seed is "":
             seed = int(time.time())
-        # To be used within GridSearch
-        inner_cv = KFold(n_splits=self.config["k_fold"],
-                         shuffle=self.config["shuffle"],
-                         random_state=seed
-                         )
+
+        if self.config["gaia_imitation"] is True:
+            # To be used within GridSearch if configuration's gaia imitation pratemeter is True
+            inner_cv = KFold(n_splits=self.config["gaia_kfold_cv_n_splits"],
+                             shuffle=self.config["gaia_kfold_shuffle"],
+                             random_state=self.config["gaia_kfold_random_state"]
+                             )
+        else:
+            # To be used within GridSearch without gaia imitation
+            inner_cv = KFold(n_splits=self.config["k_fold"],
+                             shuffle=self.config["shuffle"],
+                             random_state=seed
+                             )
         # n_jobs --> -1, means using all processors of the CPU when training the model. The default is None --> means 1
         grid = GridSearchCV(estimator=svm,
                             param_grid=parameters_grid,

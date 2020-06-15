@@ -31,13 +31,20 @@ def flatten_dict_full(dictionary, sep="_"):
     return obj
 
 
-def shuffle_data(df_data, config):
-    df_data_cols = df_data.columns
-    data_values = df_data.values
+def shuffle_data(df_ml_data, config):
+    """
+
+    :param df_ml_data: (Pandas DataFrame) the data to be shuffled
+    :param config: (dict) the configuration data
+    :return: (NumPy array) the shuffled data
+    """
+    df_ml_cols = df_ml_data.columns
+    # convert DataFrame to NumPy array
+    ml_values = df_ml_data.values
     random.seed(a=config.get("random_seed"))
-    random.shuffle(data_values)
-    df_data_shuffle = pd.DataFrame(data=data_values, columns=df_data_cols)
-    return df_data_shuffle
+    random.shuffle(ml_values)
+    df_ml_shuffle = pd.DataFrame(data=ml_values, columns=df_ml_cols)
+    return df_ml_shuffle
 
 
 class FeaturesDf:
@@ -47,8 +54,9 @@ class FeaturesDf:
             df_tracks (Pandas DataFrame): The tracks DataFrame that contains the track name, track low-level path,
                                         label, etc.
     """
-    def __init__(self, df_tracks, config):
+    def __init__(self, df_tracks, class_name, config):
         self.df_tracks = df_tracks
+        self.class_name = class_name
         self.config = config
         self.list_feats_tracks = []
         self.counter_items_transformed = 0
@@ -119,7 +127,19 @@ class FeaturesDf:
         self.df_full_tracks = pd.concat([self.df_tracks, self.df_feats_tracks], axis=1)
         print("FULL:", self.df_full_tracks.shape)
         print("COLUMNS CONTAIN OBJECTS", self.df_full_tracks.select_dtypes(include=['object']).columns)
-        self.df_full_tracks = shuffle_data(df_data=self.df_full_tracks, config=self.config)
+        # gaia imitation shuffling (in case we want to shuffle the data exactly as the gaia tool does)
+        if self.config["gaia_imitation"] is True:
+            print("DF CONCATENATION BEFORE SHUFFLING")
+            print("head:")
+            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].head(10))
+            print("tail:")
+            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].tail(10))
+            self.df_full_tracks = shuffle_data(df_ml_data=self.df_full_tracks, config=self.config)
+            print("DF CONCATENATION AFTER SHUFFLING")
+            print("head:")
+            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].head(10))
+            print("tail:")
+            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].tail(10))
         return self.df_full_tracks
 
 
@@ -131,10 +151,6 @@ if __name__ == '__main__':
     print(df_gt_data.shape)
     df_feat_data = FeaturesDf(df_tracks=df_gt_data, config=config_data).concatenate_dfs()
 
-    print("HEAD")
-    print(df_feat_data.head(20))
-    print("TAIL")
-    print(df_feat_data.tail(20))
     # df_full = df_feat_data.concatenate_dfs()
     #
     # # df GT data info

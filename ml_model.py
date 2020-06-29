@@ -50,7 +50,7 @@ class TrainModel:
             kernel=self.config.get("svc_kernel"),
             gamma=svc_gamma,
             class_weight=self.config.get("svc_class_weight_balance"),
-            probability=True
+            probability=self.config.get("svc_probability")
         )
         svm.fit(self.features, self.labels)
 

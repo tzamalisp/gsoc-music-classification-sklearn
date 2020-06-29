@@ -7,6 +7,9 @@ from tensorflow.keras.utils import to_categorical
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import RobustScaler
 from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
@@ -120,7 +123,19 @@ def scaling(feat_data, config):
     :param config:
     :return:
     """
-    scaler = StandardScaler()
+    if config.get("scaling") is "standard_scaled":
+        scaler = StandardScaler()
+    elif config.get("scaling") is "normalize_scaled":
+        scaler = Normalizer()
+    elif config.get("scaling") is "minmax_scaled":
+        scaler = MinMaxScaler()
+    elif config.get("scaling") is "robust_scaled":
+        scaler = RobustScaler()
+    else:
+        # default value if nothing from the above is declared
+        scaler = StandardScaler()
+
+    # scaling data
     scaler.fit(feat_data)
     feat_data_normalized = scaler.transform(feat_data)
 

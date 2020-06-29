@@ -7,6 +7,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
 # Neural Networks
 import tensorflow as tf
 from tensorflow import keras
@@ -37,7 +38,6 @@ class TrainModel:
         """
         svc_c = 1.0
         svc_gamma = 'auto'
-
         # C = 2 ** C_value
         if self.config.get("svm_C") != "" and self.config.get("svm_C") is not None:
             svc_c = 2 ** self.config.get("svm_C")
@@ -52,7 +52,42 @@ class TrainModel:
             class_weight=self.config.get("svc_class_weight_balance"),
             probability=self.config.get("svc_probability")
         )
-        svm.fit(self.features, self.labels)
+
+        if self.config.get("k_fold_apply") is True:
+            # KFold Cross Validation approach
+            X = self.features
+            y = self.labels
+            print("type of y:", type(y))
+            kf = KFold(n_splits=self.config["gaia_kfold_cv_n_splits"],
+                       shuffle=self.config["gaia_kfold_shuffle"],
+                       random_state=self.config["gaia_kfold_random_state"]
+                       )
+            kf.split(X)
+
+            # Initialize the accuracy of the models to blank list.
+            # The accuracy of each model will be appended to this list
+            accuracy_model = []
+
+            # Iterate over each train-test split
+            for train_index, test_index in kf.split(X):
+                # print("TRAIN INDEX: ", train_index)
+                # print("TEST INDEX: ", test_index)
+                # Split train-test
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+                # Train the model
+                model = svm.fit(X_train, y_train)
+                # Append to accuracy_model the accuracy of the model
+                accuracy_model.append(accuracy_score(y_test, model.predict(X_test), normalize=True) * 100)
+
+            # Print the accuracy
+            print("Accuracies in every fold iteration: {}".format(accuracy_model))
+            print("Mean of all the accuracies: {}".format(sum(accuracy_model) / len(accuracy_model)))
+
+        elif self.config.get("k_fold_apply") is False:
+            svm.fit(self.features, self.labels)
+        else:
+            print("Please select True/False to apply or not cross-validation to the training phase.")
 
         return svm
 

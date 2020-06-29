@@ -35,7 +35,23 @@ class TrainModel:
 
         :return:
         """
-        svm = SVC(gamma="auto", probability=True)
+        svc_c = 1.0
+        svc_gamma = 'auto'
+
+        # C = 2 ** C_value
+        if self.config.get("svm_C") != "" and self.config.get("svm_C") is not None:
+            svc_c = 2 ** self.config.get("svm_C")
+        # gamma = 2 ** gamma_value
+        if self.config.get("svc_gamma") != "" and self.config.get("svc_gamma") is not None:
+            svc_gamma = 2 ** self.config.get("svc_gamma")
+
+        svm = SVC(
+            C=svc_c,
+            kernel=self.config.get("svc_kernel"),
+            gamma=svc_gamma,
+            class_weight=self.config.get("svc_class_weight_balance"),
+            probability=True
+        )
         svm.fit(self.features, self.labels)
 
         return svm

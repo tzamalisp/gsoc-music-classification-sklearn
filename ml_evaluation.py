@@ -154,6 +154,7 @@ class Evaluation:
         # take current date and convert to string
         now = datetime.now()
         datetime_str = now.strftime("%Y-%m-%d")
+        datetime_str_verbose = now.strftime("%Y-%m-%d, %H:%M:%S")
         print("Creating report file..")
         with open(os.path.join(exports_dir,
                                "{}_{}_{}.txt".format(self.class_name,
@@ -186,6 +187,6 @@ class Evaluation:
                 file.write('\n')
             file.write('\n')
             file.write('\n')
-            file.write("Date of execution:".format(datetime.now()))
+            file.write("Date of execution: {}".format(datetime_str_verbose))
             file.close()
         print('Evaluation file for class {} is created successfully.'.format(self.config.get("class_name_train")))

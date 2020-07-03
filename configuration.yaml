@@ -77,7 +77,7 @@ processing:
       postprocess:
         - transfo: normalize
         - transfo: gaussianize
-          params: { descriptorNames: 'lowlevel.*' }
+          params: { descriptorNames: ['lowlevel.*'] }
 
     mfcc:
       preprocess:
@@ -87,7 +87,7 @@ processing:
         - transfo: enumerate
           params: { descriptorNames: *stringDescs }
         - transfo: select
-          params: { descriptorNames: 'lowlevel.mfcc*' }
+          params: { descriptorNames: ['lowlevel.mfcc*'] }
 
 classifiers:
     svm:

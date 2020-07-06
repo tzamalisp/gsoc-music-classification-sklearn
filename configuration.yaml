@@ -48,7 +48,7 @@ processing:
         - transfo: enumerate
           params: { descriptorNames: *stringDescs }
         - transfo: select
-          params: { descriptorNames: 'lowlevel*' }
+          params: { descriptorNames: ['lowlevel*'] }
 
     nobands:
       preprocess:

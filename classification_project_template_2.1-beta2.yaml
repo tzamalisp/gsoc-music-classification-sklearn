@@ -11,33 +11,33 @@
 templateVersion: 2.1-beta2
 
 # Name of the feature one wants to classify (genre, mood, artist...)
-className: test_danceability
+className: %(className)s
 
 
 # Path to the directory where the preprocessed datasets are going to be stored
 # This can be absolute or relative to where you launch the main classification script
-datasetsDirectory: /data/train_results_danceability/datasets
+datasetsDirectory: %(datasetsDirectory)s
 
 # Path to the directory where the results are going to be stored
 # This can be absolute or relative to where you launch the main classification script
-resultsDirectory: /data/train_results_danceability/results
+resultsDirectory: %(resultsDirectory)s
 
 
 # Path to the yaml file containing the list of files to be merged in the original dataset
-filelist: /data/datasets/danceability/metadata/filelist_sig.yaml
+filelist: %(filelist)s
 
 # Path to the groundtruth file, containing a serialized gaia2.classification.GroundTruth object
-groundtruth: /data/datasets/danceability/metadata/modified_groundtruth.yaml
+groundtruth: %(groundtruth)s
 
 
 # Seed used to randomly assign tracks to folds. Use 'None' to use clock value. This will
 # produce slightly different results on different trials)
-seed: 1593182276.72
+seed: %(seed)s
 
 # Cluster mode controls how subprocesses are called. Set it to True to explicitly use the subprocess
 # module to open a new python process and call each classificationTask as a script. Otherwise, this
 # call will be performed as a function.
-clusterMode: True
+clusterMode: %(clusterMode)s
 
 # List of parameters that have to be excluded before applying the transformation steps
 excludedDescriptors: [ 'metadata.tags*' ]

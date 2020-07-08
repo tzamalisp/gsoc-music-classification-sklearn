@@ -18,7 +18,7 @@ logging_level: 0
 
 # PRE-PROCESSING
 scaling: standard_scaled  # values: normalize_scaled, minmax_scaled, standard_scaled, robust_scaled
-# List of parameters that have to be excluded before applying the preprocessing steps
+# List of parameters that have to be excluded before applying the transformation steps
 excludedDescriptors: [ 'metadata.tags*' ]
 # List of preprocessed datasets to build
 processing:

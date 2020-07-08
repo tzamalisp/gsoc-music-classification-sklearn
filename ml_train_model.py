@@ -1,5 +1,5 @@
 import os
-from utils import load_yaml, FindCreateDirectory
+from utils import load_yaml, FindCreateDirectory, LogsDeleter
 from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
 from ml_load_low_level import FeaturesDf
 from utils import DfChecker
@@ -35,15 +35,10 @@ def project_ground_truth():
         individual_df_gt_data = gt_data.create_df_tracks()
         class_to_model = gt_data.export_class_name()
         print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
-        # delete logs for specific model and class on a new run
-        if config_data["delete_logs"] is True:
-            dir_name = os.path.join(os.getcwd(), "evaluations")
-            evaluations_list = os.listdir(dir_name)
-            for item in evaluations_list:
-                if item.endswith(".txt"):
-                    if item.startswith("{}_{}".format(class_to_model, config_data["train_kind"])):
-                        os.remove(os.path.join(dir_name, item))
-            print("Previous evaluation deleted successfully.")
+
+        # delete logs if set True in config file
+        log_deleter = LogsDeleter(config=config_data, train_class=class_to_model)
+        log_deleter.delete_logs()
 
         print()
         print()
@@ -52,6 +47,21 @@ def project_ground_truth():
         print()
         print()
         print()
+
+
+def data_handling():
+    config_data = load_yaml()
+    if config_data["gaia_imitation"] is True:
+        print("GAIA IMITATION MODE is ON")
+    gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()
+    print(gt_files_list)
+    print("LOAD GROUND TRUTH")
+    for gt_file in gt_files_list:
+        print("YAML FILE TO PROCESS:", gt_file)
+        gt_data = GroundTruthLoad(config_data, gt_file)
+        individual_df_gt_data = gt_data.create_df_tracks()
+        class_to_model = gt_data.export_class_name()
+        print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
 
 
 def project_acousticbrainz():
@@ -171,4 +181,4 @@ def example(argument):
 
 
 if __name__ == "__main__":
-    project_ground_truth()
+    # project_ground_truth()

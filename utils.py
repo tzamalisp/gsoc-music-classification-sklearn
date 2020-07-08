@@ -77,6 +77,26 @@ class FindCreateDirectory:
         return full_path
 
 
+class LogsDeleter:
+    def __init__(self, config, train_class):
+        self.config = config
+        self.train_class = train_class
+
+    def delete_logs(self):
+        # delete logs for specific model and class on a new run
+        if self.config["delete_logs"] is True:
+            print("Evaluation logs deletion is turned to ON.")
+            dir_name = os.path.join(os.getcwd(), "evaluations")
+            evaluations_list = os.listdir(dir_name)
+            for item in evaluations_list:
+                if item.endswith(".txt"):
+                    if item.startswith("{}_{}".format(self.train_class, self.config["train_kind"])):
+                        os.remove(os.path.join(dir_name, item))
+            print("Previous evaluation logs deleted successfully.")
+        else:
+            print("Evaluation logs deletion is turned to OFF.")
+
+
 if __name__ == '__main__':
     conf_data = load_yaml()
     print(conf_data)

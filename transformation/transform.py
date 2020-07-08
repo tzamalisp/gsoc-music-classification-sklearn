@@ -142,6 +142,9 @@ class Transform:
         self.config = config
         self.df = df
         self.process = process
+        self.cleaner()
+        self.pre_processing()
+        self.post_processing()
 
     def cleaner(self):
         cleaning_columns_list = self.config["excludedDescriptors"]

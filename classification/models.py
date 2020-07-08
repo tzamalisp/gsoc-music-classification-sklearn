@@ -14,7 +14,7 @@ from tensorflow import keras
 import time
 
 
-class TrainModel:
+class Models:
     """
     Todo: Commenting
     """
@@ -159,7 +159,7 @@ class TrainModel:
         print("Test loss: ", scores[0])
         print("Test accuracy: ", scores[1])
 
-    def train_grid_search(self):
+    def train_grid_search_svm(self):
         """
         Todo: Commenting
         :return:

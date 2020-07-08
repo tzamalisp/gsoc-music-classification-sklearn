@@ -9,7 +9,8 @@ from ml_preprocessing import enumerate_categorical_values
 from ml_preprocessing import scaling
 from ml_preprocessing import dimensionality_reduction
 from ml_preprocessing import split_to_train_test
-from ml_model import TrainModel
+from classification.train_model import TrainModel
+from transformation.transform import Transform
 from ml_evaluation import Evaluation
 import time
 from datetime import datetime
@@ -35,7 +36,6 @@ def project_ground_truth():
         individual_df_gt_data = gt_data.create_df_tracks()
         class_to_model = gt_data.export_class_name()
         print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
-
         # delete logs if set True in config file
         log_deleter = LogsDeleter(config=config_data, train_class=class_to_model)
         log_deleter.delete_logs()
@@ -57,11 +57,16 @@ def data_handling():
     print(gt_files_list)
     print("LOAD GROUND TRUTH")
     for gt_file in gt_files_list:
-        print("YAML FILE TO PROCESS:", gt_file)
-        gt_data = GroundTruthLoad(config_data, gt_file)
-        individual_df_gt_data = gt_data.create_df_tracks()
-        class_to_model = gt_data.export_class_name()
+        print("YAML file to load the data:", gt_file)
+        gt_object = GroundTruthLoad(config_data, gt_file)
+        gt_data = gt_object.create_df_tracks()
+        class_to_model = gt_object.export_class_name()
         print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
+        print("LOAD LOW LEVEL and FLATTEN THEM")
+        df_full = FeaturesDf(df_tracks=gt_data, class_name=class_to_model, config=config_data).concatenate_dfs()
+        # print(df_full.head())
+        df_transformed = Transform(config=config_data, df=df_full, process="mfcc").post_processing()
+        print(df_transformed.columns)
 
 
 def project_acousticbrainz():
@@ -79,8 +84,7 @@ def model_training(df_gt_data, class_train, config):
     :param config:
     :return:
     """
-    print("LOAD LOW LEVEL and FLATTEN THEM")
-    df_full = FeaturesDf(df_tracks=df_gt_data, class_name=class_train, config=config).concatenate_dfs()
+
     # print("DF full:")
     # print(df_full.head())
     print("DF full shape: {}".format(df_full.shape))
@@ -134,24 +138,7 @@ def model_training(df_gt_data, class_train, config):
     print("Starting training time calculation..")
     start = time.time()
     print("Start time:", datetime.now())
-    if config.get("train_kind") == "grid_svm":
-        model_trained = TrainModel(config=config,
-                                   features=feats_pca,
-                                   labels=label_data,
-                                   class_name=class_train
-                                   ).train_grid_search()
-    elif config.get("train_kind") == "svm":
-        model_trained = TrainModel(config=config,
-                                   features=feats_pca,
-                                   labels=label_data,
-                                   class_name=class_train
-                                   ).train_svm()
-    elif config.get("train_kind") == "deep_learning":
-        model_trained = TrainModel(config=config,
-                                   features=feats_pca,
-                                   labels=label_data,
-                                   class_name=class_train
-                                   ).train_neural_network()
+
     print()
     end = time.time()
     print("End time:", datetime.now())
@@ -182,3 +169,4 @@ def example(argument):
 
 if __name__ == "__main__":
     # project_ground_truth()
+    data_handling()

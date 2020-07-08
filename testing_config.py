@@ -1,5 +1,6 @@
 from utils import load_yaml, FindCreateDirectory
 import numpy as np
+from pprint import pprint
 C = np.array([[1, 1, 1], [1, 2, 0], [0, 0, 1]])
 print(C)
 
@@ -23,3 +24,9 @@ if __name__ == '__main__':
     gamma = [2 ** x for x in gamma]
     print(c)
     print(gamma)
+
+    import yaml
+    with open("classification_project_template_gsoc.yaml", "r") as config_file:
+        config_template = yaml.safe_load(config_file)
+
+    pprint(config_template)

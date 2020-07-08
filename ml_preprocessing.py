@@ -3,9 +3,9 @@ import pandas as pd
 from pprint import pprint
 from utils import FindCreateDirectory
 import tensorflow
-from tensorflow.keras.utils import to_categorical
+
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import LabelEncoder
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import Normalizer
@@ -16,40 +16,6 @@ from sklearn.model_selection import train_test_split
 # saving the ML model to pickle file and load it
 import pickle
 import joblib
-
-
-def export_label_data(df, class_name, config):
-    """
-
-    :param df:
-    :param class_name:
-    :param config:
-    :return:
-    """
-    print("EXPORT TARGET:", class_name)
-    label_data = df[class_name]
-    # svm can handle string data
-    if config.get("train_kind") == "svm" or config.get("train_kind") == "grid_svm":
-        label_data = label_data
-        print("Label Data:")
-        print(label_data.head())
-        print("Unique labels - values:\n", label_data.value_counts())
-    # TensorFlow can handle numpy ndarray arrays
-    elif config.get("train_kind") == "deep_learning":
-        lb_encoder = LabelEncoder()
-        label_data = lb_encoder.fit_transform(label_data)
-        label_data = to_categorical(label_data)
-        print(label_data[:5])
-        print("Shape of categorical data:", label_data.shape)
-    # some sklearn ML models can handle numerical values on target class
-    elif config.get("train_kind") == "supervised_lb":
-        lb_encoder = LabelEncoder()
-        label_data = lb_encoder.fit_transform(label_data)
-        print(label_data[:5])
-
-    # print the type if the labeled data
-    print("Type of the labeled data:", type(label_data))
-    return label_data
 
 
 def remove_unnecessary_columns(df, class_name, config):

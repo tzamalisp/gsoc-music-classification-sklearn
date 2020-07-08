@@ -91,74 +91,6 @@ class Models:
 
         return svm
 
-    def train_neural_network(self):
-        """
-
-        :return:
-        """
-        print("Type of features:", type(self.features))
-
-        early_stopping = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
-        checkpoint = keras.callbacks.ModelCheckpoint(os.path.join(os.getcwd(), "exports", "nn_model.h5"),
-                                                     monitor='val_acc',
-                                                     verbose=1,
-                                                     save_best_only=True,
-                                                     mode='max'
-                                                     )
-        # # transform to np array
-        # self.features = self.features.values
-        # print("Type of features:", type(self.features))
-        x_train, x_test, y_train, y_test = train_test_split(self.features,
-                                                            self.labels,
-                                                            test_size=0.33,
-                                                            random_state=42)
-        instance = x_train[0]
-        print('Instance X_train shape:', instance.shape)
-        instance_label = y_train[0]
-        print("Instance y_train shape:", instance_label.shape)
-        model = keras.Sequential([
-            keras.layers.Flatten(input_shape=instance.shape),
-            keras.layers.Dense(instance.shape[0], activation='relu'),
-            keras.layers.Dense(128, activation='relu'),
-            keras.layers.Dense(128, activation='relu'),
-            keras.layers.Dropout(rate=.5),
-            keras.layers.Dense(128, activation='relu'),
-            keras.layers.Dropout(rate=.5),
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(128, activation='relu'),
-            keras.layers.Dropout(rate=.5),
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(128, activation='relu'),
-            keras.layers.Dropout(rate=.5),
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(128, activation='relu'),
-            keras.layers.Dropout(rate=.5),
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(instance_label.shape[0])
-        ])
-
-        # Summary of the ConvNet model.
-        print('Summary of the model:')
-        model.summary()
-
-        model.compile(optimizer='adam',
-                      loss="categorical_crossentropy",
-                      metrics=["accuracy"]
-                      )
-        model.fit(self.features,
-                  self.labels,
-                  batch_size=32,
-                  epochs=100,
-                  callbacks=[early_stopping, checkpoint],
-                  validation_split=0.2
-                  )
-        scores = model.evaluate(x=x_test,
-                                y=y_test,
-                                verbose=1
-                                )
-        print("Test loss: ", scores[0])
-        print("Test accuracy: ", scores[1])
-
     def train_grid_search_svm(self):
         """
         Todo: Commenting
@@ -232,6 +164,74 @@ class Models:
             file.write(str(grid.best_params_))
 
         return grid
+
+    def train_neural_network(self):
+        """
+
+        :return:
+        """
+        print("Type of features:", type(self.features))
+
+        early_stopping = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
+        checkpoint = keras.callbacks.ModelCheckpoint(os.path.join(os.getcwd(), "exports", "nn_model.h5"),
+                                                     monitor='val_acc',
+                                                     verbose=1,
+                                                     save_best_only=True,
+                                                     mode='max'
+                                                     )
+        # # transform to np array
+        # self.features = self.features.values
+        # print("Type of features:", type(self.features))
+        x_train, x_test, y_train, y_test = train_test_split(self.features,
+                                                            self.labels,
+                                                            test_size=0.33,
+                                                            random_state=42)
+        instance = x_train[0]
+        print('Instance X_train shape:', instance.shape)
+        instance_label = y_train[0]
+        print("Instance y_train shape:", instance_label.shape)
+        model = keras.Sequential([
+            keras.layers.Flatten(input_shape=instance.shape),
+            keras.layers.Dense(instance.shape[0], activation='relu'),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dropout(rate=.5),
+            keras.layers.BatchNormalization(),
+            keras.layers.Dense(instance_label.shape[0])
+        ])
+
+        # Summary of the ConvNet model.
+        print('Summary of the model:')
+        model.summary()
+
+        model.compile(optimizer='adam',
+                      loss="categorical_crossentropy",
+                      metrics=["accuracy"]
+                      )
+        model.fit(self.features,
+                  self.labels,
+                  batch_size=32,
+                  epochs=100,
+                  callbacks=[early_stopping, checkpoint],
+                  validation_split=0.2
+                  )
+        scores = model.evaluate(x=x_test,
+                                y=y_test,
+                                verbose=1
+                                )
+        print("Test loss: ", scores[0])
+        print("Test accuracy: ", scores[1])
 
     def train_randomized_search(self):
         """

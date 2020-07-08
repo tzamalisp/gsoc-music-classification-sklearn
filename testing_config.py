@@ -25,8 +25,8 @@ if __name__ == '__main__':
     print(c)
     print(gamma)
 
-    import yaml
-    with open("classification_project_template_gsoc.yaml", "r") as config_file:
-        config_template = yaml.safe_load(config_file)
-
-    pprint(config_template)
+    # import yaml
+    # with open("classification_project_template_gsoc.yaml", "r") as config_file:
+    #     config_template = yaml.safe_load(config_file)
+    #
+    # pprint(config_template)

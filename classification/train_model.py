@@ -1,5 +1,8 @@
 from classification.models import Models
 
+# class Trainer:
+#     def __init__(self, config, train_data, ):
+
 
 class TrainModel:
     def __init__(self, config, train_data, label_data, train_class):

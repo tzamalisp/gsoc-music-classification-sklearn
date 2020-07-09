@@ -104,7 +104,7 @@ random_seed: 1
 
 ## ML SETTINGS
 # train kind: grid_svm, svm, deep_learning, supervised_lb
-train_kind: grid_svm
+train_kind: svm
 
 # svc hyperparameters
 svc_C: 7  # C: float, default=1.0

@@ -85,8 +85,8 @@ class FeaturesDf:
             data_feats_item = json.load(f, strict=False)
 
             # remove unnecessary features data
-            if 'metadata' in data_feats_item:
-                del data_feats_item['metadata']
+            # if 'metadata' in data_feats_item:
+            #     del data_feats_item['metadata']
             if 'beats_position' in data_feats_item['rhythm']:
                 del data_feats_item['rhythm']['beats_position']
 
@@ -119,7 +119,7 @@ class FeaturesDf:
         :return:
         DataFrame: The tracks with all the ground truth data and the corresponding low-level data flattened.
         """
-        self.df_tracks.drop(labels=['track_path'], axis=1, inplace=True)
+        self.df_tracks.drop(labels=['track_path', 'json_directory', 'track'], axis=1, inplace=True)
         print()
         print()
         print("CONCATENATING")
@@ -133,15 +133,15 @@ class FeaturesDf:
         if self.config["gaia_imitation"] is True:
             print("DF CONCATENATION BEFORE SHUFFLING")
             print("head:")
-            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].head(10))
+            print(self.df_full_tracks.iloc[:, 0].head(10))
             print("tail:")
-            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].tail(10))
+            print(self.df_full_tracks.iloc[:, 0].tail(10))
             self.df_full_tracks = shuffle_data(df_ml_data=self.df_full_tracks, config=self.config)
             print("DF CONCATENATION AFTER SHUFFLING")
             print("head:")
-            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].head(10))
+            print(self.df_full_tracks.iloc[:, 0].head(10))
             print("tail:")
-            print(self.df_full_tracks[["json_directory", self.class_name, "tonal_key_scale"]].tail(10))
+            print(self.df_full_tracks.iloc[:, 0].tail(10))
         return self.df_full_tracks
 
 

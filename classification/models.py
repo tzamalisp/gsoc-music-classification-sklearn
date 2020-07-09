@@ -62,18 +62,21 @@ class Models:
                        shuffle=self.config["gaia_kfold_shuffle"],
                        random_state=self.config["gaia_kfold_random_state"]
                        )
-            kf.split(X)
 
+            # transform DF to np array for K-Fold SVM training
+            X_array = X.values
+            print("Type of DF to array tranformation for F-fold training: {}".format(type(X_array)))
+            print("Shape of this array transgormation: {}".format(X_array.shape))
             # Initialize the accuracy of the models to blank list.
             # The accuracy of each model will be appended to this list
             accuracy_model = []
 
             # Iterate over each train-test split
-            for train_index, test_index in kf.split(X):
+            for train_index, test_index in kf.split(X_array):
                 # print("TRAIN INDEX: ", train_index)
                 # print("TEST INDEX: ", test_index)
                 # Split train-test
-                X_train, X_test = X[train_index], X[test_index]
+                X_train, X_test = X_array[train_index], X_array[test_index]
                 y_train, y_test = y[train_index], y[test_index]
                 # Train the model
                 model = svm.fit(X_train, y_train)

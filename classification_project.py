@@ -3,11 +3,6 @@ from utils import load_yaml, FindCreateDirectory, LogsDeleter
 from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
 from ml_load_low_level import FeaturesDf
 from utils import DfChecker
-from ml_preprocessing import remove_unnecessary_columns
-from ml_preprocessing import enumerate_categorical_values
-from ml_preprocessing import scaling
-from ml_preprocessing import dimensionality_reduction
-from ml_preprocessing import split_to_train_test
 from classification.train_model import TrainModel
 from transformation.transform import Transform
 from transformation.features_labels import FeaturesLabelsSplitter
@@ -69,7 +64,7 @@ def data_handling():
         labels = feats_labels_splitter.export_labels()
         features = feats_labels_splitter.export_features()
         # transformation
-        features_transformed = Transform(config=config_data, df=features, process="mfcc").post_processing()
+        features_transformed = Transform(config=config_data, df=features, process="gaussianized").post_processing()
         print(features_transformed.columns)
         # Model train
         print("MODEL TRAINING")

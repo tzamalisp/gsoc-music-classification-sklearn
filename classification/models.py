@@ -7,11 +7,18 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
 from sklearn.metrics import accuracy_score
 # Neural Networks
 import tensorflow as tf
 from tensorflow import keras
 import time
+
+
+def display_scores(scores):
+    print("Scores: {}".format(scores))
+    print("Mean: {}".format(scores.mean()))
+    print("Standard Deviation: {}".format(scores.std()))
 
 
 class Models:
@@ -86,6 +93,10 @@ class Models:
             # Print the accuracy
             print("Accuracies in every fold iteration: {}".format(accuracy_model))
             print("Mean of all the accuracies: {}".format(sum(accuracy_model) / len(accuracy_model)))
+            print()
+            print("Train with Cross Validation Score:")
+            scores = cross_val_score(svm, X_array, self.labels, scoring="accuracy", cv=5)
+            display_scores(scores)
 
         elif self.config.get("k_fold_apply") is False:
             svm.fit(self.features, self.labels)

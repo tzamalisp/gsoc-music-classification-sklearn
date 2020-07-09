@@ -79,20 +79,20 @@ class Models:
             accuracy_model = []
 
             # Iterate over each train-test split
-            for train_index, test_index in kf.split(X_array):
-                # print("TRAIN INDEX: ", train_index)
-                # print("TEST INDEX: ", test_index)
-                # Split train-test
-                X_train, X_test = X_array[train_index], X_array[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                # Train the model
-                model = svm.fit(X_train, y_train)
-                # Append to accuracy_model the accuracy of the model
-                accuracy_model.append(accuracy_score(y_test, model.predict(X_test), normalize=True) * 100)
+            # for train_index, test_index in kf.split(X_array):
+            #     # print("TRAIN INDEX: ", train_index)
+            #     # print("TEST INDEX: ", test_index)
+            #     # Split train-test
+            #     X_train, X_test = X_array[train_index], X_array[test_index]
+            #     y_train, y_test = y[train_index], y[test_index]
+            #     # Train the model
+            #     model = svm.fit(X_train, y_train)
+            #     # Append to accuracy_model the accuracy of the model
+            #     accuracy_model.append(accuracy_score(y_test, model.predict(X_test), normalize=True) * 100)
 
             # Print the accuracy
-            print("Accuracies in every fold iteration: {}".format(accuracy_model))
-            print("Mean of all the accuracies: {}".format(sum(accuracy_model) / len(accuracy_model)))
+            # print("Accuracies in every fold iteration: {}".format(accuracy_model))
+            # print("Mean of all the accuracies: {}".format(sum(accuracy_model) / len(accuracy_model)))
             print()
             print("Train with Cross Validation Score:")
             scores = cross_val_score(svm, X_array, self.labels, scoring="accuracy", cv=5)

@@ -131,6 +131,7 @@ grid_verbose: 10
 shuffle: True
 # set to -1 if you want to exploit all processors. Set to null if you want to exploit only 1 processor
 parallel_jobs: -1
+verbose: 10
 grid_results_directory: grid_scores
 
 # NEURAL NETWORK SETTINGS

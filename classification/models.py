@@ -95,7 +95,15 @@ class Models:
             # print("Mean of all the accuracies: {}".format(sum(accuracy_model) / len(accuracy_model)))
             print()
             print("Train with Cross Validation Score:")
-            scores = cross_val_score(svm, X_array, self.labels, scoring="accuracy", cv=5)
+            scores = cross_val_score(estimator=svm,
+                                     X=X_array,
+                                     y=self.labels,
+                                     scoring="accuracy",
+                                     cv=self.config.get("k_fold"),
+                                     n_jobs=self.config.get("parallel_jobs"),
+                                     verbose=self.config.get("verbose"))
+            print()
+            print("SVM results")
             display_scores(scores)
 
         elif self.config.get("k_fold_apply") is False:

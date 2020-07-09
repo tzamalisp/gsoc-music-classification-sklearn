@@ -74,9 +74,9 @@ class Evaluation:
 
         logger_eval.info("Model to evaluate: {}".format(self.config.get("train_kind")))
         logger_eval.info("Class to evaluate: {}".format(self.class_name))
-        logger_eval.info("Features shape: {}".format(self.x_data.shape))
-        logger_eval.info("Labels shape: {}".format(self.y_data.shape))
-        logger_eval.info("Model classes: {}".format(self.model.classes_))
+        # logger_eval.info("Features shape: {}".format(self.x_data.shape))
+        # logger_eval.info("Labels shape: {}".format(self.y_data.shape))
+        # logger_eval.info("Model classes: {}".format(self.model.classes_))
 
         # predictions
         logger_eval.info("PREDICTIONS - {}".format(self.config.get("train_kind")))

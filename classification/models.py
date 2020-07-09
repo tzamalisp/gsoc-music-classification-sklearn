@@ -4,10 +4,11 @@ import numpy as np
 from utils import load_yaml, FindCreateDirectory
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import accuracy_score
 # Neural Networks
 import tensorflow as tf
@@ -63,48 +64,95 @@ class Models:
         if self.config.get("k_fold_apply") is True:
             # KFold Cross Validation approach
             X = self.features
+            print("Type of X (features):", type(X))
             y = self.labels
-            print("type of y:", type(y))
-            kf = KFold(n_splits=self.config["gaia_kfold_cv_n_splits"],
-                       shuffle=self.config["gaia_kfold_shuffle"],
-                       random_state=self.config["gaia_kfold_random_state"]
-                       )
+            print("Type of y (labels):", type(y))
 
             # transform DF to np array for K-Fold SVM training
             X_array = X.values
             print("Type of DF to array tranformation for F-fold training: {}".format(type(X_array)))
             print("Shape of this array transgormation: {}".format(X_array.shape))
-            # Initialize the accuracy of the models to blank list.
-            # The accuracy of each model will be appended to this list
-            accuracy_model = []
 
-            # Iterate over each train-test split
-            # for train_index, test_index in kf.split(X_array):
-            #     # print("TRAIN INDEX: ", train_index)
-            #     # print("TEST INDEX: ", test_index)
-            #     # Split train-test
-            #     X_train, X_test = X_array[train_index], X_array[test_index]
-            #     y_train, y_test = y[train_index], y[test_index]
-            #     # Train the model
-            #     model = svm.fit(X_train, y_train)
-            #     # Append to accuracy_model the accuracy of the model
-            #     accuracy_model.append(accuracy_score(y_test, model.predict(X_test), normalize=True) * 100)
-
-            # Print the accuracy
-            # print("Accuracies in every fold iteration: {}".format(accuracy_model))
-            # print("Mean of all the accuracies: {}".format(sum(accuracy_model) / len(accuracy_model)))
+            # Use cross-validation by calling the cross_val_score helper function on the estimator and the dataset.
             print()
-            print("Train with Cross Validation Score:")
+            # Evaluate the classifier with cross_val_score
+            print("Evaluate the classifier with cross_val_score:")
             scores = cross_val_score(estimator=svm,
                                      X=X_array,
                                      y=self.labels,
                                      scoring="accuracy",
                                      cv=self.config.get("k_fold"),
                                      n_jobs=self.config.get("parallel_jobs"),
-                                     verbose=self.config.get("verbose"))
+                                     verbose=self.config.get("verbose")
+                                     )
             print()
-            print("SVM results")
+            print("Score results:")
             display_scores(scores)
+            print()
+            print()
+
+            # Evaluate the classifier with cross_validate
+            print("Evaluate the classifier with cross_validate:")
+            cv_results = cross_validate(estimator=svm,
+                                        X=X_array,
+                                        y=self.labels,
+                                        scoring="accuracy",
+                                        cv=self.config.get("k_fold"),
+                                        n_jobs=self.config.get("parallel_jobs"),
+                                        verbose=self.config.get("verbose"),
+                                        return_estimator=True
+                                        )
+
+            print("CV results:")
+            print(sorted(cv_results.keys()))
+            for item in cv_results.keys():
+                print("{}: {}".format(item, cv_results[item]))
+            print("Mean of all the accuracies: {}".format(sum(cv_results["test_score"]) / len(cv_results["test_score"])))
+            print()
+
+            # Evaluate the classifier with cross_val_predict
+            print("Evaluate the classifier with cross_val_predict:")
+            predictions = cross_val_predict(estimator=svm,
+                                            X=X_array,
+                                            y=self.labels,
+                                            cv=self.config.get("k_fold"),
+                                            n_jobs=self.config.get("parallel_jobs"),
+                                            verbose=self.config.get("verbose")
+                                            )
+
+            print("Confusion matrix from cross_val_predict:")
+            from sklearn.metrics import confusion_matrix
+            print(confusion_matrix(y_true=self.labels, y_pred=predictions))
+            # print(predictions.shape)
+            print()
+            print("Normalized Confusion matrix from cross_val_predict:")
+            cm = confusion_matrix(y_true=self.labels, y_pred=predictions)
+            cm = (cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]) * 100
+            print(cm)
+            print()
+
+            # Train the classifier with K-Fold cross-validation
+            print("Fitting the data to the classifier with K-Fold cross-validation..")
+            kf = KFold(n_splits=self.config["gaia_kfold_cv_n_splits"],
+                       shuffle=self.config["gaia_kfold_shuffle"],
+                       random_state=self.config["gaia_kfold_random_state"]
+                       )
+            # Initialize the accuracy of the models to blank list.
+            # The accuracy of each model will be appended to this list
+            accuracy_model = []
+            # Iterate over each train-test split
+            for train_index, val_index in kf.split(X_array):
+                print("TRAIN INDEX: ", train_index)
+                print("TEST INDEX: ", val_index)
+                # Split train-test
+                X_train, X_val = X_array[train_index], X_array[val_index]
+                y_train, y_val = y[train_index], y[val_index]
+                # Train the model
+                model = svm.fit(X_train, y_train)
+                # Append to accuracy_model the accuracy of the model
+                accuracy_model.append(accuracy_score(y_val, model.predict(X_val), normalize=True) * 100)
+                print()
+            print("Fitting the data finished.")
 
         elif self.config.get("k_fold_apply") is False:
             svm.fit(self.features, self.labels)

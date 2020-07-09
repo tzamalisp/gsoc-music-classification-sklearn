@@ -81,86 +81,21 @@ def data_handling():
         print("End time: {}".format(datetime.now()))
         print("Train time: {} seconds".format(end - start))
 
+        # Model evaluation
+        print("MODEL EVALUATION")
+        eval_model = Evaluation(config=config_data,
+                                model=model_trained,
+                                x_data=features_transformed,
+                                y_data=labels,
+                                class_name=class_to_model)
+        eval_model.model_evaluation()
+
 
 def project_acousticbrainz():
     """
 
     :return:
     """
-
-
-def model_training(df_gt_data, class_train, config):
-    """
-
-    :param df_gt_data:
-    :param class_train:
-    :param config:
-    :return:
-    """
-
-    # print("DF full:")
-    # print(df_full.head())
-    # print("DF full shape: {}".format(df_full.shape))
-    print()
-    print()
-    # labels (y)
-    print("EXPORT LABEL/TARGET DATA (str, one-hot, encoded)")
-    # label_data = export_label_data(df=df_full, class_name=class_train, config=config)
-    # print("Type of target data:", type(label_data))
-    print()
-    print()
-
-    # remove no-useful columns
-    print("REMOVE NO USEFUL FEATURES")
-    # df_ml = remove_unnecessary_columns(df=df_full, class_name=class_train, config=config)
-    # print("SHAPE DF ML SHAPE: {}".format(df_ml.shape))
-    # print("TYPE DF ML SHAPE: {}".format(type(df_ml)))
-    print()
-    print()
-
-    # enumerate categorical data
-    print("FEATURES ENUMERATION")
-    # df_ml_num = enumerate_categorical_values(df_feats_ml=df_ml, config=config)
-    print()
-    print()
-
-    # scale the data
-    # feats_scaled = scaling(feat_data=df_ml_num, config=config)
-    # print("SHAPE FEATS SCALED: {}".format(feats_scaled.shape))
-    # print("TYPE FEATS SCALED: {}".format(type(feats_scaled)))
-    print()
-    print()
-
-    # pca apply
-    print("PCA")
-    # feats_pca = dimensionality_reduction(feat_data=feats_scaled, config=config)
-    # print("SHAPE FEATS PCA: {}".format(feats_pca.shape))
-    # print("TYPE FEATS PCA: {}".format(type(feats_pca)))
-    print()
-    print()
-
-    # train/test split
-    print("TRAIN/TEST SPLIT")
-    # train_feats, test_feats, train_labels, test_labels = split_to_train_test(x_data=feats_pca, y_data=label_data)
-
-    print()
-    print()
-
-
-
-
-    print()
-    print()
-
-    # Model evaluation
-    print("MODEL EVALUATION")
-    # eval_model = Evaluation(config=config,
-    #                         model=model_trained,
-    #                         x_data=test_feats,
-    #                         y_data=test_labels,
-    #                         class_name=class_train)
-    # eval_model.model_evaluation()
-
 
 
 def example(argument):

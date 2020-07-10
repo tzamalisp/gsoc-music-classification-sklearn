@@ -167,8 +167,11 @@ class GroundTruthLoad:
             else:
                 print("There are no NULL values found.")
             if self.config.get("tracks_in_csv_format") != "":
-                tracks_csv_dir = FindCreateDirectory(self.config.get("tracks_in_csv_format")).inspect_directory()
-                self.df_tracks.to_csv(os.path.join(tracks_csv_dir, "df_{}.csv".format(self.class_name)))
+                tracks_csv_dir = os.path.join(
+                    "{}_{}".format(self.config.get("exports_directory"), self.class_name),
+                    "tracks_csv")
+                tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
+                self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}.csv".format(self.class_name)))
             else:
                 print("No directory to export tracks to csv is specified in the configuration file.")
             print("DF INFO:")

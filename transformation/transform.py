@@ -17,10 +17,11 @@ except AttributeError:
 
 
 class Transform:
-    def __init__(self, config, df, process):
+    def __init__(self, config, df, process, exports_path):
         self.config = config
         self.df = df
         self.process = process
+        self.exports_path = exports_path
         self.cleaner()
         self.pre_processing()
 
@@ -52,7 +53,11 @@ class Transform:
             print("Postprocess steps: {}".format(postprocess_steps))
             for step in postprocess_steps:
                 print("Scale process: {}".format(step))
-                self.df = descr_scaling(feats_data=self.df, processing=step, config=self.config)
+                self.df = descr_scaling(feats_data=self.df,
+                                        processing=step,
+                                        config=self.config,
+                                        exports_path=self.exports_path
+                                        )
         else:
             print("No postprocessing steps found.")
         print("Shape of the df after the postprocessing (scaling): \n{}".format(self.df.shape))

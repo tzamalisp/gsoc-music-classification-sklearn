@@ -39,7 +39,7 @@ class Evaluation:
         y_data: The labels of the testing instances.
         class_name: A string that describes the class that will be evaluated.
     """
-    def __init__(self, config, model, x_data, y_data, class_name):
+    def __init__(self, config, model, x_data, y_data, class_name, exports_path):
         """
         Inits the Evaluation with the corresponding parameters.
 
@@ -55,6 +55,7 @@ class Evaluation:
         self.x_data = x_data
         self.y_data = y_data
         self.class_name = class_name
+        self.exports_path = exports_path
 
     def model_evaluation(self):
         """
@@ -66,7 +67,9 @@ class Evaluation:
         # logging
         # logs_dir = FindCreateDirectory(self.config.get("log_directory")).inspect_directory()
         # path_logger = os.path.join(logs_dir, "evaluation.log")
-        log_eval = LoggerSetup(name="evaluation_logger",
+        log_eval = LoggerSetup(config=self.config,
+                               exports_path=self.exports_path,
+                               name="evaluation_logger",
                                log_file="evaluation.log",
                                level=self.config.get("logging_level")
                                )
@@ -150,13 +153,14 @@ class Evaluation:
                 logger_eval.info(mean_report)
                 report_list.append(mean_report)
             logger_eval.info("Next class:")
-        exports_dir = FindCreateDirectory(self.config.get("evaluations_directory")).inspect_directory()
+        exports_dir = os.path.join(self.exports_path, self.config.get("evaluations_directory"))
+        exports_path = FindCreateDirectory(exports_dir).inspect_directory()
         # take current date and convert to string
         now = datetime.now()
         datetime_str = now.strftime("%Y-%m-%d")
         datetime_str_verbose = now.strftime("%Y-%m-%d, %H:%M:%S")
         print("Creating report file..")
-        with open(os.path.join(exports_dir,
+        with open(os.path.join(exports_path,
                                "{}_{}_{}.txt".format(self.class_name,
                                                      self.config.get("train_kind"),
                                                      datetime_str)), 'w+') as file:

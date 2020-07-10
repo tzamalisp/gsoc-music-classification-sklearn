@@ -10,15 +10,18 @@ from transformation.utils_preprocessing import list_descr_handler, descr_selecto
 from utils import FindCreateDirectory
 
 
-def descr_scaling(feats_data, processing, config):
+def descr_scaling(feats_data, processing, config, exports_path):
     """
 
     :param feats_data:
     :param processing:
+    :param config:
+    :param exports_path:
     :return:
     """
     # save plots path
-    save_plot_path = FindCreateDirectory("{}/images".format(config.get("exports_directory"))).inspect_directory()
+    save_plot_dir = os.path.join(exports_path, "images")
+    save_plot_path = FindCreateDirectory(save_plot_dir).inspect_directory()
 
     # Normalize dataset
     if processing["transfo"] == "normalize":

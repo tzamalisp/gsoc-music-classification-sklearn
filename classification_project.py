@@ -57,14 +57,27 @@ def data_handling():
         gt_data = gt_object.create_df_tracks()
         class_to_model = gt_object.export_class_name()
         print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
+        print("Exports path for the training:")
+        exports_dir = "{}_{}".format(config_data.get("exports_directory"), class_to_model)
+        exports_path = FindCreateDirectory(exports_dir).inspect_directory()
+        print(exports_path)
         print("LOAD LOW LEVEL and FLATTEN THEM")
-        df_full = FeaturesDf(df_tracks=gt_data, class_name=class_to_model, config=config_data).concatenate_dfs()
-        feats_labels_splitter = FeaturesLabelsSplitter(config=config_data, df=df_full, train_class=class_to_model)
+        df_full = FeaturesDf(df_tracks=gt_data,
+                             class_name=class_to_model,
+                             config=config_data
+                             ).concatenate_dfs()
+        feats_labels_splitter = FeaturesLabelsSplitter(config=config_data,
+                                                       df=df_full,
+                                                       train_class=class_to_model)
         # labels vs. features split
         labels = feats_labels_splitter.export_labels()
         features = feats_labels_splitter.export_features()
         # transformation
-        features_transformed = Transform(config=config_data, df=features, process="gaussianized").post_processing()
+        features_transformed = Transform(config=config_data,
+                                         df=features,
+                                         process="gaussianized",
+                                         exports_path=exports_path
+                                         ).post_processing()
         print(features_transformed.columns)
         # Model train
         print("MODEL TRAINING")
@@ -74,7 +87,8 @@ def data_handling():
         training = TrainModel(config=config_data,
                               train_data=features_transformed,
                               label_data=labels,
-                              train_class=class_to_model)
+                              train_class=class_to_model,
+                              exports_path=exports_path)
         model_trained = training.train_model()
         print()
         end = time.time()
@@ -87,7 +101,8 @@ def data_handling():
                                 model=model_trained,
                                 x_data=features_transformed,
                                 y_data=labels,
-                                class_name=class_to_model)
+                                class_name=class_to_model,
+                                exports_path=exports_path)
         eval_model.model_evaluation()
 
 

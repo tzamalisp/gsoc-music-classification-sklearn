@@ -26,7 +26,7 @@ class Models:
     """
     Todo: Commenting
     """
-    def __init__(self, config, features, labels, class_name):
+    def __init__(self, config, features, labels, class_name, exports_path):
         """
 
         :param config:
@@ -38,6 +38,7 @@ class Models:
         self.features = features
         self.labels = labels
         self.class_name = class_name
+        self.exports_path = exports_path
 
     def train_svm(self):
         """
@@ -216,9 +217,9 @@ class Models:
         print()
         print("Best parameters:")
         print(grid.best_params_)
-
-        exports_dir = FindCreateDirectory(self.config.get("grid_results_directory")).inspect_directory()
-        with open(os.path.join(exports_dir, "{}.txt".format(self.class_name)), 'w+') as file:
+        exports_dir = os.path.join(self.exports_path, self.config.get("grid_results_directory"))
+        exports_path = FindCreateDirectory(exports_dir).inspect_directory()
+        with open(os.path.join(exports_path, "{}.txt".format(self.class_name)), 'w+') as file:
             file.write('Grid Score - {}:'.format(self.class_name))
             file.write("\n")
             file.write("\n")
@@ -243,7 +244,9 @@ class Models:
         print("Type of features:", type(self.features))
 
         early_stopping = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
-        checkpoint = keras.callbacks.ModelCheckpoint(os.path.join(os.getcwd(), "exports", "nn_model.h5"),
+        checkpoint = keras.callbacks.ModelCheckpoint(os.path.join(os.getcwd(),
+                                                                  self.exports_path,
+                                                                  "nn_train", "nn_model.h5"),
                                                      monitor='val_acc',
                                                      verbose=1,
                                                      save_best_only=True,

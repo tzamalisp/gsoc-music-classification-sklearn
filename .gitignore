@@ -86,6 +86,7 @@ fabric.properties
 .gitingore
 */*.tar.bz2
 
+exports*/
 evaluations/
 exports/
 .ipynb_checkpoints/

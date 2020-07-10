@@ -13,16 +13,16 @@ import os
 from utils import load_yaml, FindCreateDirectory
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
-# load yaml configuration file to a dict
-config_data = load_yaml()
-# If log directory does not exist, create one
-current_d = os.getcwd()
-if config_data["log_directory"] is None or config_data["log_directory"] is None:
-    if not os.path.exists(os.path.join(current_d, "logs_dir")):
-        os.makedirs(os.path.join(current_d, "logs_dir"))
-        log_path = os.path.join(current_d, "logs_dir")
-else:
-    log_path = FindCreateDirectory(config_data["log_directory"]).inspect_directory()
+# # load yaml configuration file to a dict
+# config_data = load_yaml()
+# # If log directory does not exist, create one
+# current_d = os.getcwd()
+# if config_data["log_directory"] is None or config_data["log_directory"] is None:
+#     if not os.path.exists(os.path.join(current_d, "logs_dir")):
+#         os.makedirs(os.path.join(current_d, "logs_dir"))
+#         log_path = os.path.join(current_d, "logs_dir")
+# else:
+#     log_path = FindCreateDirectory(config_data["log_directory"]).inspect_directory()
 
 
 class LoggerSetup:
@@ -33,7 +33,7 @@ class LoggerSetup:
         log_file: The path of the logging file export.
         level: An integer that defines the logging level.
     """
-    def __init__(self, name, log_file, level=1):
+    def __init__(self, config, exports_path, name, log_file, level=1):
         """
         Inits the logger object with the corresponding parameters.
 
@@ -42,6 +42,8 @@ class LoggerSetup:
             log_file (str): The path the logging exports will be exported.
             level (int): The level of the logging. Defaults to 1.
         """
+        self.config = config
+        self.exports_path = exports_path
         self.name = name
         self.log_file = log_file
         self.level = level
@@ -54,6 +56,8 @@ class LoggerSetup:
 
         :return:
         """
+        logs_dir = os.path.join(self.exports_path, self.config["log_directory"])
+        log_path = FindCreateDirectory(logs_dir).inspect_directory()
         handler = logging.FileHandler(os.path.join(log_path, self.log_file), mode='w')
         handler.setFormatter(formatter)
 

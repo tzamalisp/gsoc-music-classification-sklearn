@@ -5,17 +5,19 @@ from classification.models import Models
 
 
 class TrainModel:
-    def __init__(self, config, train_data, label_data, train_class):
+    def __init__(self, config, train_data, label_data, train_class, exports_path):
         self.config = config
         self.train_data = train_data
         self.label_data = label_data
         self.train_class = train_class
+        self.exports_path = exports_path
 
     def train_model(self):
         model_train = Models(config=self.config,
                              features=self.train_data,
                              labels=self.label_data,
-                             class_name=self.train_class
+                             class_name=self.train_class,
+                             exports_path=self.exports_path
                              )
         if self.config.get("train_kind") == "grid_svm":
             model = model_train.train_grid_search_svm()

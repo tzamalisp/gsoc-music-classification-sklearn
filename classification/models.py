@@ -17,6 +17,7 @@ import time
 
 
 def display_scores(scores):
+    print("Display scores:")
     print("Scores: {}".format(scores))
     print("Mean: {}".format(scores.mean()))
     print("Standard Deviation: {}".format(scores.std()))
@@ -77,6 +78,9 @@ class Models:
             # Use cross-validation by calling the cross_val_score helper function on the estimator and the dataset.
             print()
             # Evaluate the classifier with cross_val_score
+            exports_dir = os.path.join(self.exports_path, self.config.get("evaluations_directory"))
+            exports_path = FindCreateDirectory(exports_dir).inspect_directory()
+
             print("Evaluate the classifier with cross_val_score:")
             scores = cross_val_score(estimator=svm,
                                      X=X_array,

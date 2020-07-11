@@ -89,10 +89,10 @@ processing:
         - transfo: select
           params: { descriptorNames: ['lowlevel.mfcc*'] }
 
-classifiers:
-    svm:
-        # first svm test combinations
-        - processing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
+#classifiers:
+#    svm:
+#        # first svm test combinations
+#        - processing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
 
 # gaia data
 gaia_imitation: True
@@ -139,3 +139,25 @@ grid_results_directory: grid_scores
 
 # NEURAL NETWORK SETTINGS
 #
+
+
+
+# List of classifiers to be trained
+classifiers:
+    svm:
+        # first svm test combinations
+        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
+          type: [ 'C-SVC' ]
+          kernel: [ 'poly', 'RBF' ]
+          C:     [ -5, -3, -1, 1, 3, 5, 7, 9, 11 ] # will actually be 2**x
+          gamma: [ 3, 1, -1, -3, -5, -7, -9, -11 ] # will actually be 2**x
+          # if True, weight classes based on the number of elements
+          balanceClasses: [False, True]
+        #  descriptorNames: [ ['*.mean', '*.var'] ]
+        # more svm params combinations
+        # ...
+
+# List of evaluations to be performed
+evaluations:
+    nfoldcrossvalidation:
+        - nfold: [ 5 ]

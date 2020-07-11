@@ -50,6 +50,38 @@ class Models:
         :return:
         """
 
+
+        # list processes
+        svm_processes = self.config["classifiers"]["svm"][0]
+        list_processes = []
+        for classifier in self.config["classifiers"].keys():
+            for ker in svm_processes["kernel"]:
+                for c in svm_processes["C"]:
+                    for balance in svm_processes["balanceClasses"]:
+                        for preprocess in svm_processes["preprocessing"]:
+                            for typeness in svm_processes["type"]:
+                                for gamma in svm_processes["gamma"]:
+                                    dict_process = {}
+                                    dict_process["kernel"] = ker
+                                    dict_process["C"] = c
+                                    dict_process["balanceClasses"] = balance
+                                    dict_process["preprocessing"] = preprocess
+                                    dict_process["type"] = typeness
+                                    dict_process["classifier"] = classifier
+                                    dict_process["gamma"] = gamma
+                                    list_processes.append(dict_process)
+        print("Number of processes to be executed: {}".format(len(list_processes)))
+        list_evaluations = []
+        for evaluation in self.config["evaluations"].keys():
+            for test in self.config["evaluations"][evaluation]:
+                for key in test:
+                    for value in test[key]:
+                        dict_eval = {}
+                        dict_eval["nfold"] = value
+                        dict_eval["type"] = evaluation
+                        list_evaluations.append(dict_eval)
+        print("Number of evaluations to be executed: {}".format(len(list_evaluations)))
+
         # read gaia params
         path_script = os.getcwd()
         path_app = os.path.join(path_script)

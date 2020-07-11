@@ -112,10 +112,13 @@ svc_kernel: rbf  # kernel: {‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, 
 svc_gamma: -11  # gamma: {‘scale’, ‘auto’} or float, default=’scale’
 svc_class_weight_balance: null  # class_weight: dict or ‘balanced’, default=None
 svc_probability: True
+svc_preprocessing: gaussianized
 
 # k-fold hyperparameters
 k_fold_apply: True
 k_fold: 5
+k_fold_shuffle: True
+k_fold_random_seed: 1
 # GRID ML SETTINGS
 #
 pca_n_components: .95
@@ -128,7 +131,7 @@ grid_class_weight: ['balanced', null]
 grid_verbose: 10
 
 # shuffle: True or False
-shuffle: True
+ds_shuffle: True
 # set to -1 if you want to exploit all processors. Set to null if you want to exploit only 1 processor
 parallel_jobs: -1
 verbose: 10

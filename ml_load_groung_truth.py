@@ -6,6 +6,25 @@ from utils import DfChecker
 from utils import load_yaml, FindCreateDirectory
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+import random
+
+
+def shuffle_data(df_ml_data, config):
+    """
+
+    :param df_ml_data: (Pandas DataFrame) the data to be shuffled
+    :param config: (dict) the configuration data
+    :return: (NumPy array) the shuffled data
+    """
+    df_ml_cols = df_ml_data.columns
+    # convert DataFrame to NumPy array
+    ml_values = df_ml_data.values
+    # shuffle the data
+    random.seed(a=config.get("random_seed"))
+    random.shuffle(ml_values)
+    # convert the NumPy array to DF
+    df_ml_shuffle = pd.DataFrame(data=ml_values, columns=df_ml_cols)
+    return df_ml_shuffle
 
 
 class ListGroundTruthFiles:
@@ -69,6 +88,7 @@ class GroundTruthLoad:
         self.dataset_dir = ""
         self.tracks = []
         self.df_tracks = pd.DataFrame()
+        self.df_tracks_shuffled = pd.DataFrame()
 
         self.load_local_ground_truth()
         # self.create_df_tracks()
@@ -171,13 +191,21 @@ class GroundTruthLoad:
                     "{}_{}".format(self.config.get("exports_directory"), self.class_name),
                     "tracks_csv")
                 tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
-                self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}.csv".format(self.class_name)))
+                self.df_tracks[["json_directory", "track", self.class_name]].\
+                    to_csv(os.path.join(tracks_csv_path, "tracks_{}.csv".format(self.class_name)))
+                if self.config["ds_shuffle"] is True:
+                    self.df_tracks_shuffled = shuffle_data(df_ml_data=self.df_tracks, config=self.config)
+                else:
+                    self.df_tracks_shuffled = self.df_tracks
+                self.df_tracks_shuffled[["json_directory", "track", self.class_name]].\
+                    to_csv(os.path.join(tracks_csv_path, "tracks_{}_shuffled.csv".format(self.class_name)))
+
             else:
                 print("No directory to export tracks to csv is specified in the configuration file.")
             print("DF INFO:")
             print(self.df_tracks.info())
             print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)
-            return self.df_tracks
+            return self.df_tracks, self.df_tracks_shuffled
 
         else:
             return None

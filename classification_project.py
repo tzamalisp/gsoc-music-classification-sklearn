@@ -9,42 +9,10 @@ from transformation.features_labels import FeaturesLabelsSplitter
 from classification.evaluation import Evaluation
 import time
 from datetime import datetime
+import yaml
 
 
-def project_ground_truth():
-    """
-
-    :return:
-    """
-    config_data = load_yaml()
-    if config_data["gaia_imitation"] is True:
-        print("GAIA IMITATION MODE is ON")
-    print("Dataset/class for evaluation:", config_data.get("class_dir"))
-    print("Kind of training:", config_data.get("train_kind"))
-    print()
-    gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()
-    print(gt_files_list)
-    print("LOAD GROUND TRUTH")
-    for gt_file in gt_files_list:
-        print("YAML FILE TO PROCESS:", gt_file)
-        gt_data = GroundTruthLoad(config_data, gt_file)
-        individual_df_gt_data = gt_data.create_df_tracks()
-        class_to_model = gt_data.export_class_name()
-        print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
-        # delete logs if set True in config file
-        log_deleter = LogsDeleter(config=config_data, train_class=class_to_model)
-        log_deleter.delete_logs()
-
-        print()
-        print()
-        model_training(df_gt_data=individual_df_gt_data, class_train=class_to_model, config=config_data)
-        print()
-        print()
-        print()
-        print()
-
-
-def data_handling():
+def project_gt():
     config_data = load_yaml()
     if config_data["gaia_imitation"] is True:
         print("GAIA IMITATION MODE is ON")
@@ -54,15 +22,23 @@ def data_handling():
     for gt_file in gt_files_list:
         print("YAML file to load the data:", gt_file)
         gt_object = GroundTruthLoad(config_data, gt_file)
-        gt_data = gt_object.create_df_tracks()
+        gt_data, gt_data_shuffled = gt_object.create_df_tracks()
+        gt_data_shuffled_copy = gt_data_shuffled.copy()
         class_to_model = gt_object.export_class_name()
         print("CLASS TO TRAIN AND IMPORT TO PROCESSING:", class_to_model)
+
+        # read gaia params
+        path_script = os.getcwd()
+        path_app = os.path.join(path_script)
+        with open(os.path.join(path_app, "gaia_best_models", "jmp_results_{}.param".format(class_to_model)), "r") as f:
+            gaia_model = yaml.safe_load(f)
+
         print("Exports path for the training:")
         exports_dir = "{}_{}".format(config_data.get("exports_directory"), class_to_model)
         exports_path = FindCreateDirectory(exports_dir).inspect_directory()
         print(exports_path)
         print("LOAD LOW LEVEL and FLATTEN THEM")
-        df_full = FeaturesDf(df_tracks=gt_data,
+        df_full = FeaturesDf(df_tracks=gt_data_shuffled,
                              class_name=class_to_model,
                              config=config_data
                              ).concatenate_dfs()
@@ -75,7 +51,7 @@ def data_handling():
         # transformation
         features_transformed = Transform(config=config_data,
                                          df=features,
-                                         process="gaussianized",
+                                         process=gaia_model["model"]["preprocessing"],
                                          exports_path=exports_path
                                          ).post_processing()
         print(features_transformed.columns)
@@ -88,7 +64,8 @@ def data_handling():
                               train_data=features_transformed,
                               label_data=labels,
                               train_class=class_to_model,
-                              exports_path=exports_path)
+                              exports_path=exports_path,
+                              tracks_shuffled=gt_data_shuffled_copy)
         model_trained = training.train_model()
         print()
         end = time.time()
@@ -96,14 +73,14 @@ def data_handling():
         print("Train time: {} seconds".format(end - start))
 
         # Model evaluation
-        print("MODEL EVALUATION")
-        eval_model = Evaluation(config=config_data,
-                                model=model_trained,
-                                x_data=features_transformed,
-                                y_data=labels,
-                                class_name=class_to_model,
-                                exports_path=exports_path)
-        eval_model.model_evaluation()
+        # print("MODEL EVALUATION")
+        # eval_model = Evaluation(config=config_data,
+        #                         model=model_trained,
+        #                         x_data=features_transformed,
+        #                         y_data=labels,
+        #                         class_name=class_to_model,
+        #                         exports_path=exports_path)
+        # eval_model.model_evaluation()
 
 
 def project_acousticbrainz():
@@ -125,4 +102,4 @@ def example(argument):
 
 if __name__ == "__main__":
     # project_ground_truth()
-    data_handling()
+    project_gt()

@@ -63,7 +63,7 @@ class FeaturesDf:
         self.list_feats_tracks = []
         self.counter_items_transformed = 0
         self.df_feats_tracks = pd.DataFrame()
-        self.df_full_tracks = pd.DataFrame()
+        self.df_feats_label = pd.DataFrame()
 
         self.create_low_level_df()
 
@@ -126,23 +126,23 @@ class FeaturesDf:
         print("TRACKS SHAPE:", self.df_tracks.shape)
         print("LOW LEVEL:", self.df_feats_tracks.shape)
 
-        self.df_full_tracks = pd.concat([self.df_tracks, self.df_feats_tracks], axis=1)
-        print("FULL:", self.df_full_tracks.shape)
-        print("COLUMNS CONTAIN OBJECTS", self.df_full_tracks.select_dtypes(include=['object']).columns)
-        # gaia imitation shuffling (in case we want to shuffle the data exactly as the gaia tool does)
-        if self.config["gaia_imitation"] is True:
-            print("DF CONCATENATION BEFORE SHUFFLING")
-            print("head:")
-            print(self.df_full_tracks.iloc[:, 0].head(10))
-            print("tail:")
-            print(self.df_full_tracks.iloc[:, 0].tail(10))
-            self.df_full_tracks = shuffle_data(df_ml_data=self.df_full_tracks, config=self.config)
-            print("DF CONCATENATION AFTER SHUFFLING")
-            print("head:")
-            print(self.df_full_tracks.iloc[:, 0].head(10))
-            print("tail:")
-            print(self.df_full_tracks.iloc[:, 0].tail(10))
-        return self.df_full_tracks
+        self.df_feats_label = pd.concat([self.df_tracks, self.df_feats_tracks], axis=1)
+        print("FULL:", self.df_feats_label.shape)
+        print("COLUMNS CONTAIN OBJECTS", self.df_feats_label.select_dtypes(include=['object']).columns)
+        # # gaia imitation shuffling (in case we want to shuffle the data exactly as the gaia tool does)
+        # if self.config["gaia_imitation"] is True:
+        #     print("DF CONCATENATION BEFORE SHUFFLING")
+        #     print("head:")
+        #     print(self.df_feats_label.iloc[:, 0].head(10))
+        #     print("tail:")
+        #     print(self.df_feats_label.iloc[:, 0].tail(10))
+        #     self.df_feats_label = shuffle_data(df_ml_data=self.df_feats_label, config=self.config)
+        #     print("DF CONCATENATION AFTER SHUFFLING")
+        #     print("head:")
+        #     print(self.df_feats_label.iloc[:, 0].head(10))
+        #     print("tail:")
+        #     print(self.df_feats_label.iloc[:, 0].tail(10))
+        return self.df_feats_label
 
 
 if __name__ == '__main__':
@@ -152,24 +152,3 @@ if __name__ == '__main__':
     df_gt_data = GroundTruthLoad(config_data, "groundtruth.yaml").create_df_tracks()
     print(df_gt_data.shape)
     df_feat_data = FeaturesDf(df_tracks=df_gt_data, config=config_data).concatenate_dfs()
-
-    # df_full = df_feat_data.concatenate_dfs()
-    #
-    # # df GT data info
-    # print('GROUND TRUTH INFO:')
-    # checker = DfChecker(df_check=df_gt_data)
-    # checker.check_df_info()
-    # print()
-    # print()
-    # # df GT data info
-    # print('FEATURES DF INFO:')
-    # checker = DfChecker(df_check=df_feat_data.create_low_level_df())
-    # checker.check_df_info()
-    #
-    # print()
-    # print()
-    #
-    # # df full info
-    # print('CONCATENATE DF INFO:')
-    # checker = DfChecker(df_check=df_full)
-    # checker.check_df_info()

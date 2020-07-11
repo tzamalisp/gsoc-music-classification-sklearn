@@ -10,6 +10,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import accuracy_score
+import yaml
 # Neural Networks
 import tensorflow as tf
 from tensorflow import keras
@@ -27,7 +28,7 @@ class Models:
     """
     Todo: Commenting
     """
-    def __init__(self, config, features, labels, class_name, exports_path):
+    def __init__(self, config, features, labels, class_name, exports_path, tracks_shuffled):
         """
 
         :param config:
@@ -40,12 +41,23 @@ class Models:
         self.labels = labels
         self.class_name = class_name
         self.exports_path = exports_path
+        self.tracks_shuffled = tracks_shuffled
+        # self.df_fold = pd.DataFrame()
 
     def train_svm(self):
         """
 
         :return:
         """
+
+        # read gaia params
+        path_script = os.getcwd()
+        path_app = os.path.join(path_script)
+        with open(os.path.join(path_app, "gaia_best_models", "jmp_results_{}.param".format(self.class_name)), "r") as f:
+            gaia_model = yaml.safe_load(f)
+
+        print(gaia_model)
+
         svc_c = 1.0
         svc_gamma = 'auto'
         # C = 2 ** C_value
@@ -55,11 +67,28 @@ class Models:
         if self.config.get("svc_gamma") != "" and self.config.get("svc_gamma") is not None:
             svc_gamma = 2 ** self.config.get("svc_gamma")
 
+        # svm = SVC(
+        #     C=svc_c,
+        #     kernel=self.config.get("svc_kernel"),
+        #     gamma=svc_gamma,
+        #     class_weight=self.config.get("svc_class_weight_balance"),
+        #     probability=self.config.get("svc_probability")
+        # )
+
+        gaia_C = 2 ** gaia_model["model"]["C"]
+        gaia_kernel = gaia_model["model"]["kernel"].lower()
+        gaia_gamma = 2 ** gaia_model["model"]["gamma"]
+        gaia_class_weight = None
+        if  gaia_model["model"]["balanceClasses"] is True:
+            gaia_class_weight = "balanced"
+        elif gaia_model["model"]["balanceClasses"] is False:
+            gaia_class_weight = None
+
         svm = SVC(
-            C=svc_c,
-            kernel=self.config.get("svc_kernel"),
-            gamma=svc_gamma,
-            class_weight=self.config.get("svc_class_weight_balance"),
+            C=gaia_C,
+            kernel=gaia_kernel,
+            gamma=gaia_gamma,
+            class_weight=gaia_class_weight,
             probability=self.config.get("svc_probability")
         )
 
@@ -137,10 +166,16 @@ class Models:
             print()
 
             # Train the classifier with K-Fold cross-validation
+            random_seed = None
+            shuffle = self.config["k_fold_shuffle"]
+            if shuffle is True:
+                random_seed = self.config["k_fold_shuffle"]
+            elif shuffle is False:
+                random_seed = None
             print("Fitting the data to the classifier with K-Fold cross-validation..")
             kf = KFold(n_splits=self.config["gaia_kfold_cv_n_splits"],
-                       shuffle=self.config["gaia_kfold_shuffle"],
-                       random_state=self.config["gaia_kfold_random_state"]
+                       shuffle=shuffle,
+                       random_state=random_seed
                        )
             # Initialize the accuracy of the models to blank list.
             # The accuracy of each model will be appended to this list
@@ -152,12 +187,23 @@ class Models:
                 # Split train-test
                 X_train, X_val = X_array[train_index], X_array[val_index]
                 y_train, y_val = y[train_index], y[val_index]
+                df = self.tracks_shuffled[["json_directory", "track"]].iloc[val_index]
+                # print(df)
+                # print(df.columns)
                 # Train the model
                 model = svm.fit(X_train, y_train)
+                predictions = svm.predict(X_val)
+                predictions_df = pd.DataFrame(predictions, index=val_index, columns=["predictions"])
+                # y_true_df = pd.DataFrame(y_val, index=val_index, columns=["true"])
+                fold_concat_df = pd.concat([df, predictions_df, y_val], axis=1)
+                print(fold_concat_df)
+                print(fold_concat_df.columns)
+                print()
                 # Append to accuracy_model the accuracy of the model
                 accuracy_model.append(accuracy_score(y_val, model.predict(X_val), normalize=True) * 100)
                 print()
             print("Fitting the data finished.")
+            print(np.mean(accuracy_model))
 
         elif self.config.get("k_fold_apply") is False:
             svm.fit(self.features, self.labels)

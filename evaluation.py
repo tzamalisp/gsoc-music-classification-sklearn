@@ -32,7 +32,7 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_predict
-from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
+from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad, DatasetDFCreator
 
 
 # def shuffle_data(df_ml_data, config):
@@ -104,6 +104,7 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
     trainingFunc : a function which will train and return a classifier given a dataset,
                    the groundtruth, and the *args and **kwargs arguments
     """
+    nfold = config["gaia_kfold_cv_n_splits"]
     log.info('Doing %d-fold cross validation' % nfold)
     # classes = set(groundTruth.values())
     # progress = TextProgress(nfold, 'Evaluating fold %(current)d/%(total)d')
@@ -114,33 +115,41 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
     #     iclasses[c] = [ p for p in groundTruth.keys() if groundTruth[p] == c ]
     #     random.seed(a=seed)
     #     random.shuffle(iclasses[c])
-    dataset_merge = dataset.copy()
-    dataset_merge['folder_name'] = dataset_merge[["json_directory", "track"]].apply(lambda x: ''.join(x), axis=1)
-
-    dataset_merge = dataset_merge.drop(columns=["json_directory", "track", "track_path", "danceability"], axis=1)
-    print(dataset_merge.tail(20))
-    print()
-    print("Find if indexing is ok:")
-    print(dataset_merge["folder_name"].iloc[0])
-    print(dataset_merge["folder_name"].iloc[4])
-    print()
-    print("Find duplicated rows:")
-    duplicateRowsDF = dataset_merge[dataset_merge.duplicated()]
-    print(duplicateRowsDF)
-    print()
+    # dataset_merge = dataset.copy()
+    # dataset_merge['folder_name'] = dataset_merge[["json_directory", "track"]].apply(lambda x: ''.join(x), axis=1)
+    #
+    # dataset_merge = dataset_merge.drop(columns=["json_directory", "track", "track_path", "danceability"], axis=1)
+    # print(dataset_merge.tail(20))
+    # print()
+    # print("Find if indexing is ok:")
+    # print(dataset_merge["folder_name"].iloc[0])
+    # print(dataset_merge["folder_name"].iloc[4])
+    # print()
+    # print("Find duplicated rows:")
+    # duplicateRowsDF = dataset_merge[dataset_merge.duplicated()]
+    # print(duplicateRowsDF)
+    # print()
 
     print("Transform to numpy array:")
-    X_array = dataset_merge.values
-    X_array_list = X_array.tolist()
-    print(X_array[0])
-    print(X_array[4])
+    # X_array = dataset_merge.values
+    # X_array_list = X_array.tolist()
 
+    print("Type of the dataset inserted before shuffling:", type(dataset))
+    print(dataset[0])
+    print(dataset[4])
+
+    X_array_list = dataset
     print("Shuffle the data:")
     random.seed(a=config.get("random_seed"))
     random.shuffle(X_array_list)
     print("Check some indexes:")
-    pprint(X_array_list[:10])
-    print("Shuffle array length: {}".format(len(X_array)))
+    print(X_array_list[0])
+    print(X_array_list[4])
+    # pprint(X_array_list[:10])
+    print("Shuffle array length: {}".format(len(X_array_list)))
+
+    df = DatasetDFCreator(config, X_array_list, "danceability").create_df_tracks()
+    print(df.head())
 
     print("Folding..")
     # Train the classifier with K-Fold cross-validation
@@ -152,10 +161,11 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
     elif shuffle is False:
         random_seed = None
     print("Fitting the data to the classifier with K-Fold cross-validation..")
-    kf = KFold(n_splits=config["gaia_kfold_cv_n_splits"],
+    kf = KFold(n_splits=nfold,
                shuffle=shuffle,
                random_state=random_seed
                )
+
     print()
     print()
     # tracks_fold_indexing = []
@@ -184,7 +194,7 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
         fold_number += 1
     print()
     print()
-    print(["Dictionary:"])
+    print("Dictionary:")
     pprint(tracks_fold_indexing_dict)
     print("length of keys:", len(tracks_fold_indexing_dict.keys()))
     print()
@@ -229,7 +239,7 @@ if __name__ == '__main__':
     config_data = load_yaml("configuration.yaml")
 
     gt_data = GroundTruthLoad(config_data, "groundtruth.yaml")
-    df_fg_data = gt_data.create_df_tracks()
+    df_fg_data = gt_data.export_gt_tracks()
     class_name = gt_data.export_class_name()
     evaluateNfold(5, df_fg_data, groundTruth=None, trainingFunc=None, seed=None, config=config_data)
 

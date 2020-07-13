@@ -1,14 +1,14 @@
 import os
 
 
-def load_yaml():
+def load_yaml(path_file):
     """
     Todo: add comments, docstring info, etc.
     :return:
     """
     try:
         import yaml
-        with open(os.path.join(os.path.abspath(os.getcwd()), 'configuration.yaml')) as file:
+        with open(os.path.join(os.path.abspath(os.getcwd()), path_file)) as file:
             config_data = yaml.load(file, Loader=yaml.FullLoader)
             # print(type(config_data))
             # print(config_data)

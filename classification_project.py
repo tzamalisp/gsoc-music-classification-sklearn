@@ -6,14 +6,14 @@ from utils import DfChecker
 from classification.train_model import TrainModel
 from transformation.transform import Transform
 from transformation.features_labels import FeaturesLabelsSplitter
-from classification.evaluation import Evaluation
+# from classification.evaluation import Evaluation
 import time
 from datetime import datetime
 import yaml
 
 
 def project_gt():
-    config_data = load_yaml()
+    config_data = load_yaml("configuration.yaml")
     if config_data["gaia_imitation"] is True:
         print("GAIA IMITATION MODE is ON")
     gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()

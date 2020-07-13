@@ -9,24 +9,6 @@ from sklearn.decomposition import PCA
 import random
 
 
-def shuffle_data(df_ml_data, config):
-    """
-
-    :param df_ml_data: (Pandas DataFrame) the data to be shuffled
-    :param config: (dict) the configuration data
-    :return: (NumPy array) the shuffled data
-    """
-    df_ml_cols = df_ml_data.columns
-    # convert DataFrame to NumPy array
-    ml_values = df_ml_data.values
-    # shuffle the data
-    random.seed(a=config.get("random_seed"))
-    random.shuffle(ml_values)
-    # convert the NumPy array to DF
-    df_ml_shuffle = pd.DataFrame(data=ml_values, columns=df_ml_cols)
-    return df_ml_shuffle
-
-
 class ListGroundTruthFiles:
     """
 
@@ -119,6 +101,11 @@ class GroundTruthLoad:
         print("EXPORT CLASS NAME:", self.class_name)
         return self.class_name
 
+    def export_gt_tracks(self):
+        self.labeled_tracks = self.ground_truth_data["groundTruth"]
+
+        return self.labeled_tracks
+
     def create_df_tracks(self):
         """
         Creates the pandas DataFrame with the tracks.
@@ -128,6 +115,8 @@ class GroundTruthLoad:
         the path to load the JSON low-level data, the label, etc. Else, it returns None.
         """
         self.labeled_tracks = self.ground_truth_data["groundTruth"]
+        from pprint import pprint
+        pprint(self.labeled_tracks)
         print("GROUND TRUTH DICTIONARY LENGTH:", len(self.labeled_tracks))
         self.class_name = self.ground_truth_data["className"]
         # the class name from the ground truth data that is the target
@@ -193,19 +182,13 @@ class GroundTruthLoad:
                 tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
                 self.df_tracks[["json_directory", "track", self.class_name]].\
                     to_csv(os.path.join(tracks_csv_path, "tracks_{}.csv".format(self.class_name)))
-                if self.config["ds_shuffle"] is True:
-                    self.df_tracks_shuffled = shuffle_data(df_ml_data=self.df_tracks, config=self.config)
-                else:
-                    self.df_tracks_shuffled = self.df_tracks
-                self.df_tracks_shuffled[["json_directory", "track", self.class_name]].\
-                    to_csv(os.path.join(tracks_csv_path, "tracks_{}_shuffled.csv".format(self.class_name)))
-
             else:
                 print("No directory to export tracks to csv is specified in the configuration file.")
             print("DF INFO:")
             print(self.df_tracks.info())
             print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)
-            return self.df_tracks, self.df_tracks_shuffled
+            # return self.df_tracks, self.df_tracks_shuffled
+            return self.df_tracks
 
         else:
             return None
@@ -260,7 +243,7 @@ class GroundTruthLoad:
 
 
 if __name__ == "__main__":
-    config_data = load_yaml()
+    config_data = load_yaml("configuration.yaml")
 
     gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()
     print(gt_files_list)
@@ -269,12 +252,12 @@ if __name__ == "__main__":
         gt_data = GroundTruthLoad(config_data, gt_file)
         df_fg_data = gt_data.create_df_tracks()
         class_name = gt_data.export_class_name()
-        print("DF_tracks:")
-        print(df_fg_data.head())
-        print()
-        print("CLASS:", class_name)
-        print()
-        print()
+        # print("DF_tracks:")
+        # print(df_fg_data.head())
+        # print()
+        # print("CLASS:", class_name)
+        # print()
+        # print()
     #
     # # df GT data info
     # print("CHECK THE GT DF INFO:")

@@ -27,12 +27,14 @@ from pprint import pprint
 import random
 import logging
 import pandas as pd
-from utils import load_yaml
+from utils import load_yaml, FindCreateDirectory
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_predict
 from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad, DatasetDFCreator
+from transformation.features_labels import FeaturesLabelsSplitter
+from transformation.transform import Transform
 
 
 # def shuffle_data(df_ml_data, config):
@@ -51,6 +53,12 @@ from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad, DatasetD
 #     # convert the NumPy array to DF
 #     df_ml_shuffle = pd.DataFrame(data=ml_values, columns=df_ml_cols)
 #     return df_ml_shuffle
+
+def display_scores(scores):
+    print("Display scores:")
+    print("Scores: {}".format(scores))
+    print("Mean: {}".format(scores.mean()))
+    print("Standard Deviation: {}".format(scores.std()))
 
 
 def evaluate(classifier, dataset, groundTruth, confusion=None, nfold=None, verbose=True):
@@ -106,29 +114,6 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
     """
     nfold = config["gaia_kfold_cv_n_splits"]
     log.info('Doing %d-fold cross validation' % nfold)
-    # classes = set(groundTruth.values())
-    # progress = TextProgress(nfold, 'Evaluating fold %(current)d/%(total)d')
-
-    # get map from class to point names
-    # iclasses = {}
-    # for c in classes:
-    #     iclasses[c] = [ p for p in groundTruth.keys() if groundTruth[p] == c ]
-    #     random.seed(a=seed)
-    #     random.shuffle(iclasses[c])
-    # dataset_merge = dataset.copy()
-    # dataset_merge['folder_name'] = dataset_merge[["json_directory", "track"]].apply(lambda x: ''.join(x), axis=1)
-    #
-    # dataset_merge = dataset_merge.drop(columns=["json_directory", "track", "track_path", "danceability"], axis=1)
-    # print(dataset_merge.tail(20))
-    # print()
-    # print("Find if indexing is ok:")
-    # print(dataset_merge["folder_name"].iloc[0])
-    # print(dataset_merge["folder_name"].iloc[4])
-    # print()
-    # print("Find duplicated rows:")
-    # duplicateRowsDF = dataset_merge[dataset_merge.duplicated()]
-    # print(duplicateRowsDF)
-    # print()
 
     print("Transform to numpy array:")
     # X_array = dataset_merge.values
@@ -138,6 +123,7 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
     print(dataset[0])
     print(dataset[4])
 
+    # Shuffling
     X_array_list = dataset
     print("Shuffle the data:")
     random.seed(a=config.get("random_seed"))
@@ -148,89 +134,132 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
     # pprint(X_array_list[:10])
     print("Shuffle array length: {}".format(len(X_array_list)))
 
-    df = DatasetDFCreator(config, X_array_list, "danceability").create_df_tracks()
-    print(df.head())
-
-    print("Folding..")
-    # Train the classifier with K-Fold cross-validation
-    random_seed = None
-    # shuffle = config["k_fold_shuffle"]
-    shuffle = False
-    if shuffle is True:
-        random_seed = config["k_fold_shuffle"]
-    elif shuffle is False:
-        random_seed = None
-    print("Fitting the data to the classifier with K-Fold cross-validation..")
-    kf = KFold(n_splits=nfold,
-               shuffle=shuffle,
-               random_state=random_seed
-               )
+    # create DF with the features, labels, and tracks together
+    df_tracks_features = DatasetDFCreator(config, X_array_list, "danceability").create_df_tracks()
+    print("Counted columns in the full shuffled df (target class + features): {}"
+          .format(len(df_tracks_features.columns)))
+    print(df_tracks_features.columns)
+    print(df_tracks_features[["track", class_name]].head())
 
     print()
-    print()
-    # tracks_fold_indexing = []
-    tracks_fold_indexing_dict = {}
-    tracks_fold_indexing_list = []
-    print(X_array_list[0])
-    print(X_array_list[4])
-    fold_number = 0
-    for train_index, val_index in kf.split(X_array_list):
+    print("Exporting X and y..")
+    # Export features from the DF
+    X = FeaturesLabelsSplitter(config=config, df=df_tracks_features, train_class=class_name).export_features()
+    # Export labels from the DF
+    y = FeaturesLabelsSplitter(config=config, df=df_tracks_features, train_class=class_name).export_labels()
+    print("Columns: {}".format(X.columns))
 
-        print("Fold: {}".format(fold_number))
-        # print("TRAIN INDEX: ", train_index)
-        print("TEST INDEX: ", val_index)
-        # print(len(train_index))
-        print("Length of the test index array: {}".format(len(val_index)))
+    if config["gaia_imitation"] is True:
+        gaia_params = load_yaml("gaia_best_models/jmp_results_{}.param".format(class_name))
+        print("Gaia best model params: {}".format(gaia_params))
 
-        tracks_count = 0
-        for index in val_index:
-            # track = df_shuffled["folder_name"].iloc[index]
-            track = X_array_list[index][0]
-            # print(track)
-            tracks_fold_indexing_dict[track] = fold_number
-            tracks_fold_indexing_list.append("{}: {}".format(track, fold_number))
-            tracks_count += 1
-        print("tracks counted:", tracks_count)
-        fold_number += 1
-    print()
-    print()
-    print("Dictionary:")
-    pprint(tracks_fold_indexing_dict)
-    print("length of keys:", len(tracks_fold_indexing_dict.keys()))
-    print()
-    print()
+        # params data transformation
+        preprocessing = gaia_params["model"]["preprocessing"]
+
+        # params SVC
+        C = 2 ** gaia_params["model"]["C"]
+        gamma = 2 ** gaia_params["model"]["gamma"]
+        kernel = gaia_params["model"]["kernel"].lower()
+        balanceClasses = gaia_params["model"]["balanceClasses"]
+        # TODO: declare a dictionary for class weights via automated labels balancing (unresponsive dataset)
+        if balanceClasses is True:
+            class_weights = "balanced"
+        elif balanceClasses is False:
+            class_weights = None
+        else:
+            print("Define a correct class weight value")
 
 
 
-    # # get folds
-    # folds = {}
-    # for i in range(nfold):
-    #     folds[i] = []
-    #     for c in iclasses.values():
-    #         foldsize = (len(c)-1)//nfold + 1 # -1/+1 so we take all instances into account, last fold might have fewer instances
-    #         folds[i] += c[ foldsize * i : foldsize * (i+1) ]
+    # Transform dataset
+    # pre-processing: data cleaning/enumerating/selecting descriptors
+    # pre-processing: scaling
+    print("Exports path for the training:")
+    exports_dir = "{}_{}".format(config_data.get("exports_directory"), class_name)
+    exports_path = FindCreateDirectory(exports_dir).inspect_directory()
+    print(exports_path)
+    X_transformed = Transform(config=config,
+                              df=X,
+                              process=preprocessing,
+                              exports_path=exports_path
+                              ).post_processing()
+    print(X_transformed.columns)
+    print(X_transformed.head())
+
+    X_array_transformed = X_transformed.values
+
+    from sklearn.svm import SVC
+    svm = SVC(
+        C=C,
+        kernel=kernel,
+        gamma=gamma,
+        class_weight=class_weights,
+        probability=config.get("svc_probability")
+    )
+
+    print("Evaluate the classifier with cross_val_score:")
+    scores = cross_val_score(estimator=svm,
+                             X=X_array_transformed,
+                             y=y,
+                             scoring="accuracy",
+                             cv=nfold,
+                             n_jobs=config.get("parallel_jobs"),
+                             verbose=config.get("verbose")
+                             )
+
+    print()
+    print("Score results:")
+    display_scores(scores)
+    print()
+    print()
+
+    # print("Folding..")
+    # # Train the classifier with K-Fold cross-validation
+    # random_seed = None
+    # # shuffle = config["k_fold_shuffle"]
+    # shuffle_f_fold = False
+    # if shuffle_f_fold is True:
+    #     random_seed = config["k_fold_shuffle"]
+    # elif shuffle_f_fold is False:
+    #     random_seed = None
+    # print("Fitting the data to the classifier with K-Fold cross-validation..")
+    # kf = KFold(n_splits=nfold,
+    #            shuffle=shuffle_f_fold,
+    #            random_state=random_seed
+    #            )
+    # print()
+    # print()
+    # # tracks_fold_indexing = []
+    # tracks_fold_indexing_dict = {}
+    # tracks_fold_indexing_list = []
+    # print(X_array_list[0])
+    # print(X_array_list[4])
+    # fold_number = 0
+    # for train_index, val_index in kf.split(X_array_list):
+    #     print("Fold: {}".format(fold_number))
+    #     # print("TRAIN INDEX: ", train_index)
+    #     print("TEST INDEX: ", val_index)
+    #     # print(len(train_index))
+    #     print("Length of the test index array: {}".format(len(val_index)))
     #
-    # # build sub-datasets and run evaluation on them
-    # confusion = None
-    # pnames = [ p.name() for p in dataset.points() ]
+    #     tracks_count = 0
+    #     for index in val_index:
+    #         # track = df_shuffled["folder_name"].iloc[index]
+    #         track = X_array_list[index][0]
+    #         # print(track)
+    #         tracks_fold_indexing_dict[track] = fold_number
+    #         tracks_fold_indexing_list.append("{}: {}".format(track, fold_number))
+    #         tracks_count += 1
+    #     print("tracks indexed to the specific fold:", tracks_count)
+    #     fold_number += 1
     #
-    # for i in range(nfold):
-    #     if log.isEnabledFor(logging.INFO):
-    #         progress.update(i+1)
-    #
-    #     trainds = DataSet()
-    #     trainds.addPoints([ dataset.point(pname) for pname in pnames if pname not in folds[i] ])
-    #     traingt = GroundTruth(groundTruth.className, dict([ (p, c) for p, c in groundTruth.items() if p not in folds[i] ]))
-    #
-    #     testds = DataSet()
-    #     testds.addPoints([ dataset.point(str(pname)) for pname in folds[i] ])
-    #     testgt = GroundTruth(groundTruth.className, dict([ (p, c) for p, c in groundTruth.items() if p in folds[i] ]))
-    #
-    #     classifier = trainingFunc(trainds, traingt, *args, **kwargs)
-    #     # confusion = evaluate(classifier, testds, testgt, confusion, nfold=i, verbose=False)
-    #
-    # return confusion
-    # return df_shuffled
+    # print()
+    # print()
+    # print("Dictionary:")
+    # pprint(tracks_fold_indexing_dict)
+    # print("length of keys:", len(tracks_fold_indexing_dict.keys()))
+    # print()
+    # print()
 
 
 if __name__ == '__main__':
@@ -240,6 +269,11 @@ if __name__ == '__main__':
 
     gt_data = GroundTruthLoad(config_data, "groundtruth.yaml")
     df_fg_data = gt_data.export_gt_tracks()
-    class_name = gt_data.export_class_name()
-    evaluateNfold(5, df_fg_data, groundTruth=None, trainingFunc=None, seed=None, config=config_data)
-
+    class_name = gt_data.export_train_class()
+    evaluateNfold(nfold=5,
+                  dataset=df_fg_data,
+                  class_name=class_name,
+                  config=config_data,
+                  groundTruth=None,
+                  trainingFunc=None,
+                  seed=None)

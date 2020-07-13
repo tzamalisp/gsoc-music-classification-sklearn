@@ -4,9 +4,7 @@ import pandas as pd
 from pprint import pprint
 from utils import DfChecker
 from utils import load_yaml, FindCreateDirectory
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-import random
+from ml_load_low_level import FeaturesDf
 
 
 class ListGroundTruthFiles:
@@ -35,8 +33,6 @@ class ListGroundTruthFiles:
         return ground_truth_list
 
 
-
-
 class GroundTruthLoad:
     """
         The Ground Truth data object which contains features to:
@@ -56,7 +52,7 @@ class GroundTruthLoad:
         self.class_dir = ""
         self.ground_truth_data = {}
         self.labeled_tracks = {}
-        self.class_name = ""
+        self.train_class = ""
         self.dataset_dir = ""
         self.tracks = []
         self.df_tracks = pd.DataFrame()
@@ -80,14 +76,14 @@ class GroundTruthLoad:
             except yaml.YAMLError as exc:
                 print(exc)
 
-    def export_class_name(self):
+    def export_train_class(self):
         """
 
         :return:
         """
-        self.class_name = self.ground_truth_data["className"]
-        print("EXPORT CLASS NAME:", self.class_name)
-        return self.class_name
+        self.train_class = self.ground_truth_data["className"]
+        print("EXPORT CLASS NAME:", self.train_class)
+        return self.train_class
 
     def export_gt_tracks(self):
         self.labeled_tracks = self.ground_truth_data["groundTruth"]
@@ -147,12 +143,12 @@ class GroundTruthLoad:
 
 
 class DatasetDFCreator:
-    def __init__(self, config, tracks_list, class_name):
+    def __init__(self, config, tracks_list, train_class):
         self.config = config
         self.tracks_list = tracks_list
         self.dataset_dir = ""
         self.class_dir = ""
-        self.class_name = class_name
+        self.train_class = train_class
         self.df_tracks = pd.DataFrame()
 
     def create_df_tracks(self):
@@ -188,27 +184,10 @@ class DatasetDFCreator:
         print("Low-level directory name that contains the data:", low_level_dir)
         # path to the low-level data sub-directories
         path_low_level = os.path.join(os.getcwd(), self.dataset_dir, self.class_dir, "features", low_level_dir)
+        print("Path of low level data: {}".format(path_low_level))
         # create a list with dictionaries that contain the information from each track in
         if low_level_dir != "":
-            # for key, value in self.tracks_list():
-            #     track_dict = {}
-            #     # key = key.split("/")
-            #     # path_directory = key[:-1]
-            #     # path_directory_str = '/'.join(path_directory)
-            #     # track_json_name = key[-1]
-            #     path_directory_str = key
-            #     track_json_name = key
-            #     # print(key)
-            #     path_tracks = os.path.join(path_low_level, path_directory_str)
-            #     # print(path_tracks)
-            #     for f_name in os.listdir(path_tracks):
-            #         if f_name.startswith(track_json_name):
-            #             track_dict["track"] = track_json_name
-            #             track_dict["track_path"] = os.path.join(path_low_level, path_directory_str, f_name)
-            #
-            #             track_dict[self.class_name] = value
-            #     self.tracks.append(track_dict)
-            self.df_tracks = pd.DataFrame(data=self.tracks_list)
+            self.df_tracks = pd.DataFrame(data=self.tracks_list, columns=["track", self.train_class])
             print("Shape of tracks DF created before cleaning:", self.df_tracks.shape)
             print("Check the shape of a temporary DF that includes if there are any NULL values:")
             print(self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape)
@@ -223,18 +202,23 @@ class DatasetDFCreator:
                 print("There are no NULL values found.")
             if self.config.get("tracks_in_csv_format") != "":
                 tracks_csv_dir = os.path.join(
-                    "{}_{}".format(self.config.get("exports_directory"), self.class_name),
+                    "{}_{}".format(self.config.get("exports_directory"), self.train_class),
                     "tracks_csv")
                 tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
-                self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}.csv".format(self.class_name)))
+                self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}_shuffled.csv".format(self.train_class)))
             else:
                 print("No directory to export tracks to csv is specified in the configuration file.")
             print("DF INFO:")
             print(self.df_tracks.info())
             print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)
-            # return self.df_tracks, self.df_tracks_shuffled
-            return self.df_tracks
 
+            df_full = FeaturesDf(df_tracks=self.df_tracks,
+                                 train_class=self.train_class,
+                                 path_low_level=path_low_level,
+                                 config=self.config
+                                 ).export_tracks_feats_df()
+
+            return df_full
         else:
             return None
 
@@ -248,11 +232,11 @@ if __name__ == "__main__":
     for gt_file in gt_files_list:
         gt_data = GroundTruthLoad(config_data, gt_file)
         df_fg_data = gt_data.export_gt_tracks()
-        class_name = gt_data.export_class_name()
+        train_class = gt_data.export_train_class()
         # print("DF_tracks:")
         # print(df_fg_data.head())
         # print()
-        # print("CLASS:", class_name)
+        # print("CLASS:", train_class)
         # print()
         # print()
     #

@@ -44,8 +44,9 @@ class FeaturesLabelsSplitter:
         return self.label_data
 
     def export_features(self):
+        # drop the labels and the column that contains the tracks
+        features = self.df.drop(labels=["track", self.train_class], axis=1)
         print("Export features..")
-        features = self.df.drop(labels=[self.train_class], axis=1)
         print("Features shape: {}".format(features.shape))
         print("Features type: {}".format(type(features)))
         return features

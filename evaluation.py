@@ -171,6 +171,7 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
 
 
 
+
     # Transform dataset
     # pre-processing: data cleaning/enumerating/selecting descriptors
     # pre-processing: scaling
@@ -212,6 +213,9 @@ def evaluateNfold(nfold, dataset, groundTruth, trainingFunc, config, seed=None, 
     display_scores(scores)
     print()
     print()
+
+
+
 
     # print("Folding..")
     # # Train the classifier with K-Fold cross-validation

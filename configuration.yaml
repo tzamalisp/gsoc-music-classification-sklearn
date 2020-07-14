@@ -95,7 +95,7 @@ processing:
 #        - processing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
 
 # gaia data
-gaia_imitation: True
+gaia_imitation: False
 gaia_kfold_cv_n_splits: 5
 gaia_kfold_shuffle: False
 gaia_kfold_random_state: null

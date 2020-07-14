@@ -1,5 +1,5 @@
 import os
-
+from pprint import pprint
 
 def load_yaml(path_file):
     """
@@ -95,6 +95,69 @@ class LogsDeleter:
             print("Previous evaluation logs deleted successfully.")
         else:
             print("Evaluation logs deletion is turned to OFF.")
+
+
+def change_weights_values(i):
+    if i is True:
+        return "balanced"
+    elif i is False:
+        return None
+    return i
+
+
+class TrainingProcesses:
+    def __init__(self, config):
+        self.config = config
+
+    def training_processes(self):
+        """
+
+        :return:
+        processes: A list of the processes that have been identified with the corresponding parameter grid
+        """
+        print("EVALUATIONS")
+        evaluations = self.config["evaluations"]["nfoldcrossvalidation"]
+        pprint(evaluations)
+        evaluation_counter = 0
+        trainings_counted = 0
+        processes = []
+        for evaluation in evaluations:
+            print("Evaluation: {}".format(evaluation_counter))
+            for nfold_number in evaluation["nfold"]:
+                print("nfold: {}".format(nfold_number))
+
+                print("CLASSIFIER PARAMS")
+                classifiers = self.config["classifiers"]["svm"]
+                for classifier in classifiers:
+                    for pre_processing in classifier["preprocessing"]:
+                        print(pre_processing)
+                        for clf_type in classifier["type"]:
+                            if clf_type == "C-SVC":
+                                process_dict = dict()
+                                # classifier
+                                process_dict["classifier"] = clf_type
+                                # pre-processing
+                                process_dict["preprocess"] = pre_processing
+                                # kernel
+                                kernel = classifier["kernel"]
+                                process_dict["kernel"] = [i.lower() for i in kernel]
+                                # C
+                                c = classifier["C"]
+                                process_dict["C"] = [2 ** x for x in c]
+                                # gamma
+                                gamma = classifier["gamma"]
+                                process_dict["gamma"] = [2 ** x for x in gamma]
+                                # class weights
+                                balance_classes = classifier["balanceClasses"]
+                                print("Balance classes:", balance_classes)
+                                process_dict["balanceClasses"] = [change_weights_values(i) for i in balance_classes]
+                                processes.append(process_dict)
+                                trainings_counted += 1
+
+        print("Grid SVC trainings to be applied: {}".format(trainings_counted))
+        print("Processes:")
+        pprint(processes)
+        return processes
 
 
 if __name__ == '__main__':

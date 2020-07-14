@@ -30,34 +30,3 @@ if __name__ == '__main__':
     print(c)
     print(gamma)
 
-    print("EVALUATIONS")
-    evaluations = config_data["evaluations"]["nfoldcrossvalidation"]
-    pprint(evaluations)
-    evaluation_counter = 0
-    trainings_counted = 0
-    processes = []
-    for evaluation in evaluations:
-        print("Evaluation: {}".format(evaluation_counter))
-        for nfold_number in evaluation["nfold"]:
-            print("nfold: {}".format(nfold_number))
-
-            print("CLASSIFIER PARAMS")
-            classifiers = config_data["classifiers"]["svm"]
-            for classifier in classifiers:
-                for pre_processing in classifier["preprocessing"]:
-                    print(pre_processing)
-                    for clf_type in classifier["type"]:
-                        print("- {}".format(clf_type))
-                        if clf_type == "C-SVC":
-                            processes.append(dict({"preprocess": pre_processing, "classifier": clf_type}))
-                            trainings_counted += 1
-
-    print("Grid SVC trainings to be applied: {}".format(trainings_counted))
-    print("Processes:")
-    pprint(processes)
-            # print()
-            #
-            # print("GRID PARAMS")
-            # grid_params = config_data["classifiers"]["svm"][0]
-            # pprint(grid_params)
-

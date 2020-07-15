@@ -79,20 +79,15 @@ processing:
         - transfo: gaussianize
           params: { descriptorNames: ['lowlevel.*'] }
 
-    mfcc:
-      preprocess:
-        # an MFCC only baseline
-        - transfo: remove
-          params: { descriptorNames: *unusedDescs }
-        - transfo: enumerate
-          params: { descriptorNames: *stringDescs }
-        - transfo: select
-          params: { descriptorNames: ['lowlevel.mfcc*'] }
-
-#classifiers:
-#    svm:
-#        # first svm test combinations
-#        - processing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
+#    mfcc:
+#      preprocess:
+#        # an MFCC only baseline
+#        - transfo: remove
+#          params: { descriptorNames: *unusedDescs }
+#        - transfo: enumerate
+#          params: { descriptorNames: *stringDescs }
+#        - transfo: select
+#          params: { descriptorNames: ['lowlevel.mfcc*'] }
 
 # gaia data
 gaia_imitation: False
@@ -128,7 +123,7 @@ grid_kernel: ['poly', 'rbf']
 grid_C: [-5, -3, -1, 1, 3, 5, 7, 9, 11]  # will actually be 2**x
 grid_gamma: [3, 1, -1, -3, -5, -7, -9, -11]  # will actually be 2**x
 grid_class_weight: ['balanced', null]
-grid_verbose: 10
+grid_verbose: 1 # 0: no verbose, 1: simple information about the tasks completed, 2: full information of all the tasks
 
 # shuffle: True or False
 ds_shuffle: True
@@ -146,7 +141,8 @@ grid_results_directory: grid_scores
 classifiers:
     svm:
         # first svm test combinations
-        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
+#        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
+        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized']
           type: [ 'C-SVC' ]
           kernel: [ 'poly', 'RBF' ]
           C:     [ -5, -3, -1, 1, 3, 5, 7, 9, 11 ] # will actually be 2**x

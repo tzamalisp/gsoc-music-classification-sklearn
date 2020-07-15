@@ -32,10 +32,7 @@ from gaia_imitation_best_model import evaluate_gaia_imitation_model
 from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad, DatasetDFCreator
 from transformation.features_labels import FeaturesLabelsSplitter
 from folding import export_folded_instances
-from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
-from transformation.transform import Transform
-from sklearn.model_selection import KFold
+from classification.classifier_GRIDSVM import train_grid_search_svm
 
 def evaluate(classifier, dataset, groundTruth, confusion=None, nfold=None, verbose=True):
     """Evaluate the classifier on the given dataset and returns the confusion matrix.
@@ -71,9 +68,6 @@ def evaluate(classifier, dataset, groundTruth, confusion=None, nfold=None, verbo
     #     if verbose: progress.update(done)
     #
     # return confusion
-
-
-
 
 
 def evaluateNfold(n_fold, dataset, groundTruth, trainingFunc, config, seed=None, *args, **kwargs):
@@ -135,51 +129,30 @@ def evaluateNfold(n_fold, dataset, groundTruth, trainingFunc, config, seed=None,
     else:
         print("Please provide a correct boolean value for imitating or not gaia's best model for the {} class"
               .format(class_name))
-
+    print()
+    print()
+    print()
     tr_processes = TrainingProcesses(config).training_processes()
-    process_counter = 0
+    print()
+    process_counter = 1
     for tr_process in tr_processes:
         print("Train process {} - {}".format(process_counter, tr_process))
         # evaluate()
-
         if tr_process["classifier"]:
+            print("CLASSFIER", tr_process["classifier"])
             exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
             exports_path = FindCreateDirectory(exports_dir).inspect_directory()
             print(exports_path)
-            X_transformed = Transform(config=config,
-                                      df=X,
-                                      process=tr_process["preprocess"],
-                                      exports_path=exports_path
-                                      ).post_processing()
 
-            # define the length of parameters
-            parameters_grid = {'kernel': tr_process["kernel"],
-                               'C': tr_process["C"],
-                               'gamma': tr_process["gamma"],
-                               'class_weight': tr_process["balanceClasses"]
-                               }
-
-            svm = SVC(probability=True)
-
-            # To be used within GridSearch without gaia imitation
-            inner_cv = KFold(n_splits=n_fold,
-                             shuffle=False,
-                             )
-
-            gsvc = GridSearchCV(estimator=svm,
-                                param_grid=parameters_grid,
-                                cv=inner_cv,
-                                n_jobs=config["parallel_jobs"])
-
-            print("Shape of X before train: {}".format(X_transformed.shape))
-            print("Fitting the data to the model:")
-            gsvc.fit(X_transformed, y)
-
-            # print(gsvc.cv_results_["params"])
-            print(gsvc.best_score_)
-            print(gsvc.best_estimator_)
-            print(gsvc.best_params_)
-            print("Counted evaluations in this GridSearch Train process: {}".format(len(gsvc.cv_results_["params"])))
+            train_grid_search_svm(config=config,
+                                  class_name=class_name,
+                                  clf=tr_process["classifier"],
+                                  X=X,
+                                  y=y,
+                                  tr_process=tr_process,
+                                  n_fold=n_fold,
+                                  exports_path=exports_path
+                                  )
 
         print()
         print("Next train process..")

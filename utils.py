@@ -115,9 +115,8 @@ class TrainingProcesses:
         :return:
         processes: A list of the processes that have been identified with the corresponding parameter grid
         """
-        print("EVALUATIONS")
         evaluations = self.config["evaluations"]["nfoldcrossvalidation"]
-        pprint(evaluations)
+        print("Evaluations countered: {}".format(len(evaluations)))
         evaluation_counter = 0
         trainings_counted = 0
         processes = []
@@ -139,10 +138,10 @@ class TrainingProcesses:
                                 process_dict["kernel"] = [i.lower() for i in kernel]
                                 # C
                                 c = classifier["C"]
-                                process_dict["C"] = [2 ** x for x in c]
+                                process_dict["C"] = [2 ** x for x in c]  # 2 ** c
                                 # gamma
                                 gamma = classifier["gamma"]
-                                process_dict["gamma"] = [2 ** x for x in gamma]
+                                process_dict["gamma"] = [2 ** x for x in gamma]  # 2 ** gamma
                                 # class weights
                                 balance_classes = classifier["balanceClasses"]
                                 process_dict["balanceClasses"] = [change_weights_values(i) for i in balance_classes]

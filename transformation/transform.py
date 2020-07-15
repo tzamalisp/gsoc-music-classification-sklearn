@@ -56,7 +56,8 @@ class Transform:
                 self.df = descr_scaling(feats_data=self.df,
                                         processing=step,
                                         config=self.config,
-                                        exports_path=self.exports_path
+                                        exports_path=self.exports_path,
+                                        train_process=self.process
                                         )
         else:
             print("No postprocessing steps found.")

@@ -10,7 +10,7 @@ from transformation.utils_preprocessing import list_descr_handler, descr_selecto
 from utils import FindCreateDirectory
 
 
-def descr_scaling(feats_data, processing, config, exports_path):
+def descr_scaling(feats_data, processing, config, exports_path, train_process):
     """
 
     :param feats_data:
@@ -40,7 +40,11 @@ def descr_scaling(feats_data, processing, config, exports_path):
         sns.distplot(feats_data.iloc[:, 0])
         # save the plot with the normalized data distribution
         print("Saving plot with the normalized data distribution")
-        plt.savefig(os.path.join(save_plot_path, "normalized_data_distribution.png"))
+        plt.savefig(os.path.join(save_plot_path, "{}_normalized_data_distribution.png".format(train_process)))
+        plt.close()
+        # save the plot with the data depicted on a scatter plot
+        sns.scatterplot(x=feats_data.iloc[:, 0], y=feats_data.iloc[:, 1], data=feats_data)
+        plt.savefig(os.path.join(save_plot_path, "{}_normalized_data_scatterplot.png".format(train_process)))
         plt.close()
         print()
 
@@ -69,7 +73,12 @@ def descr_scaling(feats_data, processing, config, exports_path):
         sns.distplot(feats_data.iloc[:, 0])
         # save the plot with the gaussianized data distribution
         print("Saving plot with the gaussianized data distribution")
-        plt.savefig(os.path.join(save_plot_path, "gaussianized_data_distribution.png"))
+        plt.savefig(os.path.join(save_plot_path, "{}_gaussianized_data_distribution.png".format(train_process)))
         plt.close()
+        # save the plot with the data depicted on a scatter plot
+        sns.scatterplot(x=feats_data.iloc[:, 0], y=feats_data.iloc[:, 1], data=feats_data)
+        plt.savefig(os.path.join(save_plot_path, "{}_gaussianized_data_scatterplot.png".format(train_process)))
+        plt.close()
+        print()
 
     return feats_data

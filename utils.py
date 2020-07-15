@@ -122,18 +122,14 @@ class TrainingProcesses:
         trainings_counted = 0
         processes = []
         for evaluation in evaluations:
-            print("Evaluation: {}".format(evaluation_counter))
             for nfold_number in evaluation["nfold"]:
-                print("nfold: {}".format(nfold_number))
-
-                print("CLASSIFIER PARAMS")
                 classifiers = self.config["classifiers"]["svm"]
                 for classifier in classifiers:
                     for pre_processing in classifier["preprocessing"]:
-                        print(pre_processing)
                         for clf_type in classifier["type"]:
                             if clf_type == "C-SVC":
                                 process_dict = dict()
+                                process_dict["Evaluation"] = evaluation_counter
                                 # classifier
                                 process_dict["classifier"] = clf_type
                                 # pre-processing
@@ -149,14 +145,17 @@ class TrainingProcesses:
                                 process_dict["gamma"] = [2 ** x for x in gamma]
                                 # class weights
                                 balance_classes = classifier["balanceClasses"]
-                                print("Balance classes:", balance_classes)
                                 process_dict["balanceClasses"] = [change_weights_values(i) for i in balance_classes]
                                 processes.append(process_dict)
+                                # n_fold
+                                process_dict["n_fold"] = nfold_number
+                                # increase counter by 1
                                 trainings_counted += 1
+            # increase evaluation counter by 1
+            evaluation_counter += 1
 
-        print("Grid SVC trainings to be applied: {}".format(trainings_counted))
-        print("Processes:")
-        pprint(processes)
+        print("Trainings to be applied: {}".format(trainings_counted))
+
         return processes
 
 

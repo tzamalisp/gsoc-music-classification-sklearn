@@ -24,15 +24,18 @@ import os
 # from .groundtruth import GroundTruth
 # from .confusionmatrix import ConfusionMatrix
 from pprint import pprint
-import random
+from datetime import datetime
+
 import logging
 import pandas as pd
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
-from gaia_imitation_best_model import evaluate_gaia_imitation_model
-from ml_load_groung_truth import ListGroundTruthFiles, GroundTruthLoad, DatasetDFCreator
-from transformation.features_labels import FeaturesLabelsSplitter
+from classification.gaia_imitation_best_model import evaluate_gaia_imitation_model
+from transformation.load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
+
 from folding import export_folded_instances
-from classification.classifier_GRIDSVM import train_grid_search_svm
+from classification.classifierGRID import TrainGridClassifier
+from classification.data_processing import DataProcessing
+
 
 def evaluate(classifier, dataset, groundTruth, confusion=None, nfold=None, verbose=True):
     """Evaluate the classifier on the given dataset and returns the confusion matrix.
@@ -88,39 +91,6 @@ def evaluateNfold(n_fold, dataset, groundTruth, trainingFunc, config, seed=None,
     n_fold = config["gaia_kfold_cv_n_splits"]
     log.info('Doing %d-fold cross validation' % n_fold)
 
-    print("Transform to numpy array:")
-    # X_array = dataset_merge.values
-    # X_array_list = X_array.tolist()
-
-    print("Type of the dataset inserted before shuffling:", type(dataset))
-    print(dataset[0])
-    print(dataset[4])
-
-    # Shuffling
-    X_array_list = dataset
-    print("Shuffle the data:")
-    random.seed(a=config.get("random_seed"))
-    random.shuffle(X_array_list)
-    print("Check some indexes:")
-    print(X_array_list[0])
-    print(X_array_list[4])
-    print("Shuffle array length: {}".format(len(X_array_list)))
-
-    # create DF with the features, labels, and tracks together
-    df_tracks_features = DatasetDFCreator(config, X_array_list, "danceability").create_df_tracks()
-    print("Counted columns in the full shuffled df (target class + features): {}"
-          .format(len(df_tracks_features.columns)))
-    print(df_tracks_features.columns)
-    print(df_tracks_features[["track", class_name]].head())
-
-    print()
-    print("Exporting X and y..")
-    # Export features from the DF
-    X = FeaturesLabelsSplitter(config=config, df=df_tracks_features, train_class=class_name).export_features()
-    # Export labels from the DF
-    y = FeaturesLabelsSplitter(config=config, df=df_tracks_features, train_class=class_name).export_labels()
-    print("Columns: {}".format(X.columns))
-
     if config["gaia_imitation"] is True:
         print("Gaia evaluation imitation for the best model of {} class is turned ON.".format(class_name))
         evaluate_gaia_imitation_model(config=config, class_name=class_name, X=X, y=y)
@@ -131,34 +101,28 @@ def evaluateNfold(n_fold, dataset, groundTruth, trainingFunc, config, seed=None,
               .format(class_name))
     print()
     print()
+    X, y = DataProcessing(config=config,
+                          dataset=dataset,
+                          class_name=class_name
+                          ).exporting_classification_data()
     print()
-    tr_processes = TrainingProcesses(config).training_processes()
+    # TODO if not gaia imitation, train the model
+    training_processes = TrainingProcesses(config).training_processes()
     print()
-    process_counter = 1
-    for tr_process in tr_processes:
-        print("Train process {} - {}".format(process_counter, tr_process))
-        # evaluate()
-        if tr_process["classifier"]:
-            print("CLASSFIER", tr_process["classifier"])
-            exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
-            exports_path = FindCreateDirectory(exports_dir).inspect_directory()
-            print(exports_path)
+    exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
+    exports_path = FindCreateDirectory(exports_dir).inspect_directory()
+    print(exports_path)
+    grid_svm_train = TrainGridClassifier(config=config,
+                                         class_name=class_name,
+                                         X=X,
+                                         y=y,
+                                         tr_processes=training_processes,
+                                         n_fold=n_fold,
+                                         exports_path=exports_path
+                                         )
+    grid_svm_train.export_best_classifier()
 
-            train_grid_search_svm(config=config,
-                                  class_name=class_name,
-                                  clf=tr_process["classifier"],
-                                  X=X,
-                                  y=y,
-                                  tr_process=tr_process,
-                                  n_fold=n_fold,
-                                  exports_path=exports_path
-                                  )
-
-        print()
-        print("Next train process..")
-        print()
-        print()
-        process_counter += 1
+    print("Last evaluation took place at: {}".format(datetime.now()))
 
 
 if __name__ == '__main__':

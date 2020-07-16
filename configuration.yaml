@@ -112,7 +112,7 @@ svc_preprocessing: gaussianized
 # k-fold hyperparameters
 k_fold_apply: True
 k_fold: 5
-k_fold_shuffle: True
+k_fold_shuffle: False
 k_fold_random_seed: 1
 # GRID ML SETTINGS
 #

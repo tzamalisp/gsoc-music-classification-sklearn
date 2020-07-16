@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 # sklearn scaling transformation
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import QuantileTransformer
+from sklearn.decomposition import PCA
 
 from transformation.utils_preprocessing import list_descr_handler, descr_selector
 from utils import FindCreateDirectory
@@ -80,5 +81,10 @@ def descr_scaling(feats_data, processing, config, exports_path, train_process):
         plt.savefig(os.path.join(save_plot_path, "{}_gaussianized_data_scatterplot.png".format(train_process)))
         plt.close()
         print()
+
+    if processing["transfo"] == "pca":
+        # TODO: apply pca
+        pca = PCA(config["pca_n_components"])
+        pass
 
     return feats_data

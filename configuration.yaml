@@ -1,6 +1,8 @@
 # READ GROUND TRUTH
 # the ground truth data directory
 ground_truth_directory: acousticbrainz-datasets
+acousticbrainz: False
+from_disk: True
 # classes with features locally: danceability, gender, genre_rosamerica, moods_claurier, moods_mirex, timbre_bright_dark
 # classes with features locally: tonal_atonal, voice_instrumental
 # classes with features online: genre_dortmund, genre_electronic, genre_tzanetakis, ismir04_rhythm,
@@ -98,8 +100,8 @@ gaia_kfold_random_state: null
 random_seed: 1
 
 ## ML SETTINGS
-# train kind: grid_svm, svm, deep_learning, supervised_lb
-train_kind: svm
+# train kind: grid, svm, deep_learning, supervised_lb
+train_kind: grid
 
 # svc hyperparameters
 svc_C: 7  # C: float, default=1.0

@@ -24,7 +24,7 @@ import os
 # from .groundtruth import GroundTruth
 # from .confusionmatrix import ConfusionMatrix
 from pprint import pprint
-from datetime import datetime
+
 
 import logging
 import pandas as pd
@@ -90,7 +90,13 @@ def evaluateNfold(n_fold, dataset, groundTruth, trainingFunc, config, seed=None,
     """
     n_fold = config["gaia_kfold_cv_n_splits"]
     log.info('Doing %d-fold cross validation' % n_fold)
-
+    print()
+    print()
+    X, y = DataProcessing(config=config,
+                          dataset=dataset,
+                          class_name=class_name
+                          ).exporting_classification_data()
+    print()
     if config["gaia_imitation"] is True:
         print("Gaia evaluation imitation for the best model of {} class is turned ON.".format(class_name))
         evaluate_gaia_imitation_model(config=config, class_name=class_name, X=X, y=y)
@@ -99,30 +105,8 @@ def evaluateNfold(n_fold, dataset, groundTruth, trainingFunc, config, seed=None,
     else:
         print("Please provide a correct boolean value for imitating or not gaia's best model for the {} class"
               .format(class_name))
-    print()
-    print()
-    X, y = DataProcessing(config=config,
-                          dataset=dataset,
-                          class_name=class_name
-                          ).exporting_classification_data()
-    print()
-    # TODO if not gaia imitation, train the model
-    training_processes = TrainingProcesses(config).training_processes()
-    print()
-    exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
-    exports_path = FindCreateDirectory(exports_dir).inspect_directory()
-    print(exports_path)
-    grid_svm_train = TrainGridClassifier(config=config,
-                                         class_name=class_name,
-                                         X=X,
-                                         y=y,
-                                         tr_processes=training_processes,
-                                         n_fold=n_fold,
-                                         exports_path=exports_path
-                                         )
-    grid_svm_train.export_best_classifier()
 
-    print("Last evaluation took place at: {}".format(datetime.now()))
+    # TODO if not gaia imitation, train the model
 
 
 if __name__ == '__main__':

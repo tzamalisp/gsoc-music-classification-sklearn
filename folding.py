@@ -1,5 +1,8 @@
 import os
 import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 from termcolor import colored
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
@@ -47,8 +50,9 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
     fold_number = 0
     for train_index, test_index in kf.split(X_transformed):
         print("Fold: {}".format(fold_number))
-        print("TRAIN INDEX: ", train_index)
-        print("TEST INDEX: ", test_index)
+        # print("TRAIN INDEX: ", train_index)
+        print("first test index element: {} - last test index element: {}".format(test_index[0], test_index[-1]))
+        # print("TEST INDEX: ", test_index)
         print(colored("Length of the train index array: {}".format(len(train_index)), "cyan"))
         print(colored("Length of the test index array: {}".format(len(test_index)), "cyan"))
 
@@ -71,11 +75,30 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
         # Append to accuracy_model the accuracy of the model
         accuracy_model.append(accuracy_score(y_test, clf.predict(X_test), normalize=True) * 100)
 
+
         fold_number += 1
-    # Print the accuracy
-    print(accuracy_model)
-    print(np.mean(accuracy_model))
-    # 
+
+    print()
+    # ACCURACIES
+    print(colored("Accuracies in each fold: {}".format(accuracy_model), "cyan"))
+    print(colored("Mean accuracy: {}".format(np.mean(accuracy_model)), "cyan"))
+
+    # Visualize accuracy for each iteration
+    list_folds = []
+    counter_folds = 0
+    for accuracy in accuracy_model:
+        list_folds.append("Fold{}".format(counter_folds))
+        counter_folds += 1
+    print("Exporting accuracis distribution to plot file..")
+    scores = pd.DataFrame(accuracy_model, columns=['Scores'])
+    sns.set(style="white", rc={"lines.linewidth": 3})
+    sns.barplot(x=list_folds, y="Scores", data=scores)
+    plt.savefig(os.path.join(exports_path, "images", "accuracies_distribution.png"))
+    sns.set()
+    plt.close()
+    print("Plot saved successfully.")
+
+    #
     print()
     print()
     # print("Dictionary:")

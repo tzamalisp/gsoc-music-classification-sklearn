@@ -4,10 +4,12 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from termcolor import colored
-from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score
 from pprint import pprint
 import yaml
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix, classification_report
+
 from transformation.transform import Transform
 
 
@@ -35,7 +37,6 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
     print(colored("Type of y: {}".format(type(y)), "cyan"))
     # tracks_fold_indexing = []
     tracks_fold_indexing_dict = {}
-    tracks_fold_indexing_list = []
     print(tracks[0])
     print(tracks[4])
 
@@ -47,7 +48,7 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
                               ).post_processing()
 
     accuracy_model = []
-    predictions_list = pd.DataFrame()
+    predictions_df_list = []
     fold_number = 0
     for train_index, test_index in kf.split(X_transformed):
         print("Fold: {}".format(fold_number))
@@ -58,13 +59,13 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
         print(colored("Length of the test index array: {}".format(len(test_index)), "cyan"))
 
         tracks_count = 0
+        tracks_list = []
         for index in test_index:
             # track = df_shuffled["folder_name"].iloc[index]
             track = tracks[index][0]
             # print(track)
             tracks_fold_indexing_dict[track] = fold_number
-
-            tracks_fold_indexing_list.append("{}: {}".format(track, fold_number))
+            tracks_list.append(tracks[index][0])
             tracks_count += 1
         print(colored("Tracks indexed to the specific fold: {}".format(tracks_count), "cyan"))
 
@@ -72,30 +73,46 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
         y_train, y_test = y.iloc[train_index], y.iloc[test_index]
         # Train the model
         clf.fit(X_train, y_train)
+        print("Classifier classes: {}".format(clf.classes_))
 
-        predictions_fold = clf.predict(X_test)
-        print(type(predictions_fold))
-        print(predictions_fold.shape)
+        pred = clf.predict(X_test)
+        df_pred = pd.DataFrame(data=pred, index=test_index, columns=["predictions"])
+        print(type(pred))
+        print(pred.shape)
 
+        pred_prob = clf.predict_proba(X_test)
+        df_pred_prob = pd.DataFrame(data=pred_prob, index=test_index, columns=clf.classes_)
+        # tracks df
+        df_tracks = pd.DataFrame(data=tracks_list, index=test_index, columns=["track"])
+        # concatenate dfs
+        df_pred_general = pd.concat([df_tracks, df_pred_prob, df_pred, y_test], axis=1, ignore_index=False)
+        print(df_pred_general.head())
+        # predictions_all_df.append(df_pred_general, ignore_index=True)
+        predictions_df_list.append(df_pred_general)
         # Append to accuracy_model the accuracy of the model
         accuracy_model.append(accuracy_score(y_test, clf.predict(X_test), normalize=True) * 100)
-
         fold_number += 1
-    # print(predictions_list)
 
+    # concatenate predictions dfs
+    print(colored("DF Predictions all:"), "cyan")
+    df_predictions = pd.concat(predictions_df_list)
+    print(df_predictions.head())
+    print("Info:")
+    print(df_predictions.info())
+    # save predictions df
+    df_predictions.to_csv(os.path.join(exports_path, "dataset", "predictions_{}.csv".format(class_name)))
     print()
     # ACCURACIES
     print(colored("Accuracies in each fold: {}".format(accuracy_model), "cyan"))
     print(colored("Mean of accuracies: {}".format(np.mean(accuracy_model)), "cyan"))
     print(colored("Standard Deviation of accuracies: {}".format(np.std(accuracy_model)), "cyan"))
-
     # Visualize accuracy for each iteration
     list_folds = []
     counter_folds = 0
     for accuracy in accuracy_model:
         list_folds.append("Fold{}".format(counter_folds))
         counter_folds += 1
-    print("Exporting accuracis distribution to plot file..")
+    print("Exporting accuracies distribution to plot file..")
     scores = pd.DataFrame(accuracy_model, columns=['Scores'])
     sns.set(style="white", rc={"lines.linewidth": 3})
     sns.barplot(x=list_folds, y="Scores", data=scores)
@@ -104,15 +121,28 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
     plt.close()
     print("Plot saved successfully.")
 
-    #
-    print()
-    print()
+    # Folded Tracks Dictionary
+    print(colored("Folded Tracks Dictionary"))
     # print("Dictionary:")
     # pprint(tracks_fold_indexing_dict)
     print("length of keys:", len(tracks_fold_indexing_dict.keys()))
-    print()
-    print()
+    print("Saving folded dataset..")
     dataset_path = os.path.join(exports_path, "dataset",  "{}.yaml".format(class_name))
     with open(dataset_path, 'w') as file:
         folded_dataset = yaml.dump(tracks_fold_indexing_dict, file)
-    print(colored("Folded dataset written successfully.", "cyan"))
+    print(colored("Folded dataset written successfully to disk.", "cyan"))
+
+    print()
+    print(colored("Evaluation Reports:", "cyan"))
+    # CONFUSION MATRIX
+    print("Confusion Matrix:")
+    cm = confusion_matrix(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"])
+    cm_normalized = (cm / cm.astype(np.float).sum(axis=1) * 100)
+    print(colored("Regular:", "blue"))
+    print(colored(cm, "blue"))
+    print(colored("Normalized:", "yellow"))
+    print(colored(cm_normalized, "yellow"))
+
+    print()
+    print("Classification Report:")
+    print(classification_report(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"]))

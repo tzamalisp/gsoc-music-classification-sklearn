@@ -32,7 +32,6 @@ from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from classification.gaia_imitation_best_model import evaluate_gaia_imitation_model
 from transformation.load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
 
-from folding import export_folded_instances
 from classification.classifierGRID import TrainGridClassifier
 from classification.data_processing import DataProcessing
 

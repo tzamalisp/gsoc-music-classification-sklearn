@@ -4,7 +4,7 @@ import json
 from utils import load_yaml, FindCreateDirectory
 from evaluation import evaluateNfold
 from classification.classifierBASIC import TrainClassifier
-from folding import export_folded_instances
+from classification.evaluation import export_folded_instances
 
 
 class ClassificationTask:

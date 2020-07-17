@@ -4,9 +4,7 @@ from time import time
 from pprint import pprint
 from termcolor import colored
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
-from classification.data_processing import DataProcessing
 from classification.classification_task import ClassificationTask
-from transformation.load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
 from datetime import datetime
 
 log = logging.getLogger('classification.ClassificationTaskManager')
@@ -105,11 +103,11 @@ class ClassificationTaskManager:
                                       exports_path=self.exports_path,
                                       tracks=self.tracks
                                       )
-            # try:
-            #     task.run()
-            # except Exception as e:
-            #     log.error('Running task failed: %s' % e)
-            task.run()
+            try:
+                task.run()
+            except Exception as e:
+                log.error('Running task failed: %s' % e)
+            # task.run()
 
         end_time = time()
 
@@ -118,29 +116,3 @@ class ClassificationTaskManager:
 
         # test duration
         return end_time - start_time
-
-
-if __name__ == '__main__':
-    config_data = load_yaml("configuration.yaml")
-    gt_data = GroundTruthLoad(config_data, "groundtruth.yaml")
-    df_fg_data = gt_data.export_gt_tracks()
-    print(colored("Type of exported GT data exported: {}".format(type(df_fg_data)), "green"))
-    class_name = gt_data.export_train_class()
-
-    data_processing_obj = DataProcessing(config=config_data,
-                                         dataset=df_fg_data,
-                                         class_name=class_name
-                                         )
-    tracks_shuffled = data_processing_obj.shuffle_tracks_data()
-    print(colored("SHUFFLED TRACKS:", "green"))
-    print(tracks_shuffled[:4])
-    print()
-    X, y = data_processing_obj.exporting_classification_data()
-
-    class_manage = ClassificationTaskManager(yaml_file="configuration.yaml",
-                                             train_class=class_name,
-                                             X=X,
-                                             y=y,
-                                             tracks=tracks_shuffled)
-    class_manage.apply_processing()
-

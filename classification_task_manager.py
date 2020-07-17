@@ -2,6 +2,7 @@ import os
 import logging
 from time import time
 from pprint import pprint
+from termcolor import colored
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from classification.data_processing import DataProcessing
 from classification.classification_task import ClassificationTask
@@ -38,11 +39,11 @@ class ClassificationTaskManager:
         self.results_path = ""
         self.logs_path = ""
         self.tracks_path = ""
+        self.dataset_path = ""
 
         self.load_config()
         self.files_existence()
         self.config_file_analysis()
-        self.apply_processing()
 
     def load_config(self):
         try:
@@ -65,6 +66,8 @@ class ClassificationTaskManager:
         self.logs_path = FindCreateDirectory(os.path.join(self.exports_path, "logs")).inspect_directory()
         # tracks
         self.tracks_path = FindCreateDirectory(os.path.join(self.exports_path, "tracks_csv")).inspect_directory()
+        # datasets
+        self.dataset_path = FindCreateDirectory(os.path.join(self.exports_path, "dataset")).inspect_directory()
 
     def config_file_analysis(self):
 
@@ -90,6 +93,7 @@ class ClassificationTaskManager:
         start_time = time()
 
         training_processes = TrainingProcesses(self.config).training_processes()
+        print(colored("Classifiers detected: {}".format(self.config["classifiers"].keys()), "green"))
         for classifier in self.config['classifiers'].keys():
             print("Before Classification task: ", classifier)
             task = ClassificationTask(config=self.config,
@@ -109,29 +113,34 @@ class ClassificationTaskManager:
 
         end_time = time()
 
+        print()
+        print(colored("Last evaluation took place at: {}".format(datetime.now()), "magenta"))
+
         # test duration
         return end_time - start_time
-
-        print()
-        print("Last evaluation took place at: {}".format(datetime.now()))
 
 
 if __name__ == '__main__':
     config_data = load_yaml("configuration.yaml")
     gt_data = GroundTruthLoad(config_data, "groundtruth.yaml")
     df_fg_data = gt_data.export_gt_tracks()
-    # print(df_fg_data)
+    print(colored("Type of exported GT data exported: {}".format(type(df_fg_data)), "green"))
     class_name = gt_data.export_train_class()
 
-    X, y = DataProcessing(config=config_data,
-                          dataset=df_fg_data,
-                          class_name=class_name
-                          ).exporting_classification_data()
+    data_processing_obj = DataProcessing(config=config_data,
+                                         dataset=df_fg_data,
+                                         class_name=class_name
+                                         )
+    tracks_shuffled = data_processing_obj.shuffle_tracks_data()
+    print(colored("SHUFFLED TRACKS:", "green"))
+    print(tracks_shuffled[:4])
+    print()
+    X, y = data_processing_obj.exporting_classification_data()
 
     class_manage = ClassificationTaskManager(yaml_file="configuration.yaml",
                                              train_class=class_name,
                                              X=X,
                                              y=y,
-                                             tracks=df_fg_data)
+                                             tracks=tracks_shuffled)
     class_manage.apply_processing()
 

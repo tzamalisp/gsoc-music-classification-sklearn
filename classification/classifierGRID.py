@@ -22,7 +22,7 @@ class TrainGridClassifier:
         self.exports_path = exports_path
 
         self.best_models_list = []
-        self.train_grid_search_clf()
+        # self.train_grid_search_clf()
 
     def train_grid_search_clf(self):
         process_counter = 1

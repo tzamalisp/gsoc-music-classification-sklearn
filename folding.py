@@ -47,6 +47,7 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
                               ).post_processing()
 
     accuracy_model = []
+    predictions_list = pd.DataFrame()
     fold_number = 0
     for train_index, test_index in kf.split(X_transformed):
         print("Fold: {}".format(fold_number))
@@ -72,16 +73,21 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
         # Train the model
         clf.fit(X_train, y_train)
 
+        predictions_fold = clf.predict(X_test)
+        print(type(predictions_fold))
+        print(predictions_fold.shape)
+
         # Append to accuracy_model the accuracy of the model
         accuracy_model.append(accuracy_score(y_test, clf.predict(X_test), normalize=True) * 100)
 
-
         fold_number += 1
+    # print(predictions_list)
 
     print()
     # ACCURACIES
     print(colored("Accuracies in each fold: {}".format(accuracy_model), "cyan"))
-    print(colored("Mean accuracy: {}".format(np.mean(accuracy_model)), "cyan"))
+    print(colored("Mean of accuracies: {}".format(np.mean(accuracy_model)), "cyan"))
+    print(colored("Standard Deviation of accuracies: {}".format(np.std(accuracy_model)), "cyan"))
 
     # Visualize accuracy for each iteration
     list_folds = []

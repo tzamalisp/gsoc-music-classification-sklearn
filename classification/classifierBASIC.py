@@ -16,7 +16,11 @@ class TrainClassifier:
             param_gamma = self.params["gamma"]
             param_class_weight = self.params["class_weight"]
             param_kernel = self.params["kernel"]
-            model = SVC(C=param_C, gamma=param_gamma, kernel=param_kernel, class_weight=param_class_weight)
+            model = SVC(C=param_C,
+                        gamma=param_gamma,
+                        kernel=param_kernel,
+                        class_weight=param_class_weight,
+                        probability=True)
             return model
         else:
             return None

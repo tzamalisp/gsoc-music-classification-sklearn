@@ -4,7 +4,7 @@ import json
 from utils import load_yaml, FindCreateDirectory
 from evaluation import evaluateNfold
 from classification.classifierBASIC import TrainClassifier
-from classification.evaluation import export_folded_instances
+from classification.evaluation import fold_evaluation
 
 
 class ClassificationTask:
@@ -43,10 +43,12 @@ class ClassificationTask:
 
         clf_model = TrainClassifier(classifier=self.classifier, params=best_model["params"]).model()
         print("Best model loaded..")
-        export_folded_instances(config=self.config, clf=clf_model,
-                                n_fold=best_model["n_fold"],
-                                X_array_list=self.X, y=self.y,
-                                class_name=self.train_class, tracks=self.tracks,
-                                process=best_model["preprocessing"],
-                                exports_path=self.exports_path)
+        fold_evaluation(config=self.config, clf=clf_model,
+                        n_fold=best_model["n_fold"],
+                        X_array_list=self.X, y=self.y,
+                        class_name=self.train_class,
+                        tracks=self.tracks,
+                        process=best_model["preprocessing"],
+                        exports_path=self.exports_path
+                        )
 

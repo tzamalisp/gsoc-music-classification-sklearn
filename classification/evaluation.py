@@ -14,7 +14,7 @@ from transformation.transform import Transform
 from classification.report_files_export import export_report
 
 
-def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tracks, process, exports_path):
+def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, process, exports_path):
     print(colored("Folding..", "yellow"))
     print(colored("n_fold: {}".format(n_fold), "cyan"))
     print(colored("Sample of shuffled tracks tracks:", "cyan"))

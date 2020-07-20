@@ -27,7 +27,7 @@ class TrainGridClassifier:
     def train_grid_search_clf(self):
         process_counter = 1
         for tr_process in self.tr_processes:
-            print("Train process {} - {}".format(process_counter, tr_process))
+            print(colored("Train process {} - {}".format(process_counter, tr_process), "green"))
 
             # initiate SVM classifier object
             if self.classifier == "svm":
@@ -108,7 +108,7 @@ class TrainGridClassifier:
             self.best_models_list.append(results_dict)
 
             print()
-            print("Next train process..")
+            print(colored("Next train process..", "yellow"))
             process_counter += 1
             print()
             print()

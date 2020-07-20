@@ -1,6 +1,6 @@
 # READ GROUND TRUTH
 # the ground truth data directory
-ground_truth_directory: acousticbrainz-datasets
+ground_truth_directory: datasets
 acousticbrainz: False
 from_disk: True
 # classes with features locally: danceability, gender, genre_rosamerica, moods_claurier, moods_mirex, timbre_bright_dark

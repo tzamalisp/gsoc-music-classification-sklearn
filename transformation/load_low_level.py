@@ -81,16 +81,19 @@ class FeaturesDf:
         self.list_feats_tracks.clear()
         for index, row in self.df_tracks.iterrows():
             path_low_data = os.path.join(self.path_low_level, "{}.json".format(row["track"]))
-            f = open(path_low_data)
             try:
+                f = open(path_low_data)
                 data_feats_item = json.load(f, strict=False)
             except Exception as e:
-                print("There are no ")
+                print("Exception occurred in loading file:", e)
             # remove unnecessary features data
             # if 'metadata' in data_feats_item:
             #     del data_feats_item['metadata']
-            if 'beats_position' in data_feats_item['rhythm']:
-                del data_feats_item['rhythm']['beats_position']
+            try:
+                if 'beats_position' in data_feats_item['rhythm']:
+                    del data_feats_item['rhythm']['beats_position']
+            except Exception as e:
+                print("There is no 'rhythm' key in the low level data. Exception:", e)
 
             # data dictionary transformed to a fully flattened dictionary
             data_feats_item = flatten_dict_full(data_feats_item)

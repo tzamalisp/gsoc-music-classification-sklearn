@@ -11,6 +11,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix, classification_report
 
 from transformation.transform import Transform
+from classification.report_files_export import export_report
 
 
 def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tracks, process, exports_path):
@@ -106,6 +107,15 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
     print(colored("Accuracies in each fold: {}".format(accuracy_model), "cyan"))
     print(colored("Mean of accuracies: {}".format(np.mean(accuracy_model)), "cyan"))
     print(colored("Standard Deviation of accuracies: {}".format(np.std(accuracy_model)), "cyan"))
+    accuracies_export = "Accuracies in each fold: {} \nMean of accuracies: {} \nStandard Deviation of accuracies: {}"\
+        .format(accuracy_model, np.mean(accuracy_model), np.std(accuracy_model))
+    export_report(config=config,
+                  name="Accuracies results",
+                  report=accuracies_export,
+                  filename="accuracies_results",
+                  train_class=class_name,
+                  exports_path=exports_path)
+
     # Visualize accuracy for each iteration
     list_folds = []
     counter_folds = 0
@@ -142,7 +152,21 @@ def export_folded_instances(config, clf, n_fold, X_array_list, y, class_name, tr
     print(colored(cm, "blue"))
     print(colored("Normalized:", "yellow"))
     print(colored(cm_normalized, "yellow"))
+    cm_all = "Actual instances\n{}\n\nNormalized\n{}".format(cm, cm_normalized)
+    export_report(config=config,
+                  name="Confusion Matrix",
+                  report=cm_all,
+                  filename="confusion_matrix",
+                  train_class=class_name,
+                  exports_path=exports_path)
 
     print()
     print("Classification Report:")
-    print(classification_report(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"]))
+    cr = classification_report(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"])
+    print(cr)
+    export_report(config=config,
+                  name="Classification Report",
+                  report=cr,
+                  filename="classification_report",
+                  train_class=class_name,
+                  exports_path=exports_path)

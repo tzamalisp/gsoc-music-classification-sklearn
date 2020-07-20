@@ -19,6 +19,7 @@ class ClassificationTask:
         self.tracks = tracks
 
     def run(self):
+        # grid search train
         if self.config["train_kind"] == "grid":
             grid_svm_train = TrainGridClassifier(config=self.config,
                                                  classifier=self.classifier,

@@ -91,7 +91,7 @@ evaluations/
 exports/
 .ipynb_checkpoints/
 dataset_annotations/
-acousticbrainz-datasets/
+datasets/
 dask-worker-space/
 __pycache__/
 

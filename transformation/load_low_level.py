@@ -32,24 +32,6 @@ def flatten_dict_full(dictionary, sep="_"):
     return obj
 
 
-def shuffle_data(df_ml_data, config):
-    """
-
-    :param df_ml_data: (Pandas DataFrame) the data to be shuffled
-    :param config: (dict) the configuration data
-    :return: (NumPy array) the shuffled data
-    """
-    df_ml_cols = df_ml_data.columns
-    # convert DataFrame to NumPy array
-    ml_values = df_ml_data.values
-    # shuffle the data
-    random.seed(a=config.get("random_seed"))
-    random.shuffle(ml_values)
-    # convert the NumPy array to DF
-    df_ml_shuffle = pd.DataFrame(data=ml_values, columns=df_ml_cols)
-    return df_ml_shuffle
-
-
 class FeaturesDf:
     """
     Features DataFrame object by the JSON low-level data.

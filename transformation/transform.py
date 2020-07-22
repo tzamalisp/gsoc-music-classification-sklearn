@@ -41,7 +41,10 @@ class Transform:
             print("Preprocessing steps found.")
             preprocess_steps = self.config["processing"][self.process]["preprocess"]
             for step in preprocess_steps:
-                self.df = descr_handling(df=self.df, processing=step)
+                self.df = descr_handling(df=self.df,
+                                         processing=step,
+                                         exports_path=self.exports_path,
+                                         mode=self.mode)
         else:
             print("No preprocessing steps found.")
         print("Shape of the df after the data preprocessing: \n{}".format(self.df.shape))

@@ -1,7 +1,10 @@
+import os
 import re
 import pandas as pd
 import collections
-
+from sklearn.preprocessing import OneHotEncoder
+import joblib
+from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 
 def flatten_dict_full(dictionary, sep="_"):
     """
@@ -63,13 +66,14 @@ def descr_remover(df, descr_remove_list):
     return df_used_descr
 
 
-def descr_enumerator(df, descr_enumerate_list):
+def descr_enumerator(df, descr_enumerate_list, exports_path, mode):
     """
 
     :param df:
     :param descr_enumerate_list:
     :return:
     """
+    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
     columns_list = list(df.columns)
     columns_enum_list = []
     for item in descr_enumerate_list:
@@ -81,8 +85,24 @@ def descr_enumerator(df, descr_enumerate_list):
     df_cat_oh = pd.get_dummies(df_cat)
     print("No. of columns after enumeration: {}".format(len(df_cat_oh.columns)))
     print("Columns enumerated: {}".format(df_cat_oh.columns))
-    print("ENUMERATED FEATS:")
-    print(df_cat_oh.head())
+    # print("ENUMERATED FEATS:")
+
+    # if mode == "train":
+    #     encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
+    #     encoder.fit(df_cat)
+    #     transformed = encoder.transform(df_cat)
+    #     joblib.dump(encoder, os.path.join(models_path, "encoder.pkl"))
+    #     print("Categories enumerated: {}".format(encoder.categories_))
+    #     print("Shape of enumerated numpy array: {}".format(transformed.shape))
+    #     df_cat_oh = pd.DataFrame(data=transformed)
+    #     print(df_cat_oh.head())
+    # elif mode == "predict":
+    #     encoder = joblib.load(os.path.join(models_path, "encoder.pkl"))
+    #     print("OneHotEncoder loaded..")
+    #     transformed = encoder.transform(df_cat)
+    #     df_cat_oh = pd.DataFrame(data=transformed)
+    #     print(df_cat_oh.head())
+
     df.drop(labels=columns_enum_list, axis=1, inplace=True)
     df_num_oh = pd.concat([df, df_cat_oh], axis=1)
     return df_num_oh
@@ -105,11 +125,13 @@ def descr_selector(df, descr_select_list):
     return df_select_descr
 
 
-def descr_handling(df, processing):
+def descr_handling(df, processing, exports_path, mode):
     """
 
     :param df:
     :param processing:
+    :param exports_path:
+    :param mode:
     :return:
     """
     if processing["transfo"] == "remove":
@@ -119,7 +141,7 @@ def descr_handling(df, processing):
         print()
     if processing["transfo"] == "enumerate":
         enumerate_list = list_descr_handler(processing["params"]["descriptorNames"])
-        df = descr_enumerator(df, enumerate_list)
+        df = descr_enumerator(df, enumerate_list, exports_path=exports_path, mode=mode)
         print("items enumerated related to: {}".format(enumerate_list))
         print()
     if processing["transfo"] == "select":

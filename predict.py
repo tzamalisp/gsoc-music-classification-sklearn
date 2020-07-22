@@ -50,8 +50,9 @@ class Predict:
                                   df=self.df_track,
                                   process=self.best_model["preprocessing"],
                                   exports_path=self.exports_dir,
-                                  mode="predict"
+                                  mode="train"
                                   ).post_processing()
+
 
 if __name__ == '__main__':
     import requests

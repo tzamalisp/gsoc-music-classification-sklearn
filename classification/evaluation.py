@@ -47,8 +47,8 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
     X_transformed = Transform(config=config,
                               df=X_array_list,
                               process=process,
-                              exports_path=exports_path
-                              ).post_processing()
+                              exports_path=exports_path,
+                              mode="train").post_processing()
 
     accuracy_model = []
     predictions_df_list = []

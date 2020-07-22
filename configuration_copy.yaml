@@ -1,6 +1,6 @@
 # READ GROUND TRUTH
 # the ground truth data directory
-ground_truth_directory: acousticbrainz-datasets
+ground_truth_directory: datasets
 acousticbrainz: False
 from_disk: True
 # classes with features locally: danceability, gender, genre_rosamerica, moods_claurier, moods_mirex, timbre_bright_dark
@@ -48,7 +48,7 @@ preprocessing:
         - transfo: enumerate
           params: { descriptorNames: *stringDescs }
         - transfo: select
-          params: { descriptorNames: ['lowlevel*'] }
+          params: { descriptorNames: 'lowlevel*' }
 
     nobands:
         - transfo: remove
@@ -63,7 +63,7 @@ preprocessing:
           params: { descriptorNames: *unusedDescs }
         - transfo: enumerate
           params: { descriptorNames: *stringDescs }
-        - transfo: normalize  # MixMax Scale
+        - transfo: normalize
 
     gaussianized:
         - transfo: remove
@@ -72,17 +72,16 @@ preprocessing:
           params: { descriptorNames: *stringDescs }
         - transfo: normalize
         - transfo: gaussianize
-          params: { descriptorNames: ['lowlevel.*'] }
+          params: { descriptorNames: 'lowlevel.*' }
 
-#    mfcc:
-#      preprocess:
-#        # an MFCC only baseline
-#        - transfo: remove
-#          params: { descriptorNames: *unusedDescs }
-#        - transfo: enumerate
-#          params: { descriptorNames: *stringDescs }
-#        - transfo: select
-#          params: { descriptorNames: ['lowlevel.mfcc*'] }
+    mfcc:
+        # an MFCC only baseline
+        - transfo: remove
+          params: { descriptorNames: *unusedDescs }
+        - transfo: enumerate
+          params: { descriptorNames: *stringDescs }
+        - transfo: select
+          params: { descriptorNames: 'lowlevel.mfcc*' }
 
 # gaia data
 gaia_imitation: False

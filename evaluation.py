@@ -105,8 +105,6 @@ def evaluateNfold(n_fold, dataset, groundTruth, trainingFunc, config, seed=None,
         print("Please provide a correct boolean value for imitating or not gaia's best model for the {} class"
               .format(class_name))
 
-    # TODO if not gaia imitation, train the model
-
 
 if __name__ == '__main__':
     log = logging.getLogger('classification.Evaluation')

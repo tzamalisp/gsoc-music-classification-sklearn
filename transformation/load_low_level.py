@@ -1,35 +1,11 @@
 import os
 import json
 import pandas as pd
-import collections
 # from ml_load_groung_truth import GroundTruthLoad
 from utils import DfChecker
 from utils import load_yaml
 import random
-
-
-def flatten_dict_full(dictionary, sep="_"):
-    """
-
-    :param dictionary:
-    :param sep:
-    :return:
-    """
-    obj = collections.OrderedDict()
-
-    def recurse(t, parent_key=""):
-        if isinstance(t, list):
-            for i in range(len(t)):
-                recurse(t[i], parent_key + sep + str(i) if parent_key else str(i))
-        elif isinstance(t, dict):
-            for k, v in t.items():
-                recurse(v, parent_key + sep + k if parent_key else k)
-        else:
-            obj[parent_key] = t
-
-    recurse(dictionary)
-
-    return obj
+from transformation.utils_preprocessing import flatten_dict_full
 
 
 class FeaturesDf:

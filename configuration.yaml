@@ -77,8 +77,8 @@ processing:
         - transfo: enumerate
           params: { descriptorNames: *stringDescs }
       postprocess:
-        - transfo: normalize
-        - transfo: gaussianize
+        - transfo: normalize  # MixMax Scale
+        - transfo: gaussianize  # QuantileTransformer
           params: { descriptorNames: ['lowlevel.*'] }
 
 #    mfcc:

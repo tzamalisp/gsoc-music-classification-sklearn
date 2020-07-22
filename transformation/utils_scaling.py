@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import QuantileTransformer
 from sklearn.decomposition import PCA
+import joblib
 
 from transformation.utils_preprocessing import list_descr_handler, descr_selector
 from utils import FindCreateDirectory
@@ -23,7 +24,7 @@ def descr_scaling(feats_data, processing, config, exports_path, train_process):
     # save plots path
     # images exports
     images_path = FindCreateDirectory(os.path.join(exports_path, "images")).inspect_directory()
-
+    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
     # Normalize dataset
     if processing["transfo"] == "normalize":
         feats_data_columns = feats_data.columns
@@ -32,6 +33,7 @@ def descr_scaling(feats_data, processing, config, exports_path, train_process):
         normalizer = MinMaxScaler()
         normalizer.fit(feats_data)
         feats_data_normalized = normalizer.transform(feats_data)
+        joblib.dump(normalizer, os.path.join(models_path, "normalizer.pkl"))
         print("Type of normalized data: {}".format(type(feats_data_normalized)))
         feats_data = pd.DataFrame(data=feats_data_normalized, columns=feats_data_columns)
         print("Type of normalized data after conversion: {}".format(type(feats_data)))
@@ -64,6 +66,7 @@ def descr_scaling(feats_data, processing, config, exports_path, train_process):
         gaussianizer = QuantileTransformer(n_quantiles=1000)
         gaussianizer.fit(df_gauss)
         feats_data_gaussianized = gaussianizer.transform(df_gauss)
+        joblib.dump(gaussianizer, os.path.join(models_path, "gaussianizer.pkl"))
         print("Type of gaussianized data: {}".format(type(feats_data_gaussianized)))
         feats_data_gaussianized = pd.DataFrame(data=feats_data_gaussianized, columns=df_gauss_columns)
         feats_data = pd.concat([feats_data_gaussianized, df_no_gauss], axis=1)

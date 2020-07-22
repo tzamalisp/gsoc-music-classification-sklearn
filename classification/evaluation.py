@@ -9,9 +9,9 @@ import yaml
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix, classification_report
-import pickle
 import joblib
 
+from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from transformation.transform import Transform
 from classification.report_files_export import export_report
 
@@ -173,8 +173,7 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
                   train_class=class_name,
                   exports_path=exports_path)
     # save the model
-    model_file = os.path.join(exports_path, "model.pkl")
-    model_file_joblib = os.path.join(exports_path, "model.joblib")
-    pickle.dump(clf, open(model_file, 'wb'))
-    joblib.dump(clf, model_file_joblib)
+    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
+    model_save_path = os.path.join(models_path, "model.pkl")
+    joblib.dump(clf, model_save_path)
 

@@ -38,6 +38,8 @@ class ClassificationTaskManager:
         self.logs_path = ""
         self.tracks_path = ""
         self.dataset_path = ""
+        self.models_path = ""
+        self.images = ""
 
         self.load_config()
         self.files_existence()
@@ -66,6 +68,10 @@ class ClassificationTaskManager:
         self.tracks_path = FindCreateDirectory(os.path.join(self.exports_path, "tracks_csv")).inspect_directory()
         # datasets
         self.dataset_path = FindCreateDirectory(os.path.join(self.exports_path, "dataset")).inspect_directory()
+        # models
+        self.models_path = FindCreateDirectory(os.path.join(self.exports_path, "models")).inspect_directory()
+        # images
+        self.images = FindCreateDirectory(os.path.join(self.exports_path, "images")).inspect_directory()
 
     def config_file_analysis(self):
 

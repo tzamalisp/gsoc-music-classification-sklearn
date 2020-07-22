@@ -42,7 +42,7 @@ class Predict:
         list_track = []
         list_track.append(self.track_feats)
         self.df_track = pd.DataFrame(data=list_track, columns=list_track[0].keys())
-        print(self.df_track)
+        # print(self.df_track)
 
     def preprocessing(self):
         # transformation of the data
@@ -51,7 +51,7 @@ class Predict:
                                   process=self.best_model["preprocessing"],
                                   exports_path=self.exports_dir,
                                   mode="train"
-                                  ).post_processing()
+                                  ).transforming()
 
 
 if __name__ == '__main__':

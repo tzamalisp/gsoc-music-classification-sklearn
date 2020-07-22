@@ -66,6 +66,25 @@ def descr_remover(df, descr_remove_list):
     return df_used_descr
 
 
+def descr_selector(df, descr_select_list):
+    """
+
+    :param df:
+    :param descr_select_list:
+    :return:
+    """
+    columns_list = list(df.columns)
+    columns_sel_list = []
+    for item in descr_select_list:
+        for sel_item in columns_list:
+            if re.search(item, sel_item):
+                columns_sel_list.append(sel_item)
+    print(columns_sel_list)
+    print(len(columns_sel_list))
+    df_select_descr = df[columns_sel_list]
+    return df_select_descr
+
+
 def descr_enumerator(df, descr_enumerate_list, exports_path, mode):
     """
 
@@ -104,25 +123,8 @@ def descr_enumerator(df, descr_enumerate_list, exports_path, mode):
     #     print(df_cat_oh.head())
 
     df.drop(labels=columns_enum_list, axis=1, inplace=True)
-    df_num_oh = pd.concat([df, df_cat_oh], axis=1)
-    return df_num_oh
-
-
-def descr_selector(df, descr_select_list):
-    """
-
-    :param df:
-    :param descr_select_list:
-    :return:
-    """
-    columns_list = list(df.columns)
-    columns_sel_list = []
-    for item in descr_select_list:
-        for sel_item in columns_list:
-            if re.search(item, sel_item):
-                columns_sel_list.append(sel_item)
-    df_select_descr = df[columns_sel_list]
-    return df_select_descr
+    # df_num_oh = pd.concat([df, df_cat_oh], axis=1)
+    return df, df_cat_oh
 
 
 def descr_handling(df, processing, exports_path, mode):

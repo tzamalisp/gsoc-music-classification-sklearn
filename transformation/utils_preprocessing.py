@@ -101,27 +101,32 @@ def descr_enumerator(df, descr_enumerate_list, exports_path, mode):
                 columns_enum_list.append(sel_item)
     df_cat = df[columns_enum_list]
     print("No. of columns to enumerate: {}".format(len(df_cat.columns)))
-    df_cat_oh = pd.get_dummies(df_cat)
-    print("No. of columns after enumeration: {}".format(len(df_cat_oh.columns)))
-    print("Columns enumerated: {}".format(df_cat_oh.columns))
-    # print("ENUMERATED FEATS:")
 
-    # if mode == "train":
-    #     encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
-    #     encoder.fit(df_cat)
-    #     transformed = encoder.transform(df_cat)
-    #     joblib.dump(encoder, os.path.join(models_path, "encoder.pkl"))
-    #     print("Categories enumerated: {}".format(encoder.categories_))
-    #     print("Shape of enumerated numpy array: {}".format(transformed.shape))
-    #     df_cat_oh = pd.DataFrame(data=transformed)
-    #     print(df_cat_oh.head())
-    # elif mode == "predict":
-    #     encoder = joblib.load(os.path.join(models_path, "encoder.pkl"))
-    #     print("OneHotEncoder loaded..")
-    #     transformed = encoder.transform(df_cat)
-    #     df_cat_oh = pd.DataFrame(data=transformed)
-    #     print(df_cat_oh.head())
+    # -----------------------------
+    # # pandas --> get dummies
+    # df_cat_oh = pd.get_dummies(df_cat)
+    # print("No. of columns after enumeration: {}".format(len(df_cat_oh.columns)))
+    # print("Columns enumerated: {}".format(df_cat_oh.columns))
+    # ------------------------------
+    # sklearn --> OneHotEncoder
+    df_cat_oh = pd.DataFrame()
+    if mode == "train":
+        encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
+        encoder.fit(df_cat)
+        transformed = encoder.transform(df_cat)
+        joblib.dump(encoder, os.path.join(models_path, "encoder.pkl"))
+        print("Categories enumerated: {}".format(encoder.categories_))
+        print("Shape of enumerated numpy array: {}".format(transformed.shape))
+        df_cat_oh = pd.DataFrame(data=transformed)
+        print(df_cat_oh.head())
+    elif mode == "predict":
+        encoder = joblib.load(os.path.join(models_path, "encoder.pkl"))
+        print("OneHotEncoder loaded..")
+        transformed = encoder.transform(df_cat)
+        df_cat_oh = pd.DataFrame(data=transformed)
+        print(df_cat_oh.head())
 
+    # -------------------------------
     df.drop(labels=columns_enum_list, axis=1, inplace=True)
     # df_num_oh = pd.concat([df, df_cat_oh], axis=1)
     return df, df_cat_oh

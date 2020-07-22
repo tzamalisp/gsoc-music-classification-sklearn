@@ -50,8 +50,16 @@ class Predict:
                                   df=self.df_track,
                                   process=self.best_model["preprocessing"],
                                   exports_path=self.exports_dir,
-                                  mode="train"
-                                  ).transforming()
+                                  mode="predict"
+                                  ).post_processing()
+
+        model_path = os.path.join(self.exports_dir, "models", "model.pkl")
+        clf_loaded = joblib.load(model_path)
+        predicted = clf_loaded.predict(X_transformed)
+        predicted_prob = clf_loaded.predict_proba(X_transformed)
+        print(predicted)
+        print(clf_loaded.classes_)
+        print(predicted_prob)
 
 
 if __name__ == '__main__':
@@ -59,9 +67,16 @@ if __name__ == '__main__':
     from pprint import pprint
     config_data = load_yaml("configuration.yaml")
     # pprint(config_data)
+    # response = requests.get('https://acousticbrainz.org/api/v1/7fb1b586-017c-4a89-b15a-0bb837983108/low-level')
+    # jmp
     response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
+    # Earth, Wind & Fire
+    # response = requests.get('https://acousticbrainz.org/api/v1/c129e3f4-3653-467a-a67f-c33bc912e6cb/low-level')
     track = response.json()
-    # pprint(track)
+    if track["metadata"]["tags"]["artist"][0]:
+        print("Artist:", track["metadata"]["tags"]["artist"][0])
+    if track["metadata"]["tags"]["album"][0]:
+        print("Track:", track["metadata"]["tags"]["album"][0])
 
     prediction = Predict(config=config_data,
                          track_low_level=track,

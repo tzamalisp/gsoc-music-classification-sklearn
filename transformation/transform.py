@@ -40,7 +40,7 @@ class Transform:
         print("Shape of the df after the data cleaning: \n{}".format(self.df.shape))
 
     def post_processing(self):
-        print("PROCESSSSSS", self.process)
+        print(colored("PROCESS: {}".format(self.process), "cyan"))
         print(self.config["processing"][self.process])
         list_preprocesses = []
         for item in self.config["processing"][self.process]:

@@ -17,11 +17,12 @@ except AttributeError:
 
 
 class Transform:
-    def __init__(self, config, df, process, exports_path):
+    def __init__(self, config, df, process, exports_path, mode):
         self.config = config
         self.df = df
         self.process = process
         self.exports_path = exports_path
+        self.mode = mode
         self.cleaner()
         self.pre_processing()
 
@@ -57,7 +58,8 @@ class Transform:
                                         processing=step,
                                         config=self.config,
                                         exports_path=self.exports_path,
-                                        train_process=self.process
+                                        train_process=self.process,
+                                        mode=self.mode
                                         )
         else:
             print("No postprocessing steps found.")

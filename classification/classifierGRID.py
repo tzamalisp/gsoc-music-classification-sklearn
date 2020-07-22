@@ -42,8 +42,8 @@ class TrainGridClassifier:
             X_transformed = Transform(config=self.config,
                                       df=self.X,
                                       process=tr_process["preprocess"],
-                                      exports_path=self.exports_path
-                                      ).post_processing()
+                                      exports_path=self.exports_path,
+                                      mode="train").post_processing()
 
             # define the length of parameters
             parameters_grid = {'kernel': tr_process["kernel"],

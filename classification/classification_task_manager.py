@@ -1,7 +1,6 @@
 import os
 import logging
 from time import time
-from pprint import pprint
 from termcolor import colored
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from classification.classification_task import ClassificationTask

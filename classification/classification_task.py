@@ -1,8 +1,6 @@
 import os
 from classification.classifierGRID import TrainGridClassifier
 import json
-from utils import load_yaml, FindCreateDirectory
-from evaluation import evaluateNfold
 from classification.classifierBASIC import TrainClassifier
 from classification.evaluation import fold_evaluation
 

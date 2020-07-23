@@ -2,7 +2,6 @@ import os
 import yaml
 import pandas as pd
 from pprint import pprint
-from utils import DfChecker
 from utils import load_yaml, FindCreateDirectory
 from transformation.load_low_level import FeaturesDf
 

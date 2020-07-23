@@ -179,3 +179,17 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
     model_save_path = os.path.join(models_path, "model.pkl")
     joblib.dump(clf, model_save_path)
 
+    # train with all the data
+    print(colored("Evaluation to the whole dataset..", "cyan"))
+    clf.fit(X_transformed, y)
+    predictions_proba_all = clf.predict_proba(X_transformed)
+    predictions_all = clf.predict(X_transformed)
+    print(colored("Confusion Matrix All:", "magenta"))
+    cm_all = confusion_matrix(y_true=y, y_pred=predictions_all)
+    print(cm_all)
+    print(colored("Confusion Matrix All Normalized:", "magenta"))
+    cm_all_normalized = (cm_all / cm_all.astype(np.float).sum(axis=1) * 100)
+    print(cm_all_normalized)
+    print(colored("Classification Report All:", "magenta"))
+    cr_all = classification_report(y_true=y, y_pred=predictions_all)
+    print(cr_all)

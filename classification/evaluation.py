@@ -174,10 +174,6 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
                   filename="classification_report",
                   train_class=class_name,
                   exports_path=exports_path)
-    # save the model
-    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
-    model_save_path = os.path.join(models_path, "model.pkl")
-    joblib.dump(clf, model_save_path)
 
     # train with all the data
     print(colored("Evaluation to the whole dataset..", "cyan"))
@@ -193,3 +189,8 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
     print(colored("Classification Report All:", "magenta"))
     cr_all = classification_report(y_true=y, y_pred=predictions_all)
     print(cr_all)
+
+    # save the model
+    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
+    model_save_path = os.path.join(models_path, "model.pkl")
+    joblib.dump(clf, model_save_path)

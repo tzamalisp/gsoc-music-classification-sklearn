@@ -57,9 +57,9 @@ class Predict:
         clf_loaded = joblib.load(model_path)
         predicted = clf_loaded.predict(X_transformed)
         predicted_prob = clf_loaded.predict_proba(X_transformed)
-        print(predicted)
-        print(clf_loaded.classes_)
-        print(predicted_prob)
+        print("Prediction:", predicted)
+        print("Classes: ", clf_loaded.classes_)
+        print("Prediction probabilities", predicted_prob)
 
 
 if __name__ == '__main__':
@@ -73,6 +73,10 @@ if __name__ == '__main__':
     # Earth, Wind & Fire
     # response = requests.get('https://acousticbrainz.org/api/v1/c129e3f4-3653-467a-a67f-c33bc912e6cb/low-level')
     track = response.json()
+    # save the low level locally
+    # with open("sample_track.json", "w") as outfile:
+    #     json.dump(track, outfile, indent=4)
+
     if track["metadata"]["tags"]["artist"][0]:
         print("Artist:", track["metadata"]["tags"]["artist"][0])
     if track["metadata"]["tags"]["album"][0]:
@@ -83,3 +87,5 @@ if __name__ == '__main__':
                          process="normalized",
                          class_name="danceability")
     prediction.preprocessing()
+
+

@@ -157,37 +157,3 @@ def descr_handling(df, processing, exports_path, mode):
         print("items selected related to: {}".format(select_list))
         print()
     return df
-
-
-def descr_list_categorical_selector(df, descr_enumerate_list):
-    """
-
-    :param df:
-    :param descr_enumerate_list:
-    :return:
-    """
-    columns_list = list(df.columns)
-    columns_enum_list = []
-    for item in descr_enumerate_list:
-        for sel_item in columns_list:
-            if re.search(item, sel_item):
-                columns_enum_list.append(sel_item)
-    return columns_enum_list
-    # df_cat = df[columns_enum_list]
-    # return df_cat
-
-
-def descr_list_remover(df, descr_remove_list, ):
-    """
-
-    :param df:
-    :param descr_remove_list:
-    :return:
-    """
-    columns_list = list(df.columns)
-    columns_del_list = []
-    for item in descr_remove_list:
-        for del_item in columns_list:
-            if not re.search(item, del_item):
-                columns_del_list.append(del_item)
-    return columns_del_list

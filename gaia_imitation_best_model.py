@@ -94,3 +94,8 @@ def evaluate_gaia_imitation_model(config, class_name, X, y):
     display_scores(scores)
     print()
     print()
+
+
+if __name__ == '__main__':
+
+    evaluate_gaia_imitation_model()

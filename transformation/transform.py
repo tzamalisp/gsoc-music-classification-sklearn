@@ -9,8 +9,7 @@ import collections
 from pprint import pprint
 import dask
 from transformation.utils_preprocessing import list_descr_handler, descr_remover, descr_enumerator, descr_selector
-from transformation.utils_preprocessing import descr_handling
-from transformation.utils_scaling import descr_scaling, descr_normalizing, descr_gaussianizing
+from transformation.utils_scaling import descr_normalizing, descr_gaussianizing
 
 # avoid the module's method call deprecation
 try:
@@ -104,39 +103,3 @@ class Transform:
             self.df = pd.concat([self.df_num, self.df_cat], axis=1)
             print(self.df.head())
         return self.df
-
-    # def pre_processing(self):
-    #     print("Processing: {}".format(self.process))
-    #     print(self.config["processing"][self.process])
-    #     print()
-    #     if "preprocess" in self.config["processing"][self.process].keys():
-    #         print("Preprocessing steps found.")
-    #         preprocess_steps = self.config["processing"][self.process]["preprocess"]
-    #         for step in preprocess_steps:
-    #             self.df = descr_handling(df=self.df,
-    #                                      processing=step,
-    #                                      exports_path=self.exports_path,
-    #                                      mode=self.mode)
-    #     else:
-    #         print("No preprocessing steps found.")
-    #     print("Shape of the df after the data preprocessing: \n{}".format(self.df.shape))
-    #     return self.df
-    #
-    # def post_processing(self):
-    #     if "postprocess" in self.config["processing"][self.process].keys():
-    #         print("Postprocessing steps found.")
-    #         postprocess_steps = self.config["processing"][self.process]["postprocess"]
-    #         print("Postprocess steps: {}".format(postprocess_steps))
-    #         for step in postprocess_steps:
-    #             print("Scale process: {}".format(step))
-    #             self.df = descr_scaling(feats_data=self.df,
-    #                                     processing=step,
-    #                                     config=self.config,
-    #                                     exports_path=self.exports_path,
-    #                                     train_process=self.process,
-    #                                     mode=self.mode
-    #                                     )
-    #     else:
-    #         print("No postprocessing steps found.")
-    #     print("Shape of the df after the postprocessing (scaling): \n{}".format(self.df.shape))
-

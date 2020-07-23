@@ -29,7 +29,6 @@ from pprint import pprint
 import logging
 import pandas as pd
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
-from classification.gaia_imitation_best_model import evaluate_gaia_imitation_model
 from transformation.load_groung_truth import ListGroundTruthFiles, GroundTruthLoad
 
 from classification.classifierGRID import TrainGridClassifier

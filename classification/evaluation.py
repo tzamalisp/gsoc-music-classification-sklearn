@@ -96,8 +96,10 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
         accuracy_model.append(accuracy_score(y_test, clf.predict(X_test), normalize=True) * 100)
         fold_number += 1
 
+    print()
+    print()
     # concatenate predictions dfs
-    print(colored("DF Predictions all:"), "cyan")
+    print(colored("DF Predictions all:", "cyan"))
     df_predictions = pd.concat(predictions_df_list)
     print(df_predictions.head())
     print("Info:")

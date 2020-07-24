@@ -6,6 +6,7 @@ from sklearn.preprocessing import OneHotEncoder
 import joblib
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 
+
 def flatten_dict_full(dictionary, sep="_"):
     """
 

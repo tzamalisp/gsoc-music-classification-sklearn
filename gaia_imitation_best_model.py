@@ -56,11 +56,13 @@ def evaluate_gaia_imitation_model(config, class_name, X, y):
     exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
     exports_path = FindCreateDirectory(exports_dir).inspect_directory()
     print(exports_path)
+    # transformation of the data
     X_transformed = Transform(config=config,
                               df=X,
                               process=preprocessing,
-                              exports_path=exports_path
-                              ).post_processing()
+                              exports_path=exports_path,
+                              mode="train").post_processing()
+
     print(X_transformed.columns)
     print(X_transformed.head())
 

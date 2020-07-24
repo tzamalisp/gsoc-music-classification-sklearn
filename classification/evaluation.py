@@ -10,9 +10,10 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix, classification_report
 import joblib
-
+import requests
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from transformation.transform import Transform
+from transformation.utils_preprocessing import flatten_dict_full
 from classification.report_files_export import export_report
 
 
@@ -175,6 +176,11 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
                   train_class=class_name,
                   exports_path=exports_path)
 
+    # save the model
+    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
+    model_save_path = os.path.join(models_path, "model.pkl")
+    joblib.dump(clf, model_save_path)
+
     # train with all the data
     print(colored("Evaluation to the whole dataset..", "cyan"))
     clf.fit(X_transformed, y)
@@ -190,7 +196,24 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
     cr_all = classification_report(y_true=y, y_pred=predictions_all)
     print(cr_all)
 
-    # save the model
-    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
-    model_save_path = os.path.join(models_path, "model.pkl")
-    joblib.dump(clf, model_save_path)
+
+
+    # predict a single instance
+    print("predict a single instance")
+    # "Idle Up" by Dousk & JMP - danceable
+    response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
+    track = response.json()
+    # data dictionary transformed to a fully flattened dictionary
+    track_feats = dict(flatten_dict_full(track))
+    list_track = []
+    list_track.append(track_feats)
+    df_track = pd.DataFrame(data=list_track, columns=list(list_track[0].keys()))
+    print(df_track)
+    print(len(df_track.columns))
+    # X_transformed = Transform(config=config,
+    #                           df=df_track,
+    #                           process=process,
+    #                           exports_path=exports_path,
+    #                           mode="predict"
+    #                           ).post_processing()
+    # print(clf.predict(X_transformed))

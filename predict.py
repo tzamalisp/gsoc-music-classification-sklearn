@@ -20,6 +20,8 @@ class Predict:
 
         self.load_best_model()
         self.flat_dict()
+        self.df_track = pd.DataFrame()
+        self.list_track = []
 
     def load_best_model(self):
         self.exports_dir = os.path.join(os.getcwd(), "{}_{}".format(self.config["exports_directory"], self.class_name))
@@ -42,7 +44,7 @@ class Predict:
         list_track = []
         list_track.append(self.track_feats)
         self.df_track = pd.DataFrame(data=list_track, columns=list_track[0].keys())
-        # print(self.df_track)
+        print(self.df_track)
 
     def preprocessing(self):
         # transformation of the data

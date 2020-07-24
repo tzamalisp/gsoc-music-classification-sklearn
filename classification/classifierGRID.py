@@ -131,8 +131,8 @@ class TrainGridClassifier:
             if model["score"] == max(scores):
                 print("Best {} model parameters:".format(self.class_name))
                 # log2 --> convert values to initial parameters' values
-                model["params"]["C"] = math.log2(model["params"]["C"])
-                model["params"]["gamma"] = math.log2(model["params"]["gamma"])
+                # model["params"]["C"] = math.log2(model["params"]["C"])
+                # model["params"]["gamma"] = math.log2(model["params"]["gamma"])
                 pprint(model)
                 best_model_name = "best_model_{}.json".format(self.class_name)
                 with open(os.path.join(self.exports_path, best_model_name), "w") as best_model:

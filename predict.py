@@ -9,10 +9,9 @@ from transformation.transform import Transform
 
 
 class Predict:
-    def __init__(self, config, track_low_level, process, class_name):
+    def __init__(self, config, track_low_level, class_name):
         self.config = config
         self.track_low_level = track_low_level
-        self.process = process
         self.class_name = class_name
 
         self.exports_dir = ""
@@ -25,6 +24,7 @@ class Predict:
     def load_best_model(self):
         self.exports_dir = os.path.join(os.getcwd(), "{}_{}".format(self.config["exports_directory"], self.class_name))
         best_model_path = os.path.join(self.exports_dir, "best_model_{}.json".format(self.class_name))
+        # best_model_path = os.path.join(self.exports_dir, "models", "model_grid_{}.pkl".format[""])
         with open(best_model_path) as json_file:
             self.best_model = json.load(json_file)
         print("Best model:")
@@ -54,7 +54,8 @@ class Predict:
                                   ).post_processing()
 
         model_path = os.path.join(self.exports_dir, "models", "model.pkl")
-        clf_loaded = joblib.load(model_path)
+        best_model_path = os.path.join(self.exports_dir, "models", "model_grid_{}.pkl".format(self.best_model["preprocessing"]))
+        clf_loaded = joblib.load(best_model_path)
         predicted = clf_loaded.predict(X_transformed)
         predicted_prob = clf_loaded.predict_proba(X_transformed)
         print("Prediction:", predicted)
@@ -67,10 +68,15 @@ if __name__ == '__main__':
     from pprint import pprint
     config_data = load_yaml("configuration.yaml")
     # pprint(config_data)
-    # response = requests.get('https://acousticbrainz.org/api/v1/7fb1b586-017c-4a89-b15a-0bb837983108/low-level')
-    # jmp
+
+    # "Idle Up" by Dousk & JMP - danceable
+    # response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
+    # "Born Slippy" by Underworld - danceable
     response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
-    # Earth, Wind & Fire
+
+    # "So Dear to My Heart" by Peggy Lee - not danceable
+    # response = requests.get('https://acousticbrainz.org/api/v1/7fb1b586-017c-4a89-b15a-0bb837983108/low-level')
+    # "See the Light" by Earth, Wind & Fire - not danceable
     # response = requests.get('https://acousticbrainz.org/api/v1/c129e3f4-3653-467a-a67f-c33bc912e6cb/low-level')
     track = response.json()
     # save the low level locally
@@ -84,7 +90,6 @@ if __name__ == '__main__':
 
     prediction = Predict(config=config_data,
                          track_low_level=track,
-                         process="normalized",
                          class_name="danceability")
     prediction.preprocessing()
 

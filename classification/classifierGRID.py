@@ -3,7 +3,7 @@ import json
 import math
 from pprint import pprint
 from termcolor import colored
-
+import joblib
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
@@ -104,6 +104,13 @@ class TrainGridClassifier:
                 .format(self.class_name, tr_process["preprocess"], gsvc.best_score_)
             with open(os.path.join(grid_results_path, results_params_dict_name), 'w') as grid_params_json:
                 json.dump(gsvc.cv_results_["params"], grid_params_json, indent=0)
+
+            best_process_model_path = os.path.join(self.exports_path,
+                                                   "models",
+                                                   "model_grid_{}.pkl".format(tr_process["preprocess"])
+                                                   )
+            joblib.dump(gsvc.best_estimator_, best_process_model_path)
+            print(colored("Grid Best model for the {} process saved.".format(tr_process["preprocess"]), "cyan"))
 
             # return a list that includes the best models exported from each processing
             self.best_models_list.append(results_dict)

@@ -41,8 +41,7 @@ class Transform:
 
         for item in self.config["processing"][self.process]:
             if item["transfo"] == "remove":
-                print(colored("Proccessing"
-                              " --> REMOVE", "yellow"))
+                print(colored("Proccessing --> REMOVE", "yellow"))
                 # print(item["params"])
                 remove_list = list_descr_handler(item["params"]["descriptorNames"])
                 print(remove_list)

@@ -1,8 +1,16 @@
 import pandas as pd
 from termcolor import colored
 import collections
-from transformation.utils_preprocessing import list_descr_handler, descr_remover, descr_enumerator, descr_selector
+import joblib
+import os
+
+from transformation.utils_preprocessing import list_descr_handler, descr_enumerator, descr_selector
 from transformation.utils_scaling import descr_normalizing, descr_gaussianizing
+from transformation.utils_preprocessing import cleaner, descr_remover, feats_selector_list
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, QuantileTransformer
+from sklearn.pipeline import FeatureUnion
+from sklearn.pipeline import Pipeline
 
 # avoid the module's method call deprecation
 try:
@@ -12,86 +20,260 @@ except AttributeError:
 
 
 class Transform:
-    def __init__(self, config, df, process, exports_path, mode):
+    def __init__(self, config, df_feats, process, exports_path, mode):
         self.config = config
-        self.df = df
+        self.df_feats = df_feats
         self.process = process
         self.exports_path = exports_path
         self.mode = mode
-        self.cleaner()
-        # self.pre_processing()
 
+        self.list_features = []
+        self.feats_cat_list = []
+        self.feats_num_list = []
         self.df_cat = pd.DataFrame()
         self.df_num = pd.DataFrame()
 
-    def cleaner(self):
-        cleaning_columns_list = self.config["excludedDescriptors"]
-        cleaning_columns_list = list_descr_handler(cleaning_columns_list)
-        print("Cleaner for columns: {}".format(cleaning_columns_list))
-        self.df = descr_remover(self.df, cleaning_columns_list)
-        print("Shape of the df after the data cleaning: \n{}".format(self.df.shape))
+        self.feats_prepared = []
 
     def post_processing(self):
         print(colored("PROCESS: {}".format(self.process), "cyan"))
         print(self.config["processing"][self.process])
-        list_preprocesses = []
-        for item in self.config["processing"][self.process]:
-            list_preprocesses.append(item["transfo"])
-        print(list_preprocesses)
+        # list_preprocesses = []
 
-        for item in self.config["processing"][self.process]:
-            if item["transfo"] == "remove":
-                print(colored("Proccessing --> REMOVE", "yellow"))
-                # print(item["params"])
-                remove_list = list_descr_handler(item["params"]["descriptorNames"])
-                print(remove_list)
-                self.df = descr_remover(self.df, remove_list)
-                print("items removed related to: {}".format(remove_list))
+        self.list_features = list(self.df_feats.columns)
 
-        for item in self.config["processing"][self.process]:
-            if item["transfo"] == "enumerate":
-                print(colored("Proccessing --> ENUMERATE", "yellow"))
-                enumerate_list = list_descr_handler(item["params"]["descriptorNames"])
-                print(enumerate_list)
-                self.df_num, self.df_cat = descr_enumerator(self.df, enumerate_list,
-                                                            exports_path=self.exports_path,
-                                                            mode=self.mode)
-                print("items enumerated related to: {}".format(enumerate_list))
+        exports_dir = os.path.join(self.exports_path, "models")
 
-        for item in self.config["processing"][self.process]:
-            if item["transfo"] == "normalize":
-                print(colored("Proccessing --> NORMALIZE", "yellow"))
-                self.df_num = descr_normalizing(feats_data=self.df_num,
-                                                processing=item,
-                                                config=self.config,
-                                                exports_path=self.exports_path,
-                                                train_process=self.process,
-                                                mode=self.mode
-                                                )
+        # clean list
+        print(colored("Cleaning..", "yellow"))
+        cleaning_conf_list = list_descr_handler(self.config["excludedDescriptors"])
+        feats_clean_list = feats_selector_list(self.df_feats.columns, cleaning_conf_list)
+        self.list_features = [x for x in self.df_feats.columns if x not in feats_clean_list]
+        print("List after cleaning some feats: {}".format(len(self.list_features), "blue"))
 
-        for item in self.config["processing"][self.process]:
-            if item["transfo"] == "gaussianize":
-                print(colored("Proccessing --> GAUSSIANIZE", "yellow"))
-                self.df_num = descr_gaussianizing(feats_data=self.df_num,
-                                                  processing=item,
-                                                  config=self.config,
-                                                  exports_path=self.exports_path,
-                                                  train_process=self.process,
-                                                  mode=self.mode
-                                                  )
+        # remove list
+        print(colored("Removing unnecessary features..", "yellow"))
+        if self.config["processing"][self.process][0]["transfo"] == "remove":
+            remove_list = list_descr_handler(self.config["processing"][self.process][0]["params"]["descriptorNames"])
+            feats_remove_list = feats_selector_list(self.df_feats.columns, remove_list)
+            self.list_features = [x for x in self.list_features if x not in feats_remove_list]
+            print("List after removing unnecessary feats: {}".format(len(self.list_features), "blue"))
 
-        for item in self.config["processing"][self.process]:
-            if item["transfo"] == "select":
-                print(colored("Proccessing --> SELECT", "yellow"))
-                select_list = list_descr_handler(item["params"]["descriptorNames"])
-                print(select_list)
-                self.df_num = descr_selector(self.df_num, select_list)
-                print(self.df_num)
-                print("items selected related to: {}".format(select_list))
-                self.df = self.df_num
-                print(self.df)
+        # enumerate list
+        print(colored("Removing unnecessary features..", "yellow"))
+        if self.config["processing"][self.process][1]["transfo"] == "enumerate":
+            enumerate_list = list_descr_handler(self.config["processing"][self.process][1]["params"]["descriptorNames"])
+            self.feats_cat_list = feats_selector_list(self.list_features, enumerate_list)
+            print("Enumerating feats: {}".format(self.feats_cat_list))
+            self.feats_num_list = [x for x in self.list_features if x not in self.feats_cat_list]
+            print("List Num feats: {}".format(len(self.feats_num_list)))
+            print("List Cat feats: {}".format(len(self.feats_cat_list), "blue"))
 
-        if "select" not in list_preprocesses:
-            self.df = pd.concat([self.df_num, self.df_cat], axis=1)
-            print(self.df.head())
-        return self.df
+        # BASIC
+        if self.process == "basic":
+            print("List post-Num feats: {}".format(len(self.feats_num_list)))
+
+            num_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_num_list))
+            ])
+
+            cat_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_cat_list)),
+                ('cat_encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))
+            ])
+
+            full_pipeline = FeatureUnion(transformer_list=[
+                ("num_pipeline", num_pipeline),
+                ("cat_pipeline", cat_pipeline)
+            ])
+
+            self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
+
+            # save pipeline
+            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+
+        # LOW-LEVEL or MFCC
+        if self.process == "lowlevel" or self.process == "mfcc":
+            sel_list = list_descr_handler(self.config["processing"][self.process][2]["params"]["descriptorNames"])
+            self.feats_num_list = feats_selector_list(self.feats_num_list, sel_list)
+            print("List post-Num feats: {}".format(len(self.feats_num_list)))
+
+            num_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_num_list))
+            ])
+
+            cat_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_cat_list)),
+                ('cat_encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))
+            ])
+
+            full_pipeline = FeatureUnion(transformer_list=[
+                ("num_pipeline", num_pipeline),
+                ("cat_pipeline", cat_pipeline)
+            ])
+
+            self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
+
+            # save pipeline
+            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+
+        # NOBANDS
+        if self.process == "nobands":
+            sel_list = list_descr_handler(self.config["processing"][self.process][2]["params"]["descriptorNames"])
+            feats_rem_list = feats_selector_list(self.df_feats, sel_list)
+            self.feats_num_list = [x for x in self.feats_num_list if x not in feats_rem_list]
+            print("List post-Num feats: {}".format(len(self.feats_num_list)))
+
+            num_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_num_list))
+            ])
+
+            cat_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_cat_list)),
+                ('cat_encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))
+            ])
+
+            full_pipeline = FeatureUnion(transformer_list=[
+                ("num_pipeline", num_pipeline),
+                ("cat_pipeline", cat_pipeline)
+            ])
+
+            self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
+
+            # save pipeline
+            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+
+        # NORMALIZED
+        if self.process == "normalized":
+            print("List post-Num feats: {}".format(len(self.feats_num_list)))
+            num_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_num_list)),
+                ('minmax_scaler', MinMaxScaler())
+            ])
+
+            cat_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_cat_list)),
+                ('cat_encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))
+            ])
+
+            full_pipeline = FeatureUnion(transformer_list=[
+                ("num_pipeline", num_pipeline),
+                ("cat_pipeline", cat_pipeline)
+            ])
+
+            self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
+
+            # save pipeline
+            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+
+
+        # GAUSSIANIZED
+        if self.process == "gaussianized":
+            gauss_list = list_descr_handler(self.config["processing"][self.process][3]["params"]["descriptorNames"])
+            feats_num_gauss_list = feats_selector_list(self.feats_num_list, gauss_list)
+            feats_num_no_gauss_list = [x for x in self.feats_num_list if x not in feats_num_gauss_list]
+
+            print("List post-Num feats: {}".format(len(self.feats_num_list)))
+            print("List post-Num-Gauss feats: {}".format(len(feats_num_gauss_list)))
+
+            num_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_num_list)),
+                ('minmax_scaler', MinMaxScaler()),
+            ])
+
+            num_gauss_pipeline = Pipeline([
+                ('selector', DataFrameSelector(feats_num_gauss_list)),
+                ('gaussianizer', QuantileTransformer(n_quantiles=1000))
+            ])
+            cat_pipeline = Pipeline([
+                ('selector', DataFrameSelector(self.feats_cat_list)),
+                ('cat_encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))
+            ])
+
+            full_pipeline = FeatureUnion(transformer_list=[
+                ("num_pipeline", num_pipeline),
+                ("gauss_pipeline", num_gauss_pipeline),
+                ("cat_pipeline", cat_pipeline)
+            ])
+
+            self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
+
+            # save pipeline
+            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+
+        # # remove unnecessary features
+        # if self.config["processing"][self.process] == "basic":
+        #
+        #
+        #
+        # if self.process == ""
+
+        # for item in self.config["processing"][self.process]:
+        #     if item["transfo"] == "remove":
+        #         print(colored("Proccessing --> REMOVE", "yellow"))
+        #         # print(item["params"])
+        #         remove_list = list_descr_handler(item["params"]["descriptorNames"])
+        #         print(remove_list)
+        #         self.df = descr_remover(self.df, remove_list)
+        #         print("items removed related to: {}".format(remove_list))
+        #
+        # for item in self.config["processing"][self.process]:
+        #     if item["transfo"] == "enumerate":
+        #         print(colored("Proccessing --> ENUMERATE", "yellow"))
+        #         enumerate_list = list_descr_handler(item["params"]["descriptorNames"])
+        #         print(enumerate_list)
+        #         self.df_num, self.df_cat = descr_enumerator(self.df, enumerate_list,
+        #                                                     exports_path=self.exports_path,
+        #                                                     mode=self.mode)
+        #         print("items enumerated related to: {}".format(enumerate_list))
+        #
+        # for item in self.config["processing"][self.process]:
+        #     if item["transfo"] == "normalize":
+        #         print(colored("Proccessing --> NORMALIZE", "yellow"))
+        #         self.df_num = descr_normalizing(feats_data=self.df_num,
+        #                                         processing=item,
+        #                                         config=self.config,
+        #                                         exports_path=self.exports_path,
+        #                                         train_process=self.process,
+        #                                         mode=self.mode
+        #                                         )
+        #
+        # for item in self.config["processing"][self.process]:
+        #     if item["transfo"] == "gaussianize":
+        #         print(colored("Proccessing --> GAUSSIANIZE", "yellow"))
+        #         self.df_num = descr_gaussianizing(feats_data=self.df_num,
+        #                                           processing=item,
+        #                                           config=self.config,
+        #                                           exports_path=self.exports_path,
+        #                                           train_process=self.process,
+        #                                           mode=self.mode
+        #                                           )
+        #
+        # for item in self.config["processing"][self.process]:
+        #     if item["transfo"] == "select":
+        #         print(colored("Proccessing --> SELECT", "yellow"))
+        #         select_list = list_descr_handler(item["params"]["descriptorNames"])
+        #         print(select_list)
+        #         self.df_num = descr_selector(self.df_num, select_list)
+        #         print(self.df_num)
+        #         print("items selected related to: {}".format(select_list))
+        #         self.df = self.df_num
+        #         print(self.df)
+        #
+        # if "select" not in list_preprocesses:
+        #     self.df = pd.concat([self.df_num, self.df_cat], axis=1)
+        #     print(self.df.head())
+
+        return self.feats_prepared
+
+
+# Create a class to select numerical or categorical columns
+class DataFrameSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, attribute_names):
+        self.attribute_names = attribute_names
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return X[self.attribute_names].values

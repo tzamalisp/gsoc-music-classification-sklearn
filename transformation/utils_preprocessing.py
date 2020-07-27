@@ -50,6 +50,16 @@ def list_descr_handler(descr_list):
     return keys_list_handle
 
 
+def cleaner(df, config):
+    print("Cleaning process..")
+    cleaning_columns_list = config["excludedDescriptors"]
+    cleaning_columns_list = list_descr_handler(cleaning_columns_list)
+    print("Cleaner for columns: {}".format(cleaning_columns_list))
+    df = descr_remover(df, cleaning_columns_list)
+    print("Shape of the df after the data cleaning: \n{}".format(df.shape))
+    return df
+
+
 def descr_remover(df, descr_remove_list):
     """
 
@@ -57,6 +67,7 @@ def descr_remover(df, descr_remove_list):
     :param descr_remove_list:
     :return:
     """
+    print("Removing unnecessary features process..")
     columns_list = list(df.columns)
     columns_del_list = []
     for item in descr_remove_list:
@@ -158,3 +169,22 @@ def descr_handling(df, processing, exports_path, mode):
         print("items selected related to: {}".format(select_list))
         print()
     return df
+
+
+def feats_selector_list(df_feats_columns, feats_select_list):
+    """
+
+    :param df:
+    :param descr_remove_list:
+    :return:
+    """
+    columns_list = list(df_feats_columns)
+    columns_select_list = []
+    counter_feats = 0
+    for item in feats_select_list:
+        for sel_item in columns_list:
+            if re.search(item, sel_item):
+                columns_select_list.append(sel_item)
+                counter_feats += 1
+    print("features selected: {}".format(counter_feats))
+    return columns_select_list

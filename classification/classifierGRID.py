@@ -39,8 +39,8 @@ class TrainGridClassifier:
 
             print("CLASSIFIER", tr_process["classifier"])
             # transformation of the data
-            X_transformed = Transform(config=self.config,
-                                      df=self.X,
+            features_prepared = Transform(config=self.config,
+                                      df_feats=self.X,
                                       process=tr_process["preprocess"],
                                       exports_path=self.exports_path,
                                       mode="train").post_processing()
@@ -72,9 +72,9 @@ class TrainGridClassifier:
                                 verbose=self.config["grid_verbose"]
                                 )
 
-            print(colored("Shape of X before train: {}".format(X_transformed.shape), "green"))
+            print(colored("Shape of X before train: {}".format(features_prepared.shape), "green"))
             print("Fitting the data to the model:")
-            gsvc.fit(X_transformed, self.y)
+            gsvc.fit(features_prepared, self.y)
 
             # print(gsvc.cv_results_["params"])
             print(gsvc.best_score_)

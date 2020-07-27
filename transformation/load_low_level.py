@@ -21,8 +21,6 @@ class FeaturesDf:
         self.df_feats_tracks = pd.DataFrame()
         self.df_feats_label = pd.DataFrame()
 
-        self.create_low_level_df()
-
     def create_low_level_df(self):
         """
         Creates the low-level DataFrame. Cleans also the low-level data from the unnecessary features before creating
@@ -41,8 +39,6 @@ class FeaturesDf:
             except Exception as e:
                 print("Exception occurred in loading file:", e)
             # remove unnecessary features data
-            # if 'metadata' in data_feats_item:
-            #     del data_feats_item['metadata']
             try:
                 if 'beats_position' in data_feats_item['rhythm']:
                     del data_feats_item['rhythm']['beats_position']

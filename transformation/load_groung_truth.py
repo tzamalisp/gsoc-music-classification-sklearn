@@ -2,6 +2,7 @@ import os
 import yaml
 import pandas as pd
 from pprint import pprint
+import random
 from utils import load_yaml, FindCreateDirectory
 from transformation.load_low_level import FeaturesDf
 
@@ -54,11 +55,8 @@ class GroundTruthLoad:
         self.train_class = ""
         self.dataset_dir = ""
         self.tracks = []
-        self.df_tracks = pd.DataFrame()
-        self.df_tracks_shuffled = pd.DataFrame()
 
         self.load_local_ground_truth()
-        # self.create_df_tracks()
 
     def load_local_ground_truth(self):
         """
@@ -90,6 +88,8 @@ class GroundTruthLoad:
         tracks_list = []
         for track, label in self.labeled_tracks.items():
             tracks_list.append((track, label))
+        random.seed(a=self.config.get("random_seed"))
+        random.shuffle(tracks_list)
         return tracks_list
 
     def check_ground_truth_data(self):
@@ -145,10 +145,12 @@ class DatasetDFCreator:
     def __init__(self, config, tracks_list, train_class):
         self.config = config
         self.tracks_list = tracks_list
+        self.train_class = train_class
         self.dataset_dir = ""
         self.class_dir = ""
-        self.train_class = train_class
         self.df_tracks = pd.DataFrame()
+        self.df_feats = pd.DataFrame()
+        self.y = []
 
     def create_df_tracks(self):
         """
@@ -206,20 +208,21 @@ class DatasetDFCreator:
                 tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
                 self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}_shuffled.csv".format(self.train_class)))
             else:
-                print("No directory to export tracks to csv is specified in the configuration file.")
+                print("No directory to export tracks to CSV is specified in the configuration file.")
             print("DF INFO:")
             print(self.df_tracks.info())
             print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)
 
-            df_full = FeaturesDf(df_tracks=self.df_tracks,
-                                 train_class=self.train_class,
-                                 path_low_level=path_low_level,
-                                 config=self.config
-                                 ).export_tracks_feats_df()
+            self.df_feats = FeaturesDf(df_tracks=self.df_tracks,
+                                       train_class=self.train_class,
+                                       path_low_level=path_low_level, config=self.config
+                                       ).create_low_level_df()
 
-            return df_full
+            self.y = self.df_tracks[self.train_class].values
+
+            return self.df_feats, self.y, self.df_tracks["track"].values
         else:
-            return None
+            return None, None, None
 
 
 if __name__ == "__main__":
@@ -233,7 +236,7 @@ if __name__ == "__main__":
         df_fg_data = gt_data.export_gt_tracks()
         train_class = gt_data.export_train_class()
         # print("DF_tracks:")
-        # print(df_fg_data.head())
+        print(df_fg_data.head())
         # print()
         # print("CLASS:", train_class)
         # print()

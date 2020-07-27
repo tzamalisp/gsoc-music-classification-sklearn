@@ -38,15 +38,15 @@ class ClassificationTask:
             best_model = json.load(best_model_file)
 
         print(best_model)
-
-        clf_model = TrainClassifier(classifier=self.classifier, params=best_model["params"]).model()
-        print("Best model loaded..")
-        fold_evaluation(config=self.config, clf=clf_model,
-                        n_fold=best_model["n_fold"],
-                        X_array_list=self.X, y=self.y,
-                        class_name=self.train_class,
-                        tracks=self.tracks,
-                        process=best_model["preprocessing"],
-                        exports_path=self.exports_path
-                        )
+        #
+        # clf_model = TrainClassifier(classifier=self.classifier, params=best_model["params"]).model()
+        # print("Best model loaded..")
+        # fold_evaluation(config=self.config, clf=clf_model,
+        #                 n_fold=best_model["n_fold"],
+        #                 X_array_list=self.X, y=self.y,
+        #                 class_name=self.train_class,
+        #                 tracks=self.tracks,
+        #                 process=best_model["preprocessing"],
+        #                 exports_path=self.exports_path
+        #                 )
 

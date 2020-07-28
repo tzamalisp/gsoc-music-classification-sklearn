@@ -6,7 +6,7 @@ from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from transformation.load_low_level import FeaturesDf
 from transformation.utils_preprocessing import flatten_dict_full
 from transformation.transform import Transform
-from classification.transform_predictions import TransformPredictions
+from transformation.transform_predictions import TransformPredictions
 
 class Predict:
     def __init__(self, config, track_low_level, class_name):

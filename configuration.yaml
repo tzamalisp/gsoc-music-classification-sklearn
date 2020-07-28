@@ -100,7 +100,7 @@ train_kind: grid
 k_fold_apply: True
 k_fold: 5
 k_fold_shuffle: False
-k_fold_random_seed: 1
+
 # GRID ML SETTINGS
 #
 pca_n_components: .95

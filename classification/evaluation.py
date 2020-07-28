@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -17,27 +18,37 @@ from transformation.utils_preprocessing import flatten_dict_full
 from classification.report_files_export import export_report
 
 
-def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, process, exports_path):
+def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_path):
     print(colored("Folding..", "yellow"))
     print(colored("n_fold: {}".format(n_fold), "cyan"))
     print(colored("Sample of shuffled tracks tracks:", "cyan"))
     pprint(tracks[:5])
-    # Train the classifier with K-Fold cross-validation
+
+    # load best model
+    load_model_params_path = os.path.join(exports_path, "best_model_{}.json".format(class_name))
+    with open(load_model_params_path) as model_params_file:
+        model_params_data = json.load(model_params_file)
+    
+    print("Best model preprocessing step: {}".format(process))
+    preprocessing_step = model_params_data["preprocessing"]
+    clf = joblib.load(os.path.join(exports_path, "models", "model_grid_{}.pkl".format(process)))
+    print("Best model loaded.")
+
+    # inner with K-Fold cross-validation declaration
     random_seed = None
-    # shuffle = config["k_fold_shuffle"]
-    shuffle_f_fold = False
-    if shuffle_f_fold is True:
-        random_seed = config["k_fold_random_seed"]
-    elif shuffle_f_fold is False:
+    shuffle = config["k_fold_shuffle"]
+    if shuffle is True:
+        random_seed = config["random_seed"]
+    elif shuffle is False:
         random_seed = None
     print("Fitting the data to the classifier with K-Fold cross-validation..")
-    kf = KFold(n_splits=n_fold,
-               shuffle=shuffle_f_fold,
-               random_state=random_seed
-               )
+    inner_cv = KFold(n_splits=n_fold,
+                     shuffle=shuffle,
+                     random_state=random_seed
+                     )
     print()
     print()
-    print(colored("Type of X: {}".format(type(X_array_list)), "cyan"))
+    print(colored("Type of X: {}".format(type(X)), "cyan"))
     print(colored("Type of y: {}".format(type(y)), "cyan"))
     # tracks_fold_indexing = []
     tracks_fold_indexing_dict = {}
@@ -45,16 +56,16 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
     print(tracks[4])
 
     # transformation of the data
-    X_transformed = Transform(config=config,
-                              df=X_array_list,
-                              process=process,
-                              exports_path=exports_path,
-                              mode="train").post_processing()
+    features_prepared = Transform(config=config,
+                                  df_feats=X,
+                                  process=process,
+                                  exports_path=exports_path).post_processing()
+    print("features prepared shape: {}".format(features_prepared.shape))
 
     accuracy_model = []
     predictions_df_list = []
     fold_number = 0
-    for train_index, test_index in kf.split(X_transformed):
+    for train_index, test_index in inner_cv.split(features_prepared):
         print("Fold: {}".format(fold_number))
         # print("TRAIN INDEX: ", train_index)
         print("first test index element: {} - last test index element: {}".format(test_index[0], test_index[-1]))
@@ -64,128 +75,132 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
 
         tracks_count = 0
         tracks_list = []
-        for index in test_index:
-            # track = df_shuffled["folder_name"].iloc[index]
-            track = tracks[index][0]
+        for track in test_index:
+            # print(tracks[test_index])
             # print(track)
             tracks_fold_indexing_dict[track] = fold_number
-            tracks_list.append(tracks[index][0])
+            tracks_list.append(tracks[test_index])
             tracks_count += 1
         print(colored("Tracks indexed to the specific fold: {}".format(tracks_count), "cyan"))
+        pprint(tracks_list)
+    #
+    #     X_train, X_test = features_prepared[train_index], features_prepared[test_index]
+    #     y_train, y_test = y[train_index], y[test_index]
+    #     # Train the model
+    #     clf.fit(X_train, y_train)
+    #     print("Classifier classes: {}".format(clf.classes_))
+    #
+    #     pred = clf.predict(X_test)
+    #     df_pred = pd.DataFrame(data=pred, index=test_index, columns=["predictions"])
+    #     print(type(pred))
+    #     print(pred.shape)
+    #
+    #     pred_prob = clf.predict_proba(X_test)
+    #     df_pred_prob = pd.DataFrame(data=pred_prob, index=test_index, columns=clf.classes_)
+    #     # tracks df
+    #     df_tracks = pd.DataFrame(data=tracks_list, index=test_index, columns=["track"])
+    #
+    #     # y_test series
+    #     y_test_series = pd.DataFrame(data=y_test, columns=[class_name])
+    #
+    #     # concatenate dfs
+    #     df_pred_general = pd.concat([df_tracks, df_pred_prob, df_pred, y_test_series], axis=1, ignore_index=False)
+    #     print(df_pred_general.head())
+    #     # predictions_all_df.append(df_pred_general, ignore_index=True)
+    #     predictions_df_list.append(df_pred_general)
+    #     # Append to accuracy_model the accuracy of the model
+    #     accuracy_model.append(accuracy_score(y_test, clf.predict(X_test), normalize=True) * 100)
+    #     fold_number += 1
+    #
+    # print()
+    # print()
+    # # concatenate predictions dfs
+    # print(colored("DF Predictions all:", "cyan"))
+    # df_predictions = pd.concat(predictions_df_list)
+    # print(df_predictions.head())
+    # print("Info:")
+    # print(df_predictions.info())
+    # # save predictions df
+    # df_predictions.to_csv(os.path.join(exports_path, "dataset", "predictions_{}.csv".format(class_name)))
+    # print()
+    # # ACCURACIES
+    # print(colored("Accuracies in each fold: {}".format(accuracy_model), "cyan"))
+    # print(colored("Mean of accuracies: {}".format(np.mean(accuracy_model)), "cyan"))
+    # print(colored("Standard Deviation of accuracies: {}".format(np.std(accuracy_model)), "cyan"))
+    # accuracies_export = "Accuracies in each fold: {} \nMean of accuracies: {} \nStandard Deviation of accuracies: {}"\
+    #     .format(accuracy_model, np.mean(accuracy_model), np.std(accuracy_model))
+    # export_report(config=config,
+    #               name="Accuracies results",
+    #               report=accuracies_export,
+    #               filename="accuracies_results",
+    #               train_class=class_name,
+    #               exports_path=exports_path)
+    #
+    # # Visualize accuracy for each iteration
+    # list_folds = []
+    # counter_folds = 0
+    # for accuracy in accuracy_model:
+    #     list_folds.append("Fold{}".format(counter_folds))
+    #     counter_folds += 1
+    # print("Exporting accuracies distribution to plot file..")
+    # scores = pd.DataFrame(accuracy_model, columns=['Scores'])
+    # sns.set(style="white", rc={"lines.linewidth": 3})
+    # sns.barplot(x=list_folds, y="Scores", data=scores)
+    # plt.savefig(os.path.join(exports_path, "images", "accuracies_distribution.png"))
+    # sns.set()
+    # plt.close()
+    # print("Plot saved successfully.")
+    #
+    # # Folded Tracks Dictionary
+    # print(colored("Folded Tracks Dictionary"))
+    # # print("Dictionary:")
+    # # pprint(tracks_fold_indexing_dict)
+    # print("length of keys:", len(tracks_fold_indexing_dict.keys()))
+    # print("Saving folded dataset..")
+    # dataset_path = os.path.join(exports_path, "dataset",  "{}.yaml".format(class_name))
+    # with open(dataset_path, 'w') as file:
+    #     folded_dataset = yaml.dump(tracks_fold_indexing_dict, file)
+    # print(colored("Folded dataset written successfully to disk.", "cyan"))
+    #
+    # print()
+    # print(colored("Evaluation Reports:", "cyan"))
+    # # CONFUSION MATRIX
+    # print("Confusion Matrix:")
+    # cm = confusion_matrix(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"])
+    # # cm_normalized = (cm / cm.astype(np.float).sum(axis=1) * 100)
+    # print(colored("Regular:", "blue"))
+    # print(colored(cm, "blue"))
+    # print(colored("Normalized:", "yellow"))
+    # # print(colored(cm_normalized, "yellow"))
+    # cm_all = "Actual instances\n{}\n\nNormalized\n{}".format(cm)
+    # export_report(config=config,
+    #               name="Confusion Matrix",
+    #               report=cm_all,
+    #               filename="confusion_matrix",
+    #               train_class=class_name,
+    #               exports_path=exports_path)
+    #
+    # print()
+    # print("Classification Report:")
+    # cr = classification_report(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"])
+    # print(cr)
+    # export_report(config=config,
+    #               name="Classification Report",
+    #               report=cr,
+    #               filename="classification_report",
+    #               train_class=class_name,
+    #               exports_path=exports_path)
 
-        X_train, X_test = X_transformed.iloc[train_index], X_transformed.iloc[test_index]
-        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-        # Train the model
-        clf.fit(X_train, y_train)
-        print("Classifier classes: {}".format(clf.classes_))
-
-        pred = clf.predict(X_test)
-        df_pred = pd.DataFrame(data=pred, index=test_index, columns=["predictions"])
-        print(type(pred))
-        print(pred.shape)
-
-        pred_prob = clf.predict_proba(X_test)
-        df_pred_prob = pd.DataFrame(data=pred_prob, index=test_index, columns=clf.classes_)
-        # tracks df
-        df_tracks = pd.DataFrame(data=tracks_list, index=test_index, columns=["track"])
-        # concatenate dfs
-        df_pred_general = pd.concat([df_tracks, df_pred_prob, df_pred, y_test], axis=1, ignore_index=False)
-        print(df_pred_general.head())
-        # predictions_all_df.append(df_pred_general, ignore_index=True)
-        predictions_df_list.append(df_pred_general)
-        # Append to accuracy_model the accuracy of the model
-        accuracy_model.append(accuracy_score(y_test, clf.predict(X_test), normalize=True) * 100)
-        fold_number += 1
-
-    print()
-    print()
-    # concatenate predictions dfs
-    print(colored("DF Predictions all:", "cyan"))
-    df_predictions = pd.concat(predictions_df_list)
-    print(df_predictions.head())
-    print("Info:")
-    print(df_predictions.info())
-    # save predictions df
-    df_predictions.to_csv(os.path.join(exports_path, "dataset", "predictions_{}.csv".format(class_name)))
-    print()
-    # ACCURACIES
-    print(colored("Accuracies in each fold: {}".format(accuracy_model), "cyan"))
-    print(colored("Mean of accuracies: {}".format(np.mean(accuracy_model)), "cyan"))
-    print(colored("Standard Deviation of accuracies: {}".format(np.std(accuracy_model)), "cyan"))
-    accuracies_export = "Accuracies in each fold: {} \nMean of accuracies: {} \nStandard Deviation of accuracies: {}"\
-        .format(accuracy_model, np.mean(accuracy_model), np.std(accuracy_model))
-    export_report(config=config,
-                  name="Accuracies results",
-                  report=accuracies_export,
-                  filename="accuracies_results",
-                  train_class=class_name,
-                  exports_path=exports_path)
-
-    # Visualize accuracy for each iteration
-    list_folds = []
-    counter_folds = 0
-    for accuracy in accuracy_model:
-        list_folds.append("Fold{}".format(counter_folds))
-        counter_folds += 1
-    print("Exporting accuracies distribution to plot file..")
-    scores = pd.DataFrame(accuracy_model, columns=['Scores'])
-    sns.set(style="white", rc={"lines.linewidth": 3})
-    sns.barplot(x=list_folds, y="Scores", data=scores)
-    plt.savefig(os.path.join(exports_path, "images", "accuracies_distribution.png"))
-    sns.set()
-    plt.close()
-    print("Plot saved successfully.")
-
-    # Folded Tracks Dictionary
-    print(colored("Folded Tracks Dictionary"))
-    # print("Dictionary:")
-    # pprint(tracks_fold_indexing_dict)
-    print("length of keys:", len(tracks_fold_indexing_dict.keys()))
-    print("Saving folded dataset..")
-    dataset_path = os.path.join(exports_path, "dataset",  "{}.yaml".format(class_name))
-    with open(dataset_path, 'w') as file:
-        folded_dataset = yaml.dump(tracks_fold_indexing_dict, file)
-    print(colored("Folded dataset written successfully to disk.", "cyan"))
-
-    print()
-    print(colored("Evaluation Reports:", "cyan"))
-    # CONFUSION MATRIX
-    print("Confusion Matrix:")
-    cm = confusion_matrix(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"])
-    cm_normalized = (cm / cm.astype(np.float).sum(axis=1) * 100)
-    print(colored("Regular:", "blue"))
-    print(colored(cm, "blue"))
-    print(colored("Normalized:", "yellow"))
-    print(colored(cm_normalized, "yellow"))
-    cm_all = "Actual instances\n{}\n\nNormalized\n{}".format(cm, cm_normalized)
-    export_report(config=config,
-                  name="Confusion Matrix",
-                  report=cm_all,
-                  filename="confusion_matrix",
-                  train_class=class_name,
-                  exports_path=exports_path)
-
-    print()
-    print("Classification Report:")
-    cr = classification_report(y_true=df_predictions[class_name], y_pred=df_predictions["predictions"])
-    print(cr)
-    export_report(config=config,
-                  name="Classification Report",
-                  report=cr,
-                  filename="classification_report",
-                  train_class=class_name,
-                  exports_path=exports_path)
-
-    # save the model
-    models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
-    model_save_path = os.path.join(models_path, "model.pkl")
-    joblib.dump(clf, model_save_path)
-
+    # # save the model
+    # models_path = FindCreateDirectory(os.path.join(exports_path, "models")).inspect_directory()
+    # model_save_path = os.path.join(models_path, "model.pkl")
+    # joblib.dump(clf, model_save_path)
+    #
     # train with all the data
     print(colored("Evaluation to the whole dataset..", "cyan"))
-    clf.fit(X_transformed, y)
-    predictions_proba_all = clf.predict_proba(X_transformed)
-    predictions_all = clf.predict(X_transformed)
+    clf.fit(features_prepared, y)
+    predictions_proba_all = clf.predict_proba(features_prepared)
+    predictions_all = clf.predict(features_prepared)
     print(colored("Confusion Matrix All:", "magenta"))
     cm_all = confusion_matrix(y_true=y, y_pred=predictions_all)
     print(cm_all)
@@ -196,24 +211,22 @@ def fold_evaluation(config, clf, n_fold, X_array_list, y, class_name, tracks, pr
     cr_all = classification_report(y_true=y, y_pred=predictions_all)
     print(cr_all)
 
-
-
-    # predict a single instance
-    print("predict a single instance")
-    # "Idle Up" by Dousk & JMP - danceable
-    response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
-    track = response.json()
-    # data dictionary transformed to a fully flattened dictionary
-    track_feats = dict(flatten_dict_full(track))
-    list_track = []
-    list_track.append(track_feats)
-    df_track = pd.DataFrame(data=list_track, columns=list(list_track[0].keys()))
-    print(df_track)
-    print(len(df_track.columns))
-    # X_transformed = Transform(config=config,
-    #                           df=df_track,
-    #                           process=process,
-    #                           exports_path=exports_path,
-    #                           mode="predict"
-    #                           ).post_processing()
-    # print(clf.predict(X_transformed))
+    # # predict a single instance
+    # print("predict a single instance")
+    # # "Idle Up" by Dousk & JMP - danceable
+    # response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
+    # track = response.json()
+    # # data dictionary transformed to a fully flattened dictionary
+    # track_feats = dict(flatten_dict_full(track))
+    # list_track = []
+    # list_track.append(track_feats)
+    # df_track = pd.DataFrame(data=list_track, columns=list(list_track[0].keys()))
+    # print(df_track)
+    # print(len(df_track.columns))
+    # # X_transformed = Transform(config=config,
+    # #                           df=df_track,
+    # #                           process=process,
+    # #                           exports_path=exports_path,
+    # #                           mode="predict"
+    # #                           ).post_processing()
+    # # print(clf.predict(X_transformed))

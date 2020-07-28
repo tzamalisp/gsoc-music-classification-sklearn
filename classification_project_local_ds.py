@@ -15,6 +15,7 @@ def classification_project():
     print("LOAD GROUND TRUTH")
     for gt_file in gt_files_list:
         gt_data = GroundTruthLoad(config_data, gt_file)
+        # tracks shuffled and exported
         tracks_listed_shuffled = gt_data.export_gt_tracks()
         print(colored("Type of exported GT data exported: {}".format(type(tracks_listed_shuffled)), "green"))
         class_name = gt_data.export_train_class()

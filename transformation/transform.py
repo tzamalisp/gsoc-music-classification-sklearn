@@ -20,12 +20,11 @@ except AttributeError:
 
 
 class Transform:
-    def __init__(self, config, df_feats, process, exports_path, mode):
+    def __init__(self, config, df_feats, process, exports_path):
         self.config = config
         self.df_feats = df_feats
         self.process = process
         self.exports_path = exports_path
-        self.mode = mode
 
         self.list_features = []
         self.feats_cat_list = []

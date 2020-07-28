@@ -42,8 +42,7 @@ class TrainGridClassifier:
             features_prepared = Transform(config=self.config,
                                           df_feats=self.X,
                                           process=tr_process["preprocess"],
-                                          exports_path=self.exports_path,
-                                          mode="train").post_processing()
+                                          exports_path=self.exports_path).post_processing()
 
             # define the length of parameters
             parameters_grid = {'kernel': tr_process["kernel"],
@@ -56,7 +55,7 @@ class TrainGridClassifier:
             random_seed = None
             shuffle = self.config["k_fold_shuffle"]
             if shuffle is True:
-                random_seed = self.config["k_fold_random_seed"]
+                random_seed = self.config["random_seed"]
             elif shuffle is False:
                 random_seed = None
             print("Fitting the data to the classifier with K-Fold cross-validation..")
@@ -77,9 +76,10 @@ class TrainGridClassifier:
             gsvc.fit(features_prepared, self.y)
 
             # print(gsvc.cv_results_["params"])
-            print(gsvc.best_score_)
-            print(gsvc.best_estimator_)
-            print(gsvc.best_params_)
+            print("Results from each best preprocess training:")
+            print("Best score: {}".format(gsvc.best_score_))
+            print("Best estimator: {}".format(gsvc.best_estimator_))
+            print("Best parameters: {}".format(gsvc.best_params_))
             print("Counted evaluations in this GridSearch process: {}".format(len(gsvc.cv_results_["params"])))
 
             exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)

@@ -111,8 +111,7 @@ class ClassificationTaskManager:
             try:
                 task.run()
             except Exception as e:
-                log.error('Running task failed: %s' % e)
-            # task.run()
+                log.error(colored('Running task failed: {}'.format(e), "red"))
 
         end_time = time()
 

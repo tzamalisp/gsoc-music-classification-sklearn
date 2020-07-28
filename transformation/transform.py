@@ -174,16 +174,22 @@ class Transform:
 
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
             print("List post-Num-Gauss feats: {}".format(len(feats_num_gauss_list)))
+            print("List post-Num-No-Gauss feats: {}".format(len(feats_num_no_gauss_list)))
 
             num_pipeline = Pipeline([
-                ('selector', DataFrameSelector(self.feats_num_list)),
+                ('selector_num', DataFrameSelector(self.feats_num_list)),
                 ('minmax_scaler', MinMaxScaler()),
             ])
 
             num_gauss_pipeline = Pipeline([
-                ('selector', DataFrameSelector(feats_num_gauss_list)),
+                ('selector_gauss', DataFrameSelector(feats_num_gauss_list)),
                 ('gaussianizer', QuantileTransformer(n_quantiles=1000))
             ])
+
+            num_no_gauss_pipeline = ([
+                ('selector_no_gauss', DataFrameSelector(feats_num_no_gauss_list))
+            ])
+
             cat_pipeline = Pipeline([
                 ('selector', DataFrameSelector(self.feats_cat_list)),
                 ('cat_encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))

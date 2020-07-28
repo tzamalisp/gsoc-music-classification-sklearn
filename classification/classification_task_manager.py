@@ -97,7 +97,7 @@ class ClassificationTaskManager:
 
         training_processes = TrainingProcesses(self.config).training_processes()
         print(colored("Classifiers detected: {}".format(self.config["classifiers"].keys()), "green"))
-        for classifier in self.config['classifiers'].keys():
+        for classifier in self.config["classifiers"].keys():
             print("Before Classification task: ", classifier)
             task = ClassificationTask(config=self.config,
                                       classifier=classifier,

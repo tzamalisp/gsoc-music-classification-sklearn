@@ -40,10 +40,10 @@ class TrainGridClassifier:
             print("CLASSIFIER", tr_process["classifier"])
             # transformation of the data
             features_prepared = Transform(config=self.config,
-                                      df_feats=self.X,
-                                      process=tr_process["preprocess"],
-                                      exports_path=self.exports_path,
-                                      mode="train").post_processing()
+                                          df_feats=self.X,
+                                          process=tr_process["preprocess"],
+                                          exports_path=self.exports_path,
+                                          mode="train").post_processing()
 
             # define the length of parameters
             parameters_grid = {'kernel': tr_process["kernel"],

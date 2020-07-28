@@ -7,6 +7,7 @@ from classification.classification_task_manager import ClassificationTaskManager
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from transformation.load_groung_truth import DatasetDFCreator
 
+
 def classification_project():
     config_data = load_yaml("configuration.yaml")
     gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()

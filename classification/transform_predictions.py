@@ -29,15 +29,15 @@ class TransformPredictions:
         self.list_features = []
         self.feats_cat_list = []
         self.feats_num_list = []
-        self.df_cat = pd.DataFrame()
-        self.df_num = pd.DataFrame()
 
         self.feats_prepared = []
 
     def post_processing(self):
         print(colored("PROCESS: {}".format(self.process), "cyan"))
-        print(self.config["processing"][self.process])
         # list_preprocesses = []
+
+        print(self.df_feats)
+        print("Shape of DF:", self.df_feats.shape)
 
         self.list_features = list(self.df_feats.columns)
 
@@ -46,6 +46,7 @@ class TransformPredictions:
         # clean list
         print(colored("Cleaning..", "yellow"))
         cleaning_conf_list = list_descr_handler(self.config["excludedDescriptors"])
+        print("cleaning list:", cleaning_conf_list)
         feats_clean_list = feats_selector_list(self.df_feats.columns, cleaning_conf_list)
         self.list_features = [x for x in self.df_feats.columns if x not in feats_clean_list]
         print("List after cleaning some feats: {}".format(len(self.list_features), "blue"))
@@ -73,12 +74,14 @@ class TransformPredictions:
 
         # BASIC
         if self.process == "basic":
+            print(colored("Process doing: {}".format(self.process), "green"))
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
         # LOW-LEVEL or MFCC
         if self.process == "lowlevel" or self.process == "mfcc":
+            print(colored("Process doing: {}".format(self.process), "green"))
             sel_list = list_descr_handler(self.config["processing"][self.process][2]["params"]["descriptorNames"])
             self.feats_num_list = feats_selector_list(self.feats_num_list, sel_list)
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
@@ -87,6 +90,7 @@ class TransformPredictions:
 
         # NOBANDS
         if self.process == "nobands":
+            print(colored("Process doing: {}".format(self.process), "green"))
             sel_list = list_descr_handler(self.config["processing"][self.process][2]["params"]["descriptorNames"])
             feats_rem_list = feats_selector_list(self.df_feats, sel_list)
             self.feats_num_list = [x for x in self.feats_num_list if x not in feats_rem_list]
@@ -96,12 +100,14 @@ class TransformPredictions:
 
         # NORMALIZED
         if self.process == "normalized":
+            print(colored("Process doing: {}".format(self.process), "green"))
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
         # GAUSSIANIZED
         if self.process == "gaussianized":
+            print(colored("Process doing: {}".format(self.process), "green"))
             gauss_list = list_descr_handler(self.config["processing"][self.process][3]["params"]["descriptorNames"])
             feats_num_gauss_list = feats_selector_list(self.feats_num_list, gauss_list)
             feats_num_no_gauss_list = [x for x in self.feats_num_list if x not in feats_num_gauss_list]

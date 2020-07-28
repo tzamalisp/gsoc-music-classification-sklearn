@@ -18,19 +18,19 @@ class ClassificationTask:
 
     def run(self):
         # grid search train
-        # if self.config["train_kind"] == "grid":
-        #     grid_svm_train = TrainGridClassifier(config=self.config,
-        #                                          classifier=self.classifier,
-        #                                          class_name=self.train_class,
-        #                                          X=self.X,
-        #                                          y=self.y,
-        #                                          tr_processes=self.training_processes,
-        #                                          exports_path=self.exports_path
-        #                                          )
-        #     grid_svm_train.train_grid_search_clf()
-        #     grid_svm_train.export_best_classifier()
-        # elif self.classifier == "NN":
-        #     pass
+        if self.config["train_kind"] == "grid":
+            grid_svm_train = TrainGridClassifier(config=self.config,
+                                                 classifier=self.classifier,
+                                                 class_name=self.train_class,
+                                                 X=self.X,
+                                                 y=self.y,
+                                                 tr_processes=self.training_processes,
+                                                 exports_path=self.exports_path
+                                                 )
+            grid_svm_train.train_grid_search_clf()
+            grid_svm_train.export_best_classifier()
+        elif self.classifier == "NN":
+            pass
 
         # load best model
         best_model_name = "best_model_{}.json".format(self.train_class)

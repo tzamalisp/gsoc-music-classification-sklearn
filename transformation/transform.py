@@ -192,15 +192,16 @@ class Transform:
                 ('cat_encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))
             ])
 
-            full_pipeline = FeatureUnion(transformer_list=[
+            full_normalize_pipeline = FeatureUnion(transformer_list=[
                 ("num_pipeline", num_norm_pipeline),
                 ("cat_pipeline", cat_pipeline)
             ])
 
-            self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
+            self.feats_prepared = full_normalize_pipeline.fit_transform(self.df_feats)
             print("Feats prepared normalized shape: {}".format(self.feats_prepared.shape))
             # save pipeline
-            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            joblib.dump(full_normalize_pipeline,
+                        os.path.join(exports_dir, "full_normalize_pipeline_{}.pkl".format(self.process)))
             self.df_feats = pd.DataFrame(data=self.feats_prepared)
             columns = list(self.df_feats.columns)
             # print(columns)
@@ -214,79 +215,27 @@ class Transform:
             print(self.df_feats)
             print("Shape: {}".format(self.df_feats.shape))
 
+            feats_no_gauss_list = [x for x in new_feats_columns if x not in feats_num_gauss_list]
 
             num_gauss_pipeline = Pipeline([
                 ("gauss_sel_num", DataFrameSelector(feats_num_gauss_list)),
                 ("gauss_scaler", QuantileTransformer(n_quantiles=1000))
             ])
 
-            self.feats_prepared = num_gauss_pipeline.fit_transform(self.df_feats)
+            num_no_gauss_pipeline = Pipeline([
+                ("gauss_sel_num", DataFrameSelector(feats_no_gauss_list))
+            ])
+
+            full_gauss_pipeline = FeatureUnion(transformer_list=[
+                ("num_gauss_pipeline", num_gauss_pipeline),
+                ("num_no_gauss_pipeline", num_no_gauss_pipeline)
+            ])
+
+            self.feats_prepared = full_gauss_pipeline.fit_transform(self.df_feats)
 
             # save pipeline
-            joblib.dump(num_gauss_pipeline, os.path.join(exports_dir, "gauss_pipeline_{}.pkl".format(self.process)))
-
-        # # remove unnecessary features
-        # if self.config["processing"][self.process] == "basic":
-        #
-        #
-        #
-        # if self.process == ""
-
-        # for item in self.config["processing"][self.process]:
-        #     if item["transfo"] == "remove":
-        #         print(colored("Proccessing --> REMOVE", "yellow"))
-        #         # print(item["params"])
-        #         remove_list = list_descr_handler(item["params"]["descriptorNames"])
-        #         print(remove_list)
-        #         self.df = descr_remover(self.df, remove_list)
-        #         print("items removed related to: {}".format(remove_list))
-        #
-        # for item in self.config["processing"][self.process]:
-        #     if item["transfo"] == "enumerate":
-        #         print(colored("Proccessing --> ENUMERATE", "yellow"))
-        #         enumerate_list = list_descr_handler(item["params"]["descriptorNames"])
-        #         print(enumerate_list)
-        #         self.df_num, self.df_cat = descr_enumerator(self.df, enumerate_list,
-        #                                                     exports_path=self.exports_path,
-        #                                                     mode=self.mode)
-        #         print("items enumerated related to: {}".format(enumerate_list))
-        #
-        # for item in self.config["processing"][self.process]:
-        #     if item["transfo"] == "normalize":
-        #         print(colored("Proccessing --> NORMALIZE", "yellow"))
-        #         self.df_num = descr_normalizing(feats_data=self.df_num,
-        #                                         processing=item,
-        #                                         config=self.config,
-        #                                         exports_path=self.exports_path,
-        #                                         train_process=self.process,
-        #                                         mode=self.mode
-        #                                         )
-        #
-        # for item in self.config["processing"][self.process]:
-        #     if item["transfo"] == "gaussianize":
-        #         print(colored("Proccessing --> GAUSSIANIZE", "yellow"))
-        #         self.df_num = descr_gaussianizing(feats_data=self.df_num,
-        #                                           processing=item,
-        #                                           config=self.config,
-        #                                           exports_path=self.exports_path,
-        #                                           train_process=self.process,
-        #                                           mode=self.mode
-        #                                           )
-        #
-        # for item in self.config["processing"][self.process]:
-        #     if item["transfo"] == "select":
-        #         print(colored("Proccessing --> SELECT", "yellow"))
-        #         select_list = list_descr_handler(item["params"]["descriptorNames"])
-        #         print(select_list)
-        #         self.df_num = descr_selector(self.df_num, select_list)
-        #         print(self.df_num)
-        #         print("items selected related to: {}".format(select_list))
-        #         self.df = self.df_num
-        #         print(self.df)
-        #
-        # if "select" not in list_preprocesses:
-        #     self.df = pd.concat([self.df_num, self.df_cat], axis=1)
-        #     print(self.df.head())
+            joblib.dump(full_gauss_pipeline,
+                        os.path.join(exports_dir, "full_gauss_pipeline_{}.pkl".format(self.process)))
 
         return self.feats_prepared
 

@@ -69,13 +69,13 @@ class TransformPredictions:
             print("List Num feats: {}".format(len(self.feats_num_list)))
             print("List Cat feats: {}".format(len(self.feats_cat_list), "blue"))
 
-        # load pipeline
-        full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
-
         # BASIC
         if self.process == "basic":
             print(colored("Process doing: {}".format(self.process), "green"))
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
+
+            # load pipeline
+            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
@@ -85,6 +85,9 @@ class TransformPredictions:
             sel_list = list_descr_handler(self.config["processing"][self.process][2]["params"]["descriptorNames"])
             self.feats_num_list = feats_selector_list(self.feats_num_list, sel_list)
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
+
+            # load pipeline
+            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
@@ -96,12 +99,18 @@ class TransformPredictions:
             self.feats_num_list = [x for x in self.feats_num_list if x not in feats_rem_list]
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
 
+            # load pipeline
+            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
         # NORMALIZED
         if self.process == "normalized":
             print(colored("Process doing: {}".format(self.process), "green"))
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
+
+            # load pipeline
+            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
@@ -114,6 +123,9 @@ class TransformPredictions:
 
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
             print("List post-Num-Gauss feats: {}".format(len(feats_num_gauss_list)))
+
+            # load pipeline
+            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 

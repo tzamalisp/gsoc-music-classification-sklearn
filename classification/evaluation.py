@@ -39,7 +39,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     random_seed = None
     shuffle = config["k_fold_shuffle"]
     if shuffle is True:
-        random_seed = config["random_seed"]
+        random_seed = config["seed"]
     elif shuffle is False:
         random_seed = None
     print("Fitting the data to the classifier with K-Fold cross-validation..")

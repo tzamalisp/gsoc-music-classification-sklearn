@@ -2,11 +2,10 @@ import os
 import joblib
 import json
 import pandas as pd
-from utils import load_yaml, FindCreateDirectory, TrainingProcesses
-from transformation.load_low_level import FeaturesDf
+from utils import load_yaml
 from transformation.utils_preprocessing import flatten_dict_full
-from transformation.transform import Transform
 from transformation.transform_predictions import TransformPredictions
+
 
 class Predict:
     def __init__(self, config, track_low_level, class_name):
@@ -75,9 +74,9 @@ if __name__ == '__main__':
     # pprint(config_data)
 
     # "Idle Up" by Dousk & JMP - danceable
-    # response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
+    response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
     # "Shock the Monkey (Gorilla mix)" by Coal Chamber - danceable
-    response = requests.get('https://acousticbrainz.org/api/v1/34959b3b-634f-415e-8fb8-b47a8e27e0e5/low-level')
+    #  response = requests.get('https://acousticbrainz.org/api/v1/34959b3b-634f-415e-8fb8-b47a8e27e0e5/low-level')
 
     # "So Dear to My Heart" by Peggy Lee - not danceable
     # response = requests.get('https://acousticbrainz.org/api/v1/7fb1b586-017c-4a89-b15a-0bb837983108/low-level')

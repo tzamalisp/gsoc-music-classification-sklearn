@@ -55,7 +55,7 @@ class TrainGridClassifier:
             random_seed = None
             shuffle = self.config["k_fold_shuffle"]
             if shuffle is True:
-                random_seed = self.config["random_seed"]
+                random_seed = self.config["seed"]
             elif shuffle is False:
                 random_seed = None
             print("Fitting the data to the classifier with K-Fold cross-validation..")
@@ -68,7 +68,7 @@ class TrainGridClassifier:
                                 param_grid=parameters_grid,
                                 cv=inner_cv,
                                 n_jobs=self.config["parallel_jobs"],
-                                verbose=self.config["grid_verbose"]
+                                verbose=self.config["verbose"]
                                 )
 
             print(colored("Shape of X before train: {}".format(features_prepared.shape), "green"))

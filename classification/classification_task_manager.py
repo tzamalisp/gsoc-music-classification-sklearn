@@ -64,7 +64,7 @@ class ClassificationTaskManager:
         # logs
         self.logs_path = FindCreateDirectory(os.path.join(self.exports_path, "logs")).inspect_directory()
         # tracks
-        self.tracks_path = FindCreateDirectory(os.path.join(self.exports_path, "tracks_csv")).inspect_directory()
+        self.tracks_path = FindCreateDirectory(os.path.join(self.exports_path, "tracks_csv_format")).inspect_directory()
         # datasets
         self.dataset_path = FindCreateDirectory(os.path.join(self.exports_path, "dataset")).inspect_directory()
         # models
@@ -119,4 +119,6 @@ class ClassificationTaskManager:
         print(colored("Last evaluation took place at: {}".format(datetime.now()), "magenta"))
 
         # test duration
-        return end_time - start_time
+        time_duration = end_time - start_time
+        classification_time = round(time_duration / 60, 2)
+        return classification_time

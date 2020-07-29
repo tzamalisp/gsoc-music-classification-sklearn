@@ -124,10 +124,33 @@ class TransformPredictions:
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
             print("List post-Num-Gauss feats: {}".format(len(feats_num_gauss_list)))
 
-            # load pipeline
-            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            # load normalization pipeline
+            # full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            full_normalize_pipeline = joblib.load(os.path.join(exports_dir,
+                                                               "full_normalize_pipeline_{}.pkl".format(self.process)))
+            # normalize
+            self.feats_prepared = full_normalize_pipeline.transform(self.df_feats)
 
-            self.feats_prepared = full_pipeline.transform(self.df_feats)
+            # transform numpy array to pandas DF for guassianizing
+            self.df_feats = pd.DataFrame(data=self.feats_prepared)
+            columns = list(self.df_feats.columns)
+            # print(columns)
+            select_rename_list = columns[:len(self.feats_num_list)]
+            select_rename_list = self.feats_num_list
+            select_no_rename_list = columns[len(self.feats_num_list):]
+            print(select_no_rename_list)
+            new_feats_columns = select_rename_list + select_no_rename_list
+            self.df_feats.columns = new_feats_columns
+            print("Normalized Features DF:")
+            print(self.df_feats)
+            print("Shape: {}".format(self.df_feats.shape))
+            # feats_no_gauss_list = [x for x in new_feats_columns if x not in feats_num_gauss_list]
+
+            # load guassianization pipeline
+            full_gauss_pipeline = joblib.load(os.path.join(exports_dir,
+                                                           "full_gauss_pipeline_{}.pkl".format(self.process)))
+
+            self.feats_prepared = full_gauss_pipeline.transform(self.df_feats)
 
         return self.feats_prepared
 

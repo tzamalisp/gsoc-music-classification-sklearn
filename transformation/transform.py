@@ -61,7 +61,7 @@ class Transform:
             print("List after removing unnecessary feats: {}".format(len(self.list_features), "blue"))
 
         # enumerate list
-        print(colored("Removing unnecessary features..", "yellow"))
+        print(colored("Split numerical / categorical features..", "yellow"))
         if self.config["processing"][self.process][1]["transfo"] == "enumerate":
             enumerate_list = list_descr_handler(self.config["processing"][self.process][1]["params"]["descriptorNames"])
             self.feats_cat_list = feats_selector_list(self.list_features, enumerate_list)

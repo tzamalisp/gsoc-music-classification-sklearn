@@ -74,15 +74,14 @@ processing:
       - transfo: gaussianize  # QuantileTransformer
         params: { descriptorNames: ['lowlevel.*'] }
 
-#    mfcc:
-#      preprocess:
-#        # an MFCC only baseline
-#        - transfo: remove
-#          params: { descriptorNames: *unusedDescs }
-#        - transfo: enumerate
-#          params: { descriptorNames: *stringDescs }
-#        - transfo: select
-#          params: { descriptorNames: ['lowlevel.mfcc*'] }
+    mfcc:
+      # an MFCC only baseline
+      - transfo: remove
+        params: { descriptorNames: *unusedDescs }
+      - transfo: enumerate
+        params: { descriptorNames: *stringDescs }
+      - transfo: select
+        params: { descriptorNames: ['lowlevel.mfcc*'] }
 
 # gaia data
 gaia_imitation: False
@@ -128,8 +127,8 @@ grid_results_directory: grid_scores
 classifiers:
     svm:
         # first svm test combinations
-#        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
-        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized']
+        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized', 'mfcc' ]
+#        - preprocessing: [ 'basic', 'lowlevel', 'nobands', 'normalized', 'gaussianized']
           type: [ 'C-SVC' ]
           kernel: [ 'poly', 'RBF' ]
           C:     [ -5, -3, -1, 1, 3, 5, 7, 9, 11 ] # will actually be 2**x

@@ -10,6 +10,8 @@ from transformation.utils_preprocessing import cleaner, descr_remover, feats_sel
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, QuantileTransformer
 from sklearn.pipeline import FeatureUnion
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
 # avoid the module's method call deprecation
@@ -147,7 +149,7 @@ class Transform:
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
             num_pipeline = Pipeline([
                 ('selector', DataFrameSelector(self.feats_num_list)),
-                ('minmax_scaler', MinMaxScaler())
+                ('minmax_scaler', MinMaxScaler()),
             ])
 
             cat_pipeline = Pipeline([
@@ -176,18 +178,13 @@ class Transform:
             print("List post-Num-Gauss feats: {}".format(len(feats_num_gauss_list)))
             print("List post-Num-No-Gauss feats: {}".format(len(feats_num_no_gauss_list)))
 
-            num_pipeline = Pipeline([
-                ('selector_num', DataFrameSelector(self.feats_num_list)),
-                ('minmax_scaler', MinMaxScaler()),
-            ])
-
-            num_gauss_pipeline = Pipeline([
-                ('selector_gauss', DataFrameSelector(feats_num_gauss_list)),
-                ('gaussianizer', QuantileTransformer(n_quantiles=1000))
-            ])
-
-            num_no_gauss_pipeline = ([
-                ('selector_no_gauss', DataFrameSelector(feats_num_no_gauss_list))
+            # t = [('minmax', MinMaxScaler(), self.feats_num_list),
+            #      ('gauss', QuantileTransformer(n_quantiles=1000), feats_num_gauss_list)]
+            # col_transform = ColumnTransformer(transformers=t)
+            # print(colored("normalize..", "cyan"))
+            num_norm_pipeline = Pipeline([
+                ("selector_num", DataFrameSelector(self.feats_num_list)),
+                ("minmax_scaler", MinMaxScaler())
             ])
 
             cat_pipeline = Pipeline([
@@ -196,15 +193,37 @@ class Transform:
             ])
 
             full_pipeline = FeatureUnion(transformer_list=[
-                ("num_pipeline", num_pipeline),
-                ("gauss_pipeline", num_gauss_pipeline),
+                ("num_pipeline", num_norm_pipeline),
                 ("cat_pipeline", cat_pipeline)
             ])
 
             self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
-
+            print("Feats prepared normalized shape: {}".format(self.feats_prepared.shape))
             # save pipeline
             joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            self.df_feats = pd.DataFrame(data=self.feats_prepared)
+            columns = list(self.df_feats.columns)
+            # print(columns)
+            select_rename_list = columns[:len(self.feats_num_list)]
+            select_rename_list = self.feats_num_list
+            select_no_rename_list = columns[len(self.feats_num_list):]
+            print(select_no_rename_list)
+            new_feats_columns = select_rename_list + select_no_rename_list
+            self.df_feats.columns = new_feats_columns
+            print("Normalized Features DF:")
+            print(self.df_feats)
+            print("Shape: {}".format(self.df_feats.shape))
+
+
+            num_gauss_pipeline = Pipeline([
+                ("gauss_sel_num", DataFrameSelector(feats_num_gauss_list)),
+                ("gauss_scaler", QuantileTransformer(n_quantiles=1000))
+            ])
+
+            self.feats_prepared = num_gauss_pipeline.fit_transform(self.df_feats)
+
+            # save pipeline
+            joblib.dump(num_gauss_pipeline, os.path.join(exports_dir, "gauss_pipeline_{}.pkl".format(self.process)))
 
         # # remove unnecessary features
         # if self.config["processing"][self.process] == "basic":

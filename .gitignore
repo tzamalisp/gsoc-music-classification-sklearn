@@ -94,5 +94,6 @@ dataset_annotations/
 datasets/
 dask-worker-space/
 __pycache__/
+project*
 
 acousticbrainz-datasets.tar.bz2

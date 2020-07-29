@@ -21,9 +21,9 @@ def create_classification_project(ground_truth_directory, class_dir, project_fil
     project_template["class_dir"] = class_dir
     project_template["project_file"] = project_file
     project_template["exports_directory"] = exports_directory
-    project_template["logging"] = logging
+    project_template["logging_level"] = logging
     project_template["seed"] = seed
-    project_template["jobs"] = jobs
+    project_template["parallel_jobs"] = jobs
     project_template["verbose"] = verbose
 
     print()
@@ -31,6 +31,8 @@ def create_classification_project(ground_truth_directory, class_dir, project_fil
     print("-------------------------------------------------------")
     print("AFTER:")
     pprint(project_template)
+
+    train_class(project_template)
 
 
 if __name__ == '__main__':
@@ -63,18 +65,22 @@ if __name__ == '__main__':
 
     parser.add_argument('-l', '--logging',
                         default=0,
-                        help='Path where the result files will be stored.')
+                        help='Path where the result files will be stored.',
+                        type=int)
 
     parser.add_argument('-s', '--seed',
                         default=None,
-                        help='Seed used to generate the shuffled dataset applied later to folding.')
+                        help='Seed used to generate the shuffled dataset applied later to folding.',
+                        type=int)
 
     parser.add_argument('-j', '--jobs',
                         default=-1,
-                        help='Parallel jobs. Set to -1 to use all the available cores')
+                        help='Parallel jobs. Set to -1 to use all the available cores',
+                        type=int)
     parser.add_argument('-v', '--verbose',
                         default=1,
-                        help="Controls the verbosity: the higher, the more messages.")
+                        help="Controls the verbosity: the higher, the more messages.",
+                        type=int)
 
     # parser.add_argument('-t', '--template',
     #                     default=None,

@@ -4,13 +4,9 @@ import collections
 import joblib
 import os
 
-from transformation.utils_preprocessing import list_descr_handler, descr_enumerator, descr_selector
-from transformation.utils_scaling import descr_normalizing, descr_gaussianizing
-from transformation.utils_preprocessing import cleaner, descr_remover, feats_selector_list
+from transformation.utils_preprocessing import list_descr_handler
+from transformation.utils_preprocessing import feats_selector_list
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, QuantileTransformer
-from sklearn.pipeline import FeatureUnion
-from sklearn.pipeline import Pipeline
 
 # avoid the module's method call deprecation
 try:

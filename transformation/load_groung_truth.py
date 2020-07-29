@@ -2,6 +2,7 @@ import os
 import yaml
 import pandas as pd
 from pprint import pprint
+from termcolor import colored
 import random
 from utils import load_yaml, FindCreateDirectory
 from transformation.load_low_level import FeaturesDf
@@ -88,7 +89,8 @@ class GroundTruthLoad:
         tracks_list = []
         for track, label in self.labeled_tracks.items():
             tracks_list.append((track, label))
-        random.seed(a=self.config.get("random_seed"))
+        print(colored("SEED is set to: {}".format(self.config.get("seed"), "cyan")))
+        random.seed(a=self.config.get("seed"))
         random.shuffle(tracks_list)
         return tracks_list
 
@@ -141,7 +143,7 @@ class GroundTruthLoad:
         print("counted json files:", counter)
 
 
-class DatasetDFCreator:
+class DatasetExporter:
     def __init__(self, config, tracks_list, train_class):
         self.config = config
         self.tracks_list = tracks_list
@@ -192,6 +194,7 @@ class DatasetDFCreator:
             print("Shape of tracks DF created before cleaning:", self.df_tracks.shape)
             print("Check the shape of a temporary DF that includes if there are any NULL values:")
             print(self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape)
+
             print("Drop rows with NULL values if they exist..")
             if self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape[0] != 0:
                 self.df_tracks.dropna(inplace=True)
@@ -201,14 +204,12 @@ class DatasetDFCreator:
                 self.df_tracks = self.df_tracks.reset_index(drop=True)
             else:
                 print("There are no NULL values found.")
-            if self.config.get("tracks_in_csv_format") != "":
-                tracks_csv_dir = os.path.join(
-                    "{}_{}".format(self.config.get("exports_directory"), self.train_class),
-                    "tracks_csv")
-                tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
-                self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}_shuffled.csv".format(self.train_class)))
-            else:
-                print("No directory to export tracks to CSV is specified in the configuration file.")
+
+            # export shuffled tracks to CSV format
+            tracks_csv_dir = os.path.join("{}_{}".format(self.config.get("exports_directory"),
+                                                         self.train_class), "tracks_csv_format")
+            tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
+            self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}_shuffled.csv".format(self.train_class)))
             print("DF INFO:")
             print(self.df_tracks.info())
             print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)
@@ -225,24 +226,3 @@ class DatasetDFCreator:
             return None, None, None
 
 
-if __name__ == "__main__":
-    config_data = load_yaml("configuration.yaml")
-
-    gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()
-    print(gt_files_list)
-    print("GROUND TRUTH LOAD SCRIPT")
-    for gt_file in gt_files_list:
-        gt_data = GroundTruthLoad(config_data, gt_file)
-        df_fg_data = gt_data.export_gt_tracks()
-        train_class = gt_data.export_train_class()
-        # print("DF_tracks:")
-        print(df_fg_data.head())
-        # print()
-        # print("CLASS:", train_class)
-        # print()
-        # print()
-    #
-    # # df GT data info
-    # print("CHECK THE GT DF INFO:")
-    # checker = DfChecker(df_check=df_gt_data)
-    # checker.check_df_info()

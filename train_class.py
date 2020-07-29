@@ -5,7 +5,7 @@ from utils import load_yaml
 from transformation.load_groung_truth import DatasetExporter
 
 
-def classification_project():
+def train_class():
     config_data = load_yaml("configuration.yaml")
     gt_files_list = ListGroundTruthFiles(config_data).list_gt_filenames()
     print(gt_files_list)
@@ -46,4 +46,4 @@ def classification_project():
 
 
 if __name__ == '__main__':
-    classification_project()
+    train_class()

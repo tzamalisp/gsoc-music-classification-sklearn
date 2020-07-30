@@ -76,6 +76,18 @@ class Predict:
         print("Prediction:", predicted)
         print("Classes: ", clf_loaded.classes_)
         print("Prediction probabilities", predicted_prob)
+        predict_list = []
+        for pred, pred_probability in zip(predicted, predicted_prob):
+            predict_dict = dict()
+            predict_dict[self.class_name] = pred
+            predict_dict["score"] = max(pred_probability)
+            predict_dict["probabilities"] = dict(zip(clf_loaded.classes_, pred_probability))
+
+            predict_list.append(predict_dict)
+
+        pprint(predict_list)
+
+        return predict_list
 
 
 def prediction(exports_path, project_file, track_api):

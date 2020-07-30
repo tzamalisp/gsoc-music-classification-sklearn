@@ -1,4 +1,7 @@
 import os
+import requests
+import argparse
+from pprint import pprint
 import joblib
 import json
 import pandas as pd
@@ -8,10 +11,9 @@ from transformation.transform_predictions import TransformPredictions
 
 
 class Predict:
-    def __init__(self, config, track_low_level, class_name):
+    def __init__(self, config, track_low_level):
         self.config = config
         self.track_low_level = track_low_level
-        self.class_name = class_name
 
         self.exports_dir = ""
         self.best_model = ""
@@ -23,8 +25,12 @@ class Predict:
         self.list_track = []
 
     def load_best_model(self):
-        self.exports_dir = os.path.join(os.getcwd(), "{}_{}".format(self.config["exports_directory"], self.class_name))
-        best_model_path = os.path.join(self.exports_dir, "best_model_{}.json".format(self.class_name))
+        self.class_name = self.config["class_name"]
+        self.exports_path = self.config["exports_path"]
+        self.exports_dir = self.config["exports_directory"]
+
+        # self.exports_path = os.path.join(self.exports_path, "{}_{}".format(self.exports_dir, self.class_name))
+        best_model_path = os.path.join(self.exports_dir, self.exports_dir, "best_model_{}.json".format(self.class_name))
         # best_model_path = os.path.join(self.exports_dir, "models", "model_grid_{}.pkl".format[""])
         with open(best_model_path) as json_file:
             self.best_model = json.load(json_file)
@@ -53,7 +59,7 @@ class Predict:
         features_prepared = TransformPredictions(config=self.config,
                                                  df_feats=self.df_track,
                                                  process=self.best_model["preprocessing"],
-                                                 exports_path=self.exports_dir
+                                                 exports_path=self.exports_path
                                                  ).post_processing()
         print(features_prepared.shape)
 
@@ -67,12 +73,32 @@ class Predict:
         print("Prediction probabilities", predicted_prob)
 
 
-if __name__ == '__main__':
-    import requests
-    from pprint import pprint
-    config_data = load_yaml("configuration.yaml")
-    # pprint(config_data)
+def prediction(exports_path, project_file, track_api):
+    # if empty, path is declared as the app's main directory
 
+    if exports_path is None:
+        exports_path = os.getcwd()
+
+    try:
+        project_data = load_yaml("{}.yaml".format(project_file))
+    except Exception as e:
+        print('Unable to open project configuration file:', e)
+        raise
+
+    response = requests.get(track_api)
+    track = response.json()
+    if track["metadata"]["tags"]["artist"][0]:
+        print("Artist:", track["metadata"]["tags"]["artist"][0])
+    if track["metadata"]["tags"]["album"][0]:
+        print("Track:", track["metadata"]["tags"]["album"][0])
+
+    prediction_track = Predict(config=project_data,
+                               track_low_level=track
+                               )
+    prediction_track.preprocessing()
+
+
+if __name__ == '__main__':
     # "Idle Up" by Dousk & JMP - danceable
     response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
     # "Shock the Monkey (Gorilla mix)" by Coal Chamber - danceable
@@ -82,19 +108,30 @@ if __name__ == '__main__':
     # response = requests.get('https://acousticbrainz.org/api/v1/7fb1b586-017c-4a89-b15a-0bb837983108/low-level')
     # "See the Light" by Earth, Wind & Fire - not danceable
     # response = requests.get('https://acousticbrainz.org/api/v1/c129e3f4-3653-467a-a67f-c33bc912e6cb/low-level')
-    track = response.json()
+
     # save the low level locally
     # with open("sample_track.json", "w") as outfile:
     #     json.dump(track, outfile, indent=4)
 
-    if track["metadata"]["tags"]["artist"][0]:
-        print("Artist:", track["metadata"]["tags"]["artist"][0])
-    if track["metadata"]["tags"]["album"][0]:
-        print("Track:", track["metadata"]["tags"]["album"][0])
+    parser = argparse.ArgumentParser(
+        description='Generates a project configuration file given a filelist, a groundtruth file, '
+                    'and the directories to store the datasets and the results files. '
+                    'The script has a parameter to specify the project template to use. '
+                    'If it is not specified, it will try to guess the appropriated one from the '
+                    'essentia version found on the descriptor files.')
 
-    prediction = Predict(config=config_data,
-                         track_low_level=track,
-                         class_name="danceability")
-    prediction.preprocessing()
+    parser.add_argument('-g', '--groundtruth',
+                        dest="ground_truth_directory",
+                        default="datasets",
+                        help='Name of the directory containing the datasets.')
 
+    parser.add_argument('-c', '--classdir',
+                        dest="class_dir",
+                        help='Name of the directory containing the class or classes to train.',
+                        required=True)
+
+    parser.add_argument('-f', '--file',
+                        dest="project_file",
+                        default="project",
+                        help='Path name the project configuration file (.yaml) will be stored.')
 

@@ -144,7 +144,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     export_report(config=config,
                   name="Accuracies results",
                   report=accuracies_export,
-                  filename="accuracies_results",
+                  filename="accuracies_results_fold",
                   train_class=class_name,
                   exports_path=exports_path)
 
@@ -190,7 +190,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     export_report(config=config,
                   name="Confusion Matrix",
                   report=cm_all,
-                  filename="confusion_matrix",
+                  filename="confusion_matrix_fold",
                   train_class=class_name,
                   exports_path=exports_path)
 
@@ -201,7 +201,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     export_report(config=config,
                   name="Classification Report",
                   report=cr,
-                  filename="classification_report",
+                  filename="classification_report_fold",
                   train_class=class_name,
                   exports_path=exports_path)
 
@@ -210,18 +210,31 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     # model_save_path = os.path.join(models_path, "model.pkl")
     # joblib.dump(clf, model_save_path)
     #
-    # train with all the data
+    # train with all the data of the dataset
     print(colored("Evaluation to the whole dataset..", "cyan"))
     clf.fit(features_prepared, y)
     predictions_proba_all = clf.predict_proba(features_prepared)
     predictions_all = clf.predict(features_prepared)
     print(colored("Confusion Matrix All:", "magenta"))
-    cm_all = confusion_matrix(y_true=y, y_pred=predictions_all)
-    print(cm_all)
+    cm_full = confusion_matrix(y_true=y, y_pred=predictions_all)
+    print(cm_full)
     print(colored("Confusion Matrix All Normalized:", "magenta"))
-    cm_all_normalized = (cm_all / cm_all.astype(np.float).sum(axis=1) * 100)
-    print(cm_all_normalized)
+    cm_full_normalized = (cm_full / cm_full.astype(np.float).sum(axis=1) * 100)
+    print(cm_full_normalized)
+    cm_full_all = "Actual instances\n{}\n\nNormalized\n{}".format(cm_full, cm_full_normalized)
+    export_report(config=config,
+                  name="Confusion Matrix",
+                  report=cm_full_all,
+                  filename="confusion_matrix_fold_all_dataset",
+                  train_class=class_name,
+                  exports_path=exports_path)
     print(colored("Classification Report All:", "magenta"))
-    cr_all = classification_report(y_true=y, y_pred=predictions_all)
-    print(cr_all)
+    cr_full = classification_report(y_true=y, y_pred=predictions_all)
+    print(cr_full)
+    export_report(config=config,
+                  name="Classification Report",
+                  report=cr_full,
+                  filename="classification_report_all_dataset",
+                  train_class=class_name,
+                  exports_path=exports_path)
 

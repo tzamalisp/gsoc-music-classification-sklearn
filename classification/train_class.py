@@ -7,7 +7,6 @@ import yaml
 
 
 def train_class(config, gt_file):
-    print("AAAAAAAAAAAAA", type(config))
     exports_path = config["exports_path"]
 
     gt_data = GroundTruthLoad(config, gt_file)

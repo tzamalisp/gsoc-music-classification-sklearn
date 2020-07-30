@@ -5,19 +5,31 @@ from utils import load_yaml
 import yaml
 import time
 from transformation.load_groung_truth import ListGroundTruthFiles
-from train_class import train_class
+from classification.train_class import train_class
 
 
 def create_classification_project(ground_truth_directory, class_dir, project_file, exports_directory, logging, seed, jobs, verbose, exports_path):
+    """
 
+    :param ground_truth_directory:
+    :param class_dir:
+    :param project_file:
+    :param exports_directory:
+    :param logging:
+    :param seed:
+    :param jobs:
+    :param verbose:
+    :param exports_path:
+    :return:
+    """
     try:
         project_template = load_yaml("configuration_template.yaml")
     except Exception as e:
-        print('Unable to open project configuration file:', e)
+        print('Unable to open project configuration template:', e)
         raise
 
-    print("BEFORE:")
-    print("Type of congig template:", type(project_template))
+    # print("BEFORE:")
+    # print("Type of congig template:", type(project_template))
     print("-------------------------------------------------------")
     print()
     if seed is None:
@@ -44,8 +56,8 @@ def create_classification_project(ground_truth_directory, class_dir, project_fil
     print()
     print()
     print("-------------------------------------------------------")
-    print("AFTER:")
-    pprint(project_template)
+    # print("AFTER:")
+    # pprint(project_template)
 
     gt_files_list = ListGroundTruthFiles(project_template).list_gt_filenames()
     print(gt_files_list)

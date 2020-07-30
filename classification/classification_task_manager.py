@@ -47,8 +47,6 @@ class ClassificationTaskManager:
         Ensure that all the folders will exist before the training process starts
         :return:
         """
-        print("BBBBBBBBBBBBB:\n", self.config)
-
         # main exports
         self.exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
         # train results exports

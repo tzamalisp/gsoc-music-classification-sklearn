@@ -16,7 +16,7 @@ class ClassificationTaskManager:
     """
 
     """
-    def __init__(self, yaml_file, train_class, X, y, tracks):
+    def __init__(self, config, train_class, X, y, tracks, exports_path):
         """
 
         :param yaml_file: The configuration file name
@@ -24,53 +24,54 @@ class ClassificationTaskManager:
         :param X: The already shuffled data that contain the features
         :param y: The already shuffled data that contain the labels
         """
-        self.yaml_file = yaml_file
+        self.config = config
         self.train_class = train_class
         self.X = X
         self.y = y
         self.tracks = tracks
+        self.exports_path = exports_path
 
-        self.config = ""
-        self.exports_path = ""
-
+        self.exports_dir = ""
         self.results_path = ""
         self.logs_path = ""
         self.tracks_path = ""
         self.dataset_path = ""
         self.models_path = ""
-        self.images = ""
+        self.images_path = ""
 
-        self.load_config()
         self.files_existence()
         self.config_file_analysis()
-
-    def load_config(self):
-        try:
-            self.config = load_yaml(self.yaml_file)
-        except Exception as e:
-            print('Unable to open project configuration file:', e)
-            raise
 
     def files_existence(self):
         """
         Ensure that all the folders will exist before the training process starts
         :return:
         """
+        print("BBBBBBBBBBBBB:\n", self.config)
+
         # main exports
-        exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
-        self.exports_path = FindCreateDirectory(exports_dir).inspect_directory()
+        self.exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
         # train results exports
-        self.results_path = FindCreateDirectory(os.path.join(self.exports_path, "results")).inspect_directory()
+        self.results_path = FindCreateDirectory(self.exports_path,
+                                                os.path.join(self.exports_dir, "results")).inspect_directory()
         # logs
-        self.logs_path = FindCreateDirectory(os.path.join(self.exports_path, "logs")).inspect_directory()
+        self.logs_path = FindCreateDirectory(self.exports_path,
+                                             os.path.join(self.exports_dir, "logs")).inspect_directory()
         # tracks
-        self.tracks_path = FindCreateDirectory(os.path.join(self.exports_path, "tracks_csv_format")).inspect_directory()
+        self.tracks_path = FindCreateDirectory(self.exports_path,
+                                               os.path.join(self.exports_dir, "tracks_csv_format")).inspect_directory()
         # datasets
-        self.dataset_path = FindCreateDirectory(os.path.join(self.exports_path, "dataset")).inspect_directory()
+        self.dataset_path = FindCreateDirectory(self.exports_path,
+                                                os.path.join(self.exports_dir, "dataset")).inspect_directory()
         # models
-        self.models_path = FindCreateDirectory(os.path.join(self.exports_path, "models")).inspect_directory()
+        self.models_path = FindCreateDirectory(self.exports_path,
+                                               os.path.join(self.exports_dir, "models")).inspect_directory()
         # images
-        self.images = FindCreateDirectory(os.path.join(self.exports_path, "images")).inspect_directory()
+        self.images_path = FindCreateDirectory(self.exports_path,
+                                               os.path.join(self.exports_dir, "images")).inspect_directory()
+        # reports
+        self.reports_path = FindCreateDirectory(self.exports_path,
+                                               os.path.join(self.exports_dir, "reports")).inspect_directory()
 
     def config_file_analysis(self):
 

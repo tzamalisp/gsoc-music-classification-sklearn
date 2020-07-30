@@ -25,14 +25,17 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     pprint(tracks[:5])
     print("Tracks list length", len(tracks))
 
+    exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
+
     # load best model
-    load_model_params_path = os.path.join(exports_path, "best_model_{}.json".format(class_name))
+    load_model_params_path = os.path.join(exports_path, exports_dir, "best_model_{}.json".format(class_name))
     with open(load_model_params_path) as model_params_file:
         model_params_data = json.load(model_params_file)
     
     print("Best model preprocessing step: {}".format(process))
-    preprocessing_step = model_params_data["preprocessing"]
-    clf = joblib.load(os.path.join(exports_path, "models", "model_grid_{}.pkl".format(process)))
+    models_path = FindCreateDirectory(exports_path,
+                                      os.path.join(exports_dir, "models")).inspect_directory()
+    clf = joblib.load(os.path.join(models_path, "model_grid_{}.pkl".format(process)))
     print("Best model loaded.")
 
     # inner with K-Fold cross-validation declaration
@@ -60,6 +63,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     features_prepared = Transform(config=config,
                                   df_feats=X,
                                   process=process,
+                                  train_class=class_name,
                                   exports_path=exports_path).post_processing()
     print("features prepared shape: {}".format(features_prepared.shape))
 
@@ -127,7 +131,9 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     print("Info:")
     print(df_predictions.info())
     # save predictions df
-    df_predictions.to_csv(os.path.join(exports_path, "dataset", "predictions_{}.csv".format(class_name)))
+    dataset_path = FindCreateDirectory(exports_path,
+                                       os.path.join(exports_dir, "dataset")).inspect_directory()
+    df_predictions.to_csv(os.path.join(dataset_path, "predictions_{}.csv".format(class_name)))
     print()
     # ACCURACIES
     print(colored("Accuracies in each fold: {}".format(accuracy_model), "cyan"))
@@ -152,7 +158,9 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     scores = pd.DataFrame(accuracy_model, columns=['Scores'])
     sns.set(style="white", rc={"lines.linewidth": 3})
     sns.barplot(x=list_folds, y="Scores", data=scores)
-    plt.savefig(os.path.join(exports_path, "images", "accuracies_distribution.png"))
+    images_path = FindCreateDirectory(exports_path,
+                                      os.path.join(exports_dir, "images")).inspect_directory()
+    plt.savefig(os.path.join(images_path, "accuracies_distribution.png"))
     sns.set()
     plt.close()
     print("Plot saved successfully.")
@@ -163,8 +171,8 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     # pprint(tracks_fold_indexing_dict)
     print("length of keys:", len(tracks_fold_indexing_dict.keys()))
     print("Saving folded dataset..")
-    dataset_path = os.path.join(exports_path, "dataset",  "{}.yaml".format(class_name))
-    with open(dataset_path, 'w') as file:
+    folded_dataset_path = os.path.join(dataset_path,  "{}.yaml".format(class_name))
+    with open(folded_dataset_path, 'w') as file:
         folded_dataset = yaml.dump(tracks_fold_indexing_dict, file)
     print(colored("Folded dataset written successfully to disk.", "cyan"))
 
@@ -217,22 +225,3 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     cr_all = classification_report(y_true=y, y_pred=predictions_all)
     print(cr_all)
 
-    # # predict a single instance
-    # print("predict a single instance")
-    # # "Idle Up" by Dousk & JMP - danceable
-    # response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
-    # track = response.json()
-    # # data dictionary transformed to a fully flattened dictionary
-    # track_feats = dict(flatten_dict_full(track))
-    # list_track = []
-    # list_track.append(track_feats)
-    # df_track = pd.DataFrame(data=list_track, columns=list(list_track[0].keys()))
-    # print(df_track)
-    # print(len(df_track.columns))
-    # # X_transformed = Transform(config=config,
-    # #                           df=df_track,
-    # #                           process=process,
-    # #                           exports_path=exports_path,
-    # #                           mode="predict"
-    # #                           ).post_processing()
-    # # print(clf.predict(X_transformed))

@@ -4,6 +4,7 @@ import collections
 import joblib
 import os
 
+from utils import FindCreateDirectory
 from transformation.utils_preprocessing import list_descr_handler
 from transformation.utils_preprocessing import feats_selector_list
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -19,11 +20,12 @@ except AttributeError:
 
 
 class Transform:
-    def __init__(self, config, df_feats, process, exports_path):
+    def __init__(self, config, df_feats, process, train_class, exports_path):
         self.config = config
         self.df_feats = df_feats
         self.process = process
         self.exports_path = exports_path
+        self.train_class = train_class
 
         self.list_features = []
         self.feats_cat_list = []
@@ -40,7 +42,9 @@ class Transform:
 
         self.list_features = list(self.df_feats.columns)
 
-        exports_dir = os.path.join(self.exports_path, "models")
+        exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+        models_path = FindCreateDirectory(self.exports_path,
+                                          os.path.join(exports_dir, "models")).inspect_directory()
 
         # clean list
         print(colored("Cleaning..", "yellow"))
@@ -88,7 +92,7 @@ class Transform:
             self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
 
             # save pipeline
-            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            joblib.dump(full_pipeline, os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
         # LOW-LEVEL or MFCC
         if self.process == "lowlevel" or self.process == "mfcc":
@@ -113,7 +117,7 @@ class Transform:
             self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
 
             # save pipeline
-            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            joblib.dump(full_pipeline, os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
         # NOBANDS
         if self.process == "nobands":
@@ -139,7 +143,7 @@ class Transform:
             self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
 
             # save pipeline
-            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            joblib.dump(full_pipeline, os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
         # NORMALIZED
         if self.process == "normalized":
@@ -162,7 +166,7 @@ class Transform:
             self.feats_prepared = full_pipeline.fit_transform(self.df_feats)
 
             # save pipeline
-            joblib.dump(full_pipeline, os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            joblib.dump(full_pipeline, os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
 
         # GAUSSIANIZED
@@ -198,7 +202,7 @@ class Transform:
             print("Feats prepared normalized shape: {}".format(self.feats_prepared.shape))
             # save pipeline
             joblib.dump(full_normalize_pipeline,
-                        os.path.join(exports_dir, "full_normalize_pipeline_{}.pkl".format(self.process)))
+                        os.path.join(models_path, "full_normalize_pipeline_{}.pkl".format(self.process)))
             self.df_feats = pd.DataFrame(data=self.feats_prepared)
             columns = list(self.df_feats.columns)
             # print(columns)
@@ -232,7 +236,7 @@ class Transform:
 
             # save pipeline
             joblib.dump(full_gauss_pipeline,
-                        os.path.join(exports_dir, "full_gauss_pipeline_{}.pkl".format(self.process)))
+                        os.path.join(models_path, "full_gauss_pipeline_{}.pkl".format(self.process)))
 
         return self.feats_prepared
 

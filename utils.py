@@ -55,11 +55,12 @@ class FindCreateDirectory:
     """
 
     """
-    def __init__(self, directory):
+    def __init__(self, exports_path, directory):
         """
 
         :param directory:
         """
+        self.exports_path = exports_path
         self.directory = directory
 
     def inspect_directory(self):
@@ -68,8 +69,8 @@ class FindCreateDirectory:
         :return:
         """
         # find dynamically the current script directory
-        path_app = os.path.join(os.path.abspath(os.getcwd()))
-        full_path = os.path.join(path_app, self.directory)
+        # path_app = os.path.join(os.path.abspath(os.getcwd()))
+        full_path = os.path.join(self.exports_path, self.directory)
         # create path directories if not exist --> else return the path
         if not os.path.exists(full_path):
             os.makedirs(full_path)

@@ -1,6 +1,7 @@
 import os
 from classification.classifierGRID import TrainGridClassifier
 import json
+from termcolor import colored
 from classification.classifierBASIC import TrainClassifier
 from classification.evaluation import fold_evaluation
 
@@ -33,10 +34,11 @@ class ClassificationTask:
             pass
 
         # load best model
+        exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
         best_model_name = "best_model_{}.json".format(self.train_class)
-        with open(os.path.join(self.exports_path, best_model_name)) as best_model_file:
+        with open(os.path.join(self.exports_path, exports_dir, best_model_name)) as best_model_file:
             best_model = json.load(best_model_file)
-
+        print(colored("BEST MODEL:", "cyan"))
         print(best_model)
 
         clf_model = TrainClassifier(classifier=self.classifier, params=best_model["params"]).model()

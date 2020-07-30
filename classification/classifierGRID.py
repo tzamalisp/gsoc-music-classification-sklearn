@@ -42,6 +42,7 @@ class TrainGridClassifier:
             features_prepared = Transform(config=self.config,
                                           df_feats=self.X,
                                           process=tr_process["preprocess"],
+                                          train_class=self.class_name,
                                           exports_path=self.exports_path).post_processing()
 
             # define the length of parameters
@@ -82,12 +83,10 @@ class TrainGridClassifier:
             print("Best parameters: {}".format(gsvc.best_params_))
             print("Counted evaluations in this GridSearch process: {}".format(len(gsvc.cv_results_["params"])))
 
-            exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)
-            exports_path = FindCreateDirectory(exports_dir).inspect_directory()
-
             # save best results for each train process
-            grid_results_dir = os.path.join(exports_path, "results")
-            grid_results_path = FindCreateDirectory(grid_results_dir).inspect_directory()
+            exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)
+            results_path = FindCreateDirectory(self.exports_path,
+                                               os.path.join(exports_dir, "results")).inspect_directory()
             results_best_dict_name = "result_{}_{}_best_{}.json"\
                 .format(self.class_name, tr_process["preprocess"], gsvc.best_score_)
 
@@ -96,19 +95,18 @@ class TrainGridClassifier:
             results_dict["params"] = gsvc.best_params_
             results_dict["n_fold"] = tr_process['n_fold']
             results_dict["preprocessing"] = tr_process["preprocess"]
-            with open(os.path.join(grid_results_path, results_best_dict_name), 'w') as grid_best_json:
+            with open(os.path.join(results_path, results_best_dict_name), 'w') as grid_best_json:
                 json.dump(results_dict, grid_best_json, indent=4)
 
             # export parameters that the
             results_params_dict_name = "result_{}_{}_params_{}.json"\
                 .format(self.class_name, tr_process["preprocess"], gsvc.best_score_)
-            with open(os.path.join(grid_results_path, results_params_dict_name), 'w') as grid_params_json:
+            with open(os.path.join(results_path, results_params_dict_name), 'w') as grid_params_json:
                 json.dump(gsvc.cv_results_["params"], grid_params_json, indent=0)
 
-            best_process_model_path = os.path.join(self.exports_path,
-                                                   "models",
-                                                   "model_grid_{}.pkl".format(tr_process["preprocess"])
-                                                   )
+            models_path = FindCreateDirectory(self.exports_path,
+                                              os.path.join(exports_dir, "models")).inspect_directory()
+            best_process_model_path = os.path.join(models_path, "model_grid_{}.pkl".format(tr_process["preprocess"]))
             joblib.dump(gsvc.best_estimator_, best_process_model_path)
             print(colored("Grid Best model for the {} process saved.".format(tr_process["preprocess"]), "cyan"))
 
@@ -135,7 +133,8 @@ class TrainGridClassifier:
                 # model["params"]["gamma"] = math.log2(model["params"]["gamma"])
                 pprint(model)
                 best_model_name = "best_model_{}.json".format(self.class_name)
-                with open(os.path.join(self.exports_path, best_model_name), "w") as best_model:
+                exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)
+                with open(os.path.join(self.exports_path, exports_dir, best_model_name), "w") as best_model:
                     json.dump(model, best_model, indent=4)
                     print(colored("Best {} model parameters saved successfully to disk.".format(self.class_name),
                                   "cyan"))

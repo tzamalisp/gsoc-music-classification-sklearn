@@ -1,15 +1,23 @@
+import os
 import argparse
 from pprint import pprint
 from utils import load_yaml
 import yaml
 import time
+from transformation.load_groung_truth import ListGroundTruthFiles
 from train_class import train_class
 
 
-def create_classification_project(ground_truth_directory, class_dir, project_file, exports_directory, logging, seed, jobs, verbose):
-    project_template = load_yaml("configuration_template.yaml")
+def create_classification_project(ground_truth_directory, class_dir, project_file, exports_directory, logging, seed, jobs, verbose, exports_path):
+
+    try:
+        project_template = load_yaml("configuration_template.yaml")
+    except Exception as e:
+        print('Unable to open project configuration file:', e)
+        raise
+
     print("BEFORE:")
-    pprint(project_template)
+    print("Type of congig template:", type(project_template))
     print("-------------------------------------------------------")
     print()
     if seed is None:
@@ -26,13 +34,24 @@ def create_classification_project(ground_truth_directory, class_dir, project_fil
     project_template["parallel_jobs"] = jobs
     project_template["verbose"] = verbose
 
+    # if empty, path is declared as the app's main directory
+    if exports_path is None:
+        exports_path = os.getcwd()
+
+    print("Exports path: {}".format(exports_path))
+    project_template["exports_path"] = exports_path
+
     print()
     print()
     print("-------------------------------------------------------")
     print("AFTER:")
     pprint(project_template)
 
-    train_class(project_template)
+    gt_files_list = ListGroundTruthFiles(project_template).list_gt_filenames()
+    print(gt_files_list)
+    print("LOAD GROUND TRUTH")
+    for gt_file in gt_files_list:
+        train_class(project_template, gt_file)
 
 
 if __name__ == '__main__':
@@ -53,10 +72,10 @@ if __name__ == '__main__':
                         help='Name of the directory containing the class or classes to train.',
                         required=True)
 
-    parser.add_argument('-p', '--projectfile',
+    parser.add_argument('-f', '--file',
                         dest="project_file",
                         default="project",
-                        help='Path name where the project configuration file (.project) will be stored.')
+                        help='Path name the project configuration file (.yaml) will be stored.')
 
     parser.add_argument('-e', '--exportsdir',
                         dest="exports_directory",
@@ -81,6 +100,10 @@ if __name__ == '__main__':
                         default=1,
                         help="Controls the verbosity: the higher, the more messages.",
                         type=int)
+    parser.add_argument('-p', '--path',
+                        dest='exports_path',
+                        help='Path where the project results will be stored. If empty, the results will be saved in '
+                             'app directory')
 
     # parser.add_argument('-t', '--template',
     #                     default=None,
@@ -91,4 +114,4 @@ if __name__ == '__main__':
 
     create_classification_project(args.ground_truth_directory, args.class_dir, args.project_file,
                                   args.exports_directory, logging=args.logging, seed=args.seed, jobs=args.jobs,
-                                  verbose=args.verbose)
+                                  verbose=args.verbose, exports_path=args.exports_path)

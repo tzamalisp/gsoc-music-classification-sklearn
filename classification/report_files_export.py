@@ -5,8 +5,8 @@ from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 
 
 def export_report(config, name, report, filename, train_class, exports_path):
-    reports_dir = os.path.join(exports_path, "reports")
-    reports_path = FindCreateDirectory(os.path.join(reports_dir)).inspect_directory()
+    exports_dir = "{}_{}".format(config.get("exports_directory"), train_class)
+    reports_path = FindCreateDirectory(exports_path, os.path.join(exports_dir, "reports")).inspect_directory()
     # take current date and convert to string
     now = datetime.now()
     datetime_str = now.strftime("%Y-%m-%d")

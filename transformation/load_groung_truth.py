@@ -144,10 +144,11 @@ class GroundTruthLoad:
 
 
 class DatasetExporter:
-    def __init__(self, config, tracks_list, train_class):
+    def __init__(self, config, tracks_list, train_class, exports_path):
         self.config = config
         self.tracks_list = tracks_list
         self.train_class = train_class
+        self.exports_path = exports_path
         self.dataset_dir = ""
         self.class_dir = ""
         self.df_tracks = pd.DataFrame()
@@ -206,10 +207,10 @@ class DatasetExporter:
                 print("There are no NULL values found.")
 
             # export shuffled tracks to CSV format
-            tracks_csv_dir = os.path.join("{}_{}".format(self.config.get("exports_directory"),
-                                                         self.train_class), "tracks_csv_format")
-            tracks_csv_path = FindCreateDirectory(tracks_csv_dir).inspect_directory()
-            self.df_tracks.to_csv(os.path.join(tracks_csv_path, "tracks_{}_shuffled.csv".format(self.train_class)))
+            exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+            tracks_path = FindCreateDirectory(self.exports_path,
+                                              os.path.join(exports_dir, "tracks_csv_format")).inspect_directory()
+            self.df_tracks.to_csv(os.path.join(tracks_path, "tracks_{}_shuffled.csv".format(self.train_class)))
             print("DF INFO:")
             print(self.df_tracks.info())
             print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)

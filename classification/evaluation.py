@@ -225,7 +225,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     export_report(config=config,
                   name="Confusion Matrix",
                   report=cm_full_all,
-                  filename="confusion_matrix_fold_all_dataset",
+                  filename="confusion_matrix_all_dataset",
                   train_class=class_name,
                   exports_path=exports_path)
     print(colored("Classification Report All:", "magenta"))

@@ -6,7 +6,6 @@ from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from classification.classification_task import ClassificationTask
 from datetime import datetime
 
-log = logging.getLogger('classification.ClassificationTaskManager')
 
 validClassifiers = ['NN', 'svm']
 validEvaluations = ['nfoldcrossvalidation']

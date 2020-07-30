@@ -4,11 +4,11 @@ from transformation.load_groung_truth import GroundTruthLoad
 from classification.classification_task_manager import ClassificationTaskManager
 from transformation.load_groung_truth import DatasetExporter
 import yaml
+from logging_tool import LoggerSetup
 
 
-def train_class(config, gt_file):
+def train_class(config, gt_file, log_level):
     exports_path = config["exports_path"]
-
     gt_data = GroundTruthLoad(config, gt_file)
     # tracks shuffled and exported
     tracks_listed_shuffled = gt_data.export_gt_tracks()
@@ -17,6 +17,12 @@ def train_class(config, gt_file):
     # class to train
     class_name = gt_data.export_train_class()
     config["class_name"] = class_name
+
+    logger = LoggerSetup(config=config,
+                         exports_path=exports_path,
+                         name="train_class",
+                         train_class=class_name,
+                         level=log_level).setup_logger()
 
     # save project file
     project_file_name_save = "{}_{}.yaml".format(config["project_file"], class_name)
@@ -32,11 +38,11 @@ def train_class(config, gt_file):
                                                train_class=class_name,
                                                exports_path=exports_path
                                                ).create_df_tracks()
-    print(colored("Types of exported files from GT:", "cyan"))
-    print("Type of features: {}".format(type(features)))
-    print("Type of labels: {}".format(type(labels)))
-    print("Type of Tracks: {}".format(type(tracks)))
-    print()
+    logger.debug("Types of exported files from GT:")
+    logger.debug("Type of features: {}".format(type(features)))
+    logger.debug("Type of labels: {}".format(type(labels)))
+    logger.debug("Type of Tracks: {}".format(type(tracks)))
+
     print(colored("Small previews:", "cyan"))
     print(colored("FEATURES", "magenta"))
     print(features.head(10))
@@ -53,4 +59,4 @@ def train_class(config, gt_file):
                                              exports_path=exports_path)
     classification_time = model_manage.apply_processing()
     print(colored("Classification ended in {} minutes.".format(classification_time), "green"))
-
+    logger.info("Classification ended in {} minutes.".format(classification_time))

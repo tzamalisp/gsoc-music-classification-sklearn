@@ -33,7 +33,7 @@ class LoggerSetup:
         log_file: The path of the logging file export.
         level: An integer that defines the logging level.
     """
-    def __init__(self, config, exports_path, name, log_file, level=1):
+    def __init__(self, config, exports_path, name, train_class, level=1):
         """
         Inits the logger object with the corresponding parameters.
 
@@ -45,10 +45,12 @@ class LoggerSetup:
         self.config = config
         self.exports_path = exports_path
         self.name = name
-        self.log_file = log_file
+        self.train_class = train_class
         self.level = level
 
-# def setup_logger(name, log_file, level=logging.INFO):
+        self.exports_dir = ""
+        self.logs_path = ""
+
     def setup_logger(self):
         """
         Function to set up as many loggers as you want. It exports the logging results to a file
@@ -56,9 +58,10 @@ class LoggerSetup:
 
         :return:
         """
-        logs_dir = os.path.join(self.exports_path, self.config["log_directory"])
-        log_path = FindCreateDirectory(logs_dir).inspect_directory()
-        handler = logging.FileHandler(os.path.join(log_path, self.log_file), mode='w')
+        self.exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+        self.logs_path = FindCreateDirectory(self.exports_path,
+                                             os.path.join(self.exports_dir, "logs")).inspect_directory()
+        handler = logging.FileHandler(os.path.join(self.logs_path, "{}.log".format(self.name)), mode='w')
         handler.setFormatter(formatter)
 
         logger_object = logging.getLogger(self.name)

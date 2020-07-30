@@ -63,7 +63,7 @@ def create_classification_project(ground_truth_directory, class_dir, project_fil
     print(gt_files_list)
     print("LOAD GROUND TRUTH")
     for gt_file in gt_files_list:
-        train_class(project_template, gt_file)
+        train_class(project_template, gt_file, logging)
 
 
 if __name__ == '__main__':
@@ -95,7 +95,7 @@ if __name__ == '__main__':
                         help='Path the exports of the project will be stored.')
 
     parser.add_argument('-l', '--logging',
-                        default=0,
+                        default=1,
                         help='Path where the result files will be stored.',
                         type=int)
 

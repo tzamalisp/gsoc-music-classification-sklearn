@@ -4,6 +4,7 @@ import collections
 import joblib
 import os
 
+from utils import FindCreateDirectory
 from transformation.utils_preprocessing import list_descr_handler
 from transformation.utils_preprocessing import feats_selector_list
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -16,10 +17,11 @@ except AttributeError:
 
 
 class TransformPredictions:
-    def __init__(self, config, df_feats, process, exports_path):
+    def __init__(self, config, df_feats, process, train_class, exports_path):
         self.config = config
         self.df_feats = df_feats
         self.process = process
+        self.train_class = train_class
         self.exports_path = exports_path
 
         self.list_features = []
@@ -37,7 +39,9 @@ class TransformPredictions:
 
         self.list_features = list(self.df_feats.columns)
 
-        exports_dir = os.path.join(self.exports_path, "models")
+        exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+        models_path = FindCreateDirectory(self.exports_path,
+                                          os.path.join(exports_dir, "models")).inspect_directory()
 
         # clean list
         print(colored("Cleaning..", "yellow"))
@@ -71,7 +75,7 @@ class TransformPredictions:
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
 
             # load pipeline
-            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            full_pipeline = joblib.load(os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
@@ -83,7 +87,7 @@ class TransformPredictions:
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
 
             # load pipeline
-            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            full_pipeline = joblib.load(os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
@@ -96,7 +100,7 @@ class TransformPredictions:
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
 
             # load pipeline
-            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            full_pipeline = joblib.load(os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
@@ -106,7 +110,7 @@ class TransformPredictions:
             print("List post-Num feats: {}".format(len(self.feats_num_list)))
 
             # load pipeline
-            full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
+            full_pipeline = joblib.load(os.path.join(models_path, "full_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_pipeline.transform(self.df_feats)
 
@@ -122,7 +126,7 @@ class TransformPredictions:
 
             # load normalization pipeline
             # full_pipeline = joblib.load(os.path.join(exports_dir, "full_pipeline_{}.pkl".format(self.process)))
-            full_normalize_pipeline = joblib.load(os.path.join(exports_dir,
+            full_normalize_pipeline = joblib.load(os.path.join(models_path,
                                                                "full_normalize_pipeline_{}.pkl".format(self.process)))
             # normalize
             self.feats_prepared = full_normalize_pipeline.transform(self.df_feats)
@@ -143,7 +147,7 @@ class TransformPredictions:
             # feats_no_gauss_list = [x for x in new_feats_columns if x not in feats_num_gauss_list]
 
             # load guassianization pipeline
-            full_gauss_pipeline = joblib.load(os.path.join(exports_dir,
+            full_gauss_pipeline = joblib.load(os.path.join(models_path,
                                                            "full_gauss_pipeline_{}.pkl".format(self.process)))
 
             self.feats_prepared = full_gauss_pipeline.transform(self.df_feats)

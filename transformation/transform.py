@@ -24,8 +24,9 @@ class Transform:
         self.config = config
         self.df_feats = df_feats
         self.process = process
-        self.exports_path = exports_path
         self.train_class = train_class
+        self.exports_path = exports_path
+
 
         self.list_features = []
         self.feats_cat_list = []

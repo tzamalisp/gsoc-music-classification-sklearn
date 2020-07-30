@@ -5,7 +5,7 @@ from pprint import pprint
 import joblib
 import json
 import pandas as pd
-from utils import load_yaml
+from utils import load_yaml, FindCreateDirectory
 from transformation.utils_preprocessing import flatten_dict_full
 from transformation.transform_predictions import TransformPredictions
 
@@ -15,6 +15,8 @@ class Predict:
         self.config = config
         self.track_low_level = track_low_level
 
+        self.class_name = ""
+        self.exports_path = ""
         self.exports_dir = ""
         self.best_model = ""
         self.track_feats = dict()
@@ -27,10 +29,12 @@ class Predict:
     def load_best_model(self):
         self.class_name = self.config["class_name"]
         self.exports_path = self.config["exports_path"]
-        self.exports_dir = self.config["exports_directory"]
+        self.exports_dir = "{}_{}".format(self.config["exports_directory"], self.class_name)
 
         # self.exports_path = os.path.join(self.exports_path, "{}_{}".format(self.exports_dir, self.class_name))
-        best_model_path = os.path.join(self.exports_dir, self.exports_dir, "best_model_{}.json".format(self.class_name))
+        best_model_path = os.path.join(self.exports_path,
+                                       self.exports_dir,
+                                       "best_model_{}.json".format(self.class_name))
         # best_model_path = os.path.join(self.exports_dir, "models", "model_grid_{}.pkl".format[""])
         with open(best_model_path) as json_file:
             self.best_model = json.load(json_file)
@@ -59,12 +63,13 @@ class Predict:
         features_prepared = TransformPredictions(config=self.config,
                                                  df_feats=self.df_track,
                                                  process=self.best_model["preprocessing"],
+                                                 train_class=self.class_name,
                                                  exports_path=self.exports_path
                                                  ).post_processing()
         print(features_prepared.shape)
-
-        model_path = os.path.join(self.exports_dir, "models", "model.pkl")
-        best_model_path = os.path.join(self.exports_dir, "models", "model_grid_{}.pkl".format(self.best_model["preprocessing"]))
+        models_path = FindCreateDirectory(self.exports_path,
+                                          os.path.join(self.exports_dir, "models")).inspect_directory()
+        best_model_path = os.path.join(models_path, "model_grid_{}.pkl".format(self.best_model["preprocessing"]))
         clf_loaded = joblib.load(best_model_path)
         predicted = clf_loaded.predict(features_prepared)
         predicted_prob = clf_loaded.predict_proba(features_prepared)
@@ -86,6 +91,7 @@ def prediction(exports_path, project_file, track_api):
         raise
 
     response = requests.get(track_api)
+
     track = response.json()
     if track["metadata"]["tags"]["artist"][0]:
         print("Artist:", track["metadata"]["tags"]["artist"][0])
@@ -99,39 +105,26 @@ def prediction(exports_path, project_file, track_api):
 
 
 if __name__ == '__main__':
-    # "Idle Up" by Dousk & JMP - danceable
-    response = requests.get('https://acousticbrainz.org/api/v1/78281677-8ba1-41df-b0f7-df6b024caf13/low-level')
-    # "Shock the Monkey (Gorilla mix)" by Coal Chamber - danceable
-    #  response = requests.get('https://acousticbrainz.org/api/v1/34959b3b-634f-415e-8fb8-b47a8e27e0e5/low-level')
-
-    # "So Dear to My Heart" by Peggy Lee - not danceable
-    # response = requests.get('https://acousticbrainz.org/api/v1/7fb1b586-017c-4a89-b15a-0bb837983108/low-level')
-    # "See the Light" by Earth, Wind & Fire - not danceable
-    # response = requests.get('https://acousticbrainz.org/api/v1/c129e3f4-3653-467a-a67f-c33bc912e6cb/low-level')
-
-    # save the low level locally
-    # with open("sample_track.json", "w") as outfile:
-    #     json.dump(track, outfile, indent=4)
 
     parser = argparse.ArgumentParser(
-        description='Generates a project configuration file given a filelist, a groundtruth file, '
-                    'and the directories to store the datasets and the results files. '
-                    'The script has a parameter to specify the project template to use. '
-                    'If it is not specified, it will try to guess the appropriated one from the '
-                    'essentia version found on the descriptor files.')
+        description='Predictions.')
 
-    parser.add_argument('-g', '--groundtruth',
-                        dest="ground_truth_directory",
-                        default="datasets",
-                        help='Name of the directory containing the datasets.')
-
-    parser.add_argument('-c', '--classdir',
-                        dest="class_dir",
-                        help='Name of the directory containing the class or classes to train.',
-                        required=True)
+    parser.add_argument('-p', '--path',
+                        dest="exports_path",
+                        help='Path where the project results are stored.')
 
     parser.add_argument('-f', '--file',
                         dest="project_file",
-                        default="project",
-                        help='Path name the project configuration file (.yaml) will be stored.')
+                        help='Name prefix of the project configuration file (.yaml) that is stored.',
+                        required=True)
 
+    parser.add_argument('-t', '--track',
+                        dest="track_api",
+                        help='Low-level data link from the AcousticBrainz API.',
+                        required=True)
+
+    args = parser.parse_args()
+
+    prediction(exports_path=args.exports_path,
+               project_file=args.project_file,
+               track_api=args.track_api)

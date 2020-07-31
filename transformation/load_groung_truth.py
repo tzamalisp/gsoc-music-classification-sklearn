@@ -174,9 +174,9 @@ class DatasetExporter:
         """
         logger = LoggerSetup(config=self.config,
                              exports_path=self.exports_path,
-                             name="train_class_{}".format(self.train_class),
+                             name="dataset_exports_{}".format(self.train_class),
                              train_class=self.train_class,
-                             mode="a+",
+                             mode="w",
                              level=self.log_level).setup_logger()
         logger.info("---- EXPORTING FEATURES - LABELS - TRACKS ----")
         # the class name from the ground truth data that is the target

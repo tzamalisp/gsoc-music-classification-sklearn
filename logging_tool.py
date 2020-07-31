@@ -11,7 +11,6 @@ Here, the LoggerSetup and its embedded setup_logger() method set up a new logger
 import logging
 import os
 from utils import load_yaml, FindCreateDirectory
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 # # load yaml configuration file to a dict
 # config_data = load_yaml()
@@ -62,10 +61,24 @@ class LoggerSetup:
         self.exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
         self.logs_path = FindCreateDirectory(self.exports_path,
                                              os.path.join(self.exports_dir, "logs")).inspect_directory()
-        handler = logging.FileHandler(os.path.join(self.logs_path, "{}.log".format(self.name)), mode=self.mode)
-        handler.setFormatter(formatter)
 
+        # Create a custom logger
         logger_object = logging.getLogger(self.name)
+
+        # Create handlers
+        c_handler = logging.StreamHandler()
+        f_handler = logging.FileHandler(os.path.join(self.logs_path, "{}.log".format(self.name)), mode=self.mode)
+
+        # Create formatters and add it to handlers
+        c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+        f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        c_handler.setFormatter(c_format)
+        f_handler.setFormatter(f_format)
+
+        # Add handlers to the logger
+        logger_object.addHandler(c_handler)
+        logger_object.addHandler(f_handler)
+
         if self.level is None:
             logger_object.setLevel(logging.INFO)
         elif self.level is 0:
@@ -85,7 +98,5 @@ class LoggerSetup:
                   '2: WARNING\n'
                   '3: ERROR\n'
                   '4: CRITICAL')
-
-        logger_object.addHandler(handler)
 
         return logger_object

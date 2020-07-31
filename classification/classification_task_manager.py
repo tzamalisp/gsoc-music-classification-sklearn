@@ -41,8 +41,17 @@ class ClassificationTaskManager:
         self.reports_path = ""
 
         self.logger = ""
+        self.setting_logger()
         self.files_existence()
         self.config_file_analysis()
+
+    def setting_logger(self):
+        self.logger = LoggerSetup(config=self.config,
+                                  exports_path=self.exports_path,
+                                  name="train_class_{}".format(self.train_class),
+                                  train_class=self.train_class,
+                                  mode="a",
+                                  level=self.log_level).setup_logger()
 
     def files_existence(self):
         """
@@ -74,12 +83,6 @@ class ClassificationTaskManager:
                                                os.path.join(self.exports_dir, "reports")).inspect_directory()
 
     def config_file_analysis(self):
-        self.logger = LoggerSetup(config=self.config,
-                                  exports_path=self.exports_path,
-                                  name="task_manager_{}".format(self.train_class),
-                                  train_class=self.train_class,
-                                  mode="w",
-                                  level=self.log_level).setup_logger()
         self.logger.info("---- CHECK FOR INAPPROPRIATE CONFIG FILE FORMAT ----")
         if 'processing' not in self.config:
             self.logger.error('No preprocessing defined in config.')

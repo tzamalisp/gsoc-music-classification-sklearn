@@ -8,6 +8,7 @@ import pandas as pd
 from utils import load_yaml, FindCreateDirectory
 from transformation.utils_preprocessing import flatten_dict_full
 from transformation.transform_predictions import TransformPredictions
+from logging_tool import LoggerSetup
 
 
 class Predict:
@@ -25,6 +26,15 @@ class Predict:
         # self.flat_dict()
         self.df_track = pd.DataFrame()
         self.list_track = []
+
+    # def setting_logger(self):
+    #     # set up logger
+    #     self.logger = LoggerSetup(config=self.config,
+    #                               exports_path=self.exports_path,
+    #                               name="dataset_exports_transformations_{}".format(self.train_class),
+    #                               train_class=self.train_class,
+    #                               mode="a",
+    #                               level=self.log_level).setup_logger()
 
     def load_best_model(self):
         self.class_name = self.config["class_name"]

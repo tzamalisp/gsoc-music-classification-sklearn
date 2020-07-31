@@ -27,6 +27,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
                          train_class=class_name,
                          mode="w",
                          level=log_level).setup_logger()
+
     logger.info("---- EVALUATION of the model in the Folded dataset as well as in the whole dataset ----")
     print("---- EVALUATION of the model in the Folded dataset as well as in the whole dataset ----")
     print(colored("Evaluation and Folding..", "yellow"))

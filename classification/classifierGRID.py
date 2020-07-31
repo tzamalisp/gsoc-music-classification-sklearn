@@ -10,6 +10,7 @@ from sklearn.model_selection import KFold
 
 from transformation.transform import Transform
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
+from logging_tool import LoggerSetup
 
 
 class TrainGridClassifier:
@@ -23,14 +24,26 @@ class TrainGridClassifier:
         self.exports_path = exports_path
         self.log_level = log_level
 
+        self.logger = ""
         self.best_models_list = []
         # self.train_grid_search_clf()
+
+        self.setting_logger()
+
+    def setting_logger(self):
+        # set up logger
+        self.logger = LoggerSetup(config=self.config,
+                                  exports_path=self.exports_path,
+                                  name="train_class_{}".format(self.class_name),
+                                  train_class=self.class_name,
+                                  mode="a",
+                                  level=self.log_level).setup_logger()
 
     def train_grid_search_clf(self):
         process_counter = 1
         for tr_process in self.tr_processes:
             print(colored("Train process {} - {}".format(process_counter, tr_process), "green"))
-
+            self.logger.info("(Grid) - Train process {} - {}".format(process_counter, tr_process))
             # initiate SVM classifier object
             if self.classifier == "svm":
                 grid_clf = SVC(gamma="auto", probability=True)
@@ -61,7 +74,7 @@ class TrainGridClassifier:
                 random_seed = self.config["seed"]
             elif shuffle is False:
                 random_seed = None
-            print("Fitting the data to the classifier with K-Fold cross-validation..")
+            self.logger.info("Fitting the data to the classifier with K-Fold cross-validation..")
             inner_cv = KFold(n_splits=tr_process["n_fold"],
                              shuffle=shuffle,
                              random_state=random_seed
@@ -74,16 +87,16 @@ class TrainGridClassifier:
                                 verbose=self.config["verbose"]
                                 )
 
-            print(colored("Shape of X before train: {}".format(features_prepared.shape), "green"))
-            print("Fitting the data to the model:")
+            self.logger.debug("Shape of X before train: {}".format(features_prepared.shape))
+            self.logger.info("Fitting the data to the model..")
             gsvc.fit(features_prepared, self.y)
 
             # print(gsvc.cv_results_["params"])
-            print("Results from each best preprocess training:")
-            print("Best score: {}".format(gsvc.best_score_))
-            print("Best estimator: {}".format(gsvc.best_estimator_))
-            print("Best parameters: {}".format(gsvc.best_params_))
-            print("Counted evaluations in this GridSearch process: {}".format(len(gsvc.cv_results_["params"])))
+            self.logger.info("Results from each best preprocess training:")
+            self.logger.info("a) Best score: {}".format(gsvc.best_score_))
+            self.logger.info("b) Best estimator: {}".format(gsvc.best_estimator_))
+            self.logger.info("c) Best parameters: {}".format(gsvc.best_params_))
+            self.logger.info("Counted evaluations in this GridSearch process: {}".format(len(gsvc.cv_results_["params"])))
 
             # save best results for each train process
             exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)
@@ -110,12 +123,11 @@ class TrainGridClassifier:
                                               os.path.join(exports_dir, "models")).inspect_directory()
             best_process_model_path = os.path.join(models_path, "model_grid_{}.pkl".format(tr_process["preprocess"]))
             joblib.dump(gsvc.best_estimator_, best_process_model_path)
-            print(colored("Grid Best model for the {} process saved.".format(tr_process["preprocess"]), "cyan"))
+            self.logger.info("Grid Best model for the {} process saved.".format(tr_process["preprocess"]))
 
             # return a list that includes the best models exported from each processing
             self.best_models_list.append(results_dict)
 
-            print()
             print(colored("Next train process..", "yellow"))
             process_counter += 1
             print()
@@ -126,17 +138,16 @@ class TrainGridClassifier:
     def export_best_classifier(self):
         # gather best scores from the exported grid clf models
         scores = [x["score"] for x in self.best_models_list]
-        print(colored("This is the max score of all the training processes: {}".format(max(scores)), "cyan"))
+        self.logger.info("This is the max score of all the training processes: {}".format(max(scores)))
         for model in self.best_models_list:
             if model["score"] == max(scores):
-                print("Best {} model parameters:".format(self.class_name))
+                self.logger.info("Best {} model parameters:".format(self.class_name))
                 # log2 --> convert values to initial parameters' values
                 # model["params"]["C"] = math.log2(model["params"]["C"])
                 # model["params"]["gamma"] = math.log2(model["params"]["gamma"])
-                pprint(model)
+                self.logger.info("{}".format(model))
                 best_model_name = "best_model_{}.json".format(self.class_name)
                 exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)
                 with open(os.path.join(self.exports_path, exports_dir, best_model_name), "w") as best_model:
                     json.dump(model, best_model, indent=4)
-                    print(colored("Best {} model parameters saved successfully to disk.".format(self.class_name),
-                                  "cyan"))
+                    self.logger.info("Best {} model parameters saved successfully to disk.".format(self.class_name))

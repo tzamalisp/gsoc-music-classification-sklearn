@@ -71,9 +71,14 @@ class LoggerSetup:
 
         # Create formatters and add it to handlers
         c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-        f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        f_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         c_handler.setFormatter(c_format)
         f_handler.setFormatter(f_format)
+
+        #  if handlers are already present and if so, clear them before adding new handlers. This is pretty convenient
+        #  when debugging and the code includes the logger initialization
+        if logger_object.hasHandlers():
+            logger_object.handlers.clear()
 
         # Add handlers to the logger
         logger_object.addHandler(c_handler)

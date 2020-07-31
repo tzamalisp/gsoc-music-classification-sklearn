@@ -50,7 +50,7 @@ def train_class(config, gt_file, log_level):
 
     print(colored("Small previews:", "cyan"))
     print(colored("FEATURES", "magenta"))
-    print(features.head(10))
+    print(features.head(3))
     print(colored("LABELS", "magenta"))
     print(labels[:10])
     print(colored("TRACKS:", "magenta"))

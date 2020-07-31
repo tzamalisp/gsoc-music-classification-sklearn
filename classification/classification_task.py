@@ -19,17 +19,23 @@ class ClassificationTask:
         self.training_processes = training_processes
         self.exports_path = exports_path
         self.tracks = tracks
+        self.logger = ""
+
+        self.setting_logger()
+
+    def setting_logger(self):
+        # set up logger
+        self.logger = LoggerSetup(config=self.config,
+                                  exports_path=self.exports_path,
+                                  name="train_class_{}".format(self.train_class),
+                                  train_class=self.train_class,
+                                  mode="a",
+                                  level=self.log_level).setup_logger()
 
     def run(self):
-        logger = LoggerSetup(config=self.config,
-                             exports_path=self.exports_path,
-                             name="train_class_{}".format(self.train_class),
-                             train_class=self.train_class,
-                             mode="a",
-                             level=self.log_level).setup_logger()
         # grid search train
         if self.config["train_kind"] == "grid":
-            logger.info("Train Classifier: Classifier with GridSearchCV")
+            self.logger.info("Train Classifier: Classifier with GridSearchCV")
             grid_svm_train = TrainGridClassifier(config=self.config,
                                                  classifier=self.classifier,
                                                  class_name=self.train_class,
@@ -42,20 +48,20 @@ class ClassificationTask:
             grid_svm_train.train_grid_search_clf()
             grid_svm_train.export_best_classifier()
         elif self.classifier == "NN":
-            logger.info("Train Classifier: Neural Networks")
+            self.logger.info("Train Classifier: Neural Networks")
             pass
 
-        logger.info("Training is completed successfully..")
+        self.logger.info("Training is completed successfully..")
 
         # load best model
-        logger.info("Loading Best Model..")
+        self.logger.info("Loading Best Model..")
         exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
         best_model_name = "best_model_{}.json".format(self.train_class)
         with open(os.path.join(self.exports_path, exports_dir, best_model_name)) as best_model_file:
             best_model = json.load(best_model_file)
         print(colored("BEST MODEL:", "cyan"))
         print(best_model)
-        logger.info("Best Model loaded successfully.")
+        self.logger.info("Best Model loaded successfully.")
 
         # clf_model = TrainClassifier(classifier=self.classifier, params=best_model["params"]).model()
         print("Best model loaded..")
@@ -68,4 +74,3 @@ class ClassificationTask:
                         exports_path=self.exports_path,
                         log_level=self.log_level
                         )
-

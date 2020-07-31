@@ -38,19 +38,20 @@ class Transform:
 
         self.feats_prepared = []
         self.logger = ""
+        self.setting_logger()
 
-    def post_processing(self):
+    def setting_logger(self):
         # set up logger
         self.logger = LoggerSetup(config=self.config,
                                   exports_path=self.exports_path,
-                                  name="transformations_{}".format(self.train_class),
+                                  name="dataset_exports_transformations_{}".format(self.train_class),
                                   train_class=self.train_class,
-                                  mode="w",
+                                  mode="a",
                                   level=self.log_level).setup_logger()
 
+    def post_processing(self):
         print(colored("PROCESS: {}".format(self.process), "cyan"))
-        self.logger.info("PROCESS: {}".format(self.process))
-        print("Process: {}".format(self.config["processing"][self.process]))
+        self.logger.debug("PROCESS: {}".format(self.process))
         self.logger.debug("Process: {}".format(self.config["processing"][self.process]))
         # list_preprocesses = []
 

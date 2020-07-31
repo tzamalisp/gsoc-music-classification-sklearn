@@ -13,7 +13,7 @@ from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 
 
 class TrainGridClassifier:
-    def __init__(self, config, classifier, class_name, X, y, tr_processes, exports_path):
+    def __init__(self, config, classifier, class_name, X, y, tr_processes, exports_path, log_level):
         self.config = config
         self.classifier = classifier
         self.class_name = class_name
@@ -21,6 +21,7 @@ class TrainGridClassifier:
         self.y = y
         self.tr_processes = tr_processes
         self.exports_path = exports_path
+        self.log_level = log_level
 
         self.best_models_list = []
         # self.train_grid_search_clf()
@@ -43,7 +44,8 @@ class TrainGridClassifier:
                                           df_feats=self.X,
                                           process=tr_process["preprocess"],
                                           train_class=self.class_name,
-                                          exports_path=self.exports_path).post_processing()
+                                          exports_path=self.exports_path,
+                                          log_level=self.log_level).post_processing()
 
             # define the length of parameters
             parameters_grid = {'kernel': tr_process["kernel"],

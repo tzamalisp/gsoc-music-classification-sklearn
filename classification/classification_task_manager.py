@@ -1,10 +1,10 @@
 import os
-import logging
 from time import time
 from termcolor import colored
 from utils import load_yaml, FindCreateDirectory, TrainingProcesses
 from classification.classification_task import ClassificationTask
 from datetime import datetime
+from logging_tool import LoggerSetup
 
 
 validClassifiers = ['NN', 'svm']
@@ -15,7 +15,7 @@ class ClassificationTaskManager:
     """
 
     """
-    def __init__(self, config, train_class, X, y, tracks, exports_path):
+    def __init__(self, config, train_class, X, y, tracks, exports_path, log_level):
         """
 
         :param yaml_file: The configuration file name
@@ -29,6 +29,7 @@ class ClassificationTaskManager:
         self.y = y
         self.tracks = tracks
         self.exports_path = exports_path
+        self.log_level = log_level
 
         self.exports_dir = ""
         self.results_path = ""
@@ -71,30 +72,42 @@ class ClassificationTaskManager:
                                                os.path.join(self.exports_dir, "reports")).inspect_directory()
 
     def config_file_analysis(self):
-
+        logger = LoggerSetup(config=self.config,
+                             exports_path=self.exports_path,
+                             name="train_class_{}".format(self.train_class),
+                             train_class=self.train_class,
+                             mode="a",
+                             level=self.log_level).setup_logger()
+        logger.info("---- CHECK FOR INAPPROPRIATE CONFIG FILE FORMAT ----")
         if 'processing' not in self.config:
-            log.warning('No preprocessing defined in {}.'.format(self.yaml_file))
+            logger.warning('No preprocessing defined in config.')
 
         if 'evaluations' not in self.config:
-            log.warning('No evaluations defined in {}.'.format(self.yaml_file))
-            log.warning('Setting default evaluation to 10-fold cross-validation')
+            logger.warning('No evaluations defined in config.')
+            logger.warning('Setting default evaluation to 10-fold cross-validation')
             self.config['evaluations'] = {'nfoldcrossvalidation': [{'nfold': [10]}]}
 
         for classifier in self.config['classifiers'].keys():
             if classifier not in validClassifiers:
-                log.warning('Not a valid classifier: {}'.format(classifier))
+                logger.warning('Not a valid classifier: {}'.format(classifier))
                 raise ValueError('The classifier name must be valid.')
 
         for evaluation in self.config['evaluations'].keys():
             if evaluation not in validEvaluations:
-                log.warning('Not a valid evaluation: {}'.format(evaluation))
+                logger.warning('Not a valid evaluation: {}'.format(evaluation))
                 raise ValueError("The evaluation must be valid.")
+        logger.info("No errors in config file format found.")
 
     def apply_processing(self):
+        logger = LoggerSetup(config=self.config,
+                             exports_path=self.exports_path,
+                             name="train_class_{}".format(self.train_class),
+                             train_class=self.train_class,
+                             mode="a",
+                             level=self.log_level).setup_logger()
         start_time = time()
-
         training_processes = TrainingProcesses(self.config).training_processes()
-        print(colored("Classifiers detected: {}".format(self.config["classifiers"].keys()), "green"))
+        logger.info("Classifiers detected: {}".format(self.config["classifiers"].keys()))
         for classifier in self.config["classifiers"].keys():
             print("Before Classification task: ", classifier)
             task = ClassificationTask(config=self.config,
@@ -104,17 +117,19 @@ class ClassificationTaskManager:
                                       X=self.X,
                                       y=self.y,
                                       exports_path=self.exports_path,
-                                      tracks=self.tracks
+                                      tracks=self.tracks,
+                                      log_level=self.log_level
                                       )
             try:
                 task.run()
             except Exception as e:
-                log.error(colored('Running task failed: {}'.format(e), "red"))
-
+                logger.error('Running task failed: {}'.format(e))
+                print(colored('Running task failed: {}'.format(e), "red"))
         end_time = time()
 
         print()
         print(colored("Last evaluation took place at: {}".format(datetime.now()), "magenta"))
+        logger.info("Last evaluation took place at: {}".format(datetime.now()))
 
         # test duration
         time_duration = end_time - start_time

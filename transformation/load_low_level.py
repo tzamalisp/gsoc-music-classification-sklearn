@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 from transformation.utils_preprocessing import flatten_dict_full
+from logging_tool import LoggerSetup
 
 
 class FeaturesDf:
@@ -11,11 +12,13 @@ class FeaturesDf:
             df_tracks (Pandas DataFrame): The tracks DataFrame that contains the track name, track low-level path,
                                         label, etc.
     """
-    def __init__(self, df_tracks, train_class, path_low_level, config):
+    def __init__(self, df_tracks, train_class, path_low_level, config, exports_path, log_level):
         self.df_tracks = df_tracks
         self.train_class = train_class
         self.path_low_level = path_low_level
         self.config = config
+        self.exports_path = exports_path
+        self.log_level = log_level
         self.list_feats_tracks = []
         self.counter_items_transformed = 0
         self.df_feats_tracks = pd.DataFrame()
@@ -29,6 +32,13 @@ class FeaturesDf:
         :return:
         DataFrame: low-level features Daa=taFrame from all the tracks in the collection.
         """
+        logger = LoggerSetup(config=self.config,
+                             exports_path=self.exports_path,
+                             name="train_class_{}".format(self.train_class),
+                             train_class=self.train_class,
+                             mode="a+",
+                             level=self.log_level).setup_logger()
+        logger.info("---- CREATE LOW LEVEL DATAFRAME ----")
         # clear the list if it not empty
         self.list_feats_tracks.clear()
         for index, row in self.df_tracks.iterrows():
@@ -38,6 +48,7 @@ class FeaturesDf:
                 data_feats_item = json.load(f, strict=False)
             except Exception as e:
                 print("Exception occurred in loading file:", e)
+                logger.warning("Exception occurred in loading file: {}".format(e))
             # remove unnecessary features data
             try:
                 if 'beats_position' in data_feats_item['rhythm']:
@@ -55,7 +66,9 @@ class FeaturesDf:
 
         # The dictionary's keys list is transformed to type <class 'list'>
         self.df_feats_tracks = pd.DataFrame(self.list_feats_tracks, columns=list(self.list_feats_tracks[0].keys()))
-        print("COLUMNS CONTAIN OBJECTS", self.df_feats_tracks.select_dtypes(include=['object']).columns)
+        logger.info("COLUMNS CONTAIN OBJECTS: \n{}".format(
+            self.df_feats_tracks.select_dtypes(include=['object']).columns))
+        logger.info("Exporting low-level data (dataframe)")
         return self.df_feats_tracks
 
     def check_processing_info(self):

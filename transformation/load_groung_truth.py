@@ -43,7 +43,7 @@ class GroundTruthLoad:
 
          Attributes:
         """
-    def __init__(self, config, gt_filename):
+    def __init__(self, config, gt_filename, exports_path, log_level):
         """
 
         :param config:
@@ -51,6 +51,10 @@ class GroundTruthLoad:
         """
         self.config = config
         self.gt_filename = gt_filename
+        self.exports_path = exports_path
+        self.log_level = log_level
+
+        self.logger = ""
         self.class_dir = ""
         self.ground_truth_data = {}
         self.labeled_tracks = {}
@@ -66,13 +70,16 @@ class GroundTruthLoad:
         * The directory with the dataset should be located inside the app folder location.
         :return:
         """
+
         self.dataset_dir = self.config.get("ground_truth_directory")
         self.class_dir = self.config.get("class_dir")
         with open(os.path.join(os.getcwd(), "{}/{}/metadata/{}".format(
                 self.dataset_dir, self.class_dir, self.gt_filename)), "r") as stream:
             try:
                 self.ground_truth_data = yaml.safe_load(stream)
+                print("Ground truth file loaded.")
             except yaml.YAMLError as exc:
+                print("Error in loading the ground truth file.")
                 print(exc)
 
     def export_train_class(self):
@@ -81,12 +88,11 @@ class GroundTruthLoad:
         :return:
         """
         self.train_class = self.ground_truth_data["className"]
-        print("EXPORT CLASS NAME:", self.train_class)
+        print("EXPORT CLASS NAME: {}".format(self.train_class))
         return self.train_class
 
     def export_gt_tracks(self):
         self.labeled_tracks = self.ground_truth_data["groundTruth"]
-        print("GROUND TRUTH DICTIONARY LENGTH:", len(self.labeled_tracks))
         tracks_list = []
         for track, label in self.labeled_tracks.items():
             tracks_list.append((track, label))
@@ -108,9 +114,9 @@ class GroundTruthLoad:
         :return:
         """
         len(self.ground_truth_data["groundTruth"].keys())
-        print("Ground truth data class/target:", self.ground_truth_data["className"])
-        print("Label tracks:", type(self.labeled_tracks))
-        print("Ground truth data keys - tracks:", len(self.ground_truth_data["groundTruth"].keys()))
+        print("Ground truth data class/target: {}".format(self.ground_truth_data["className"]))
+        print("Label tracks: {}".format(type(self.labeled_tracks)))
+        print("Ground truth data keys - tracks: {}".format(len(self.ground_truth_data["groundTruth"].keys())))
 
     def check_tracks_folders(self):
         """
@@ -127,7 +133,7 @@ class GroundTruthLoad:
             folders = list(folders)
             folders.sort()
             print("Directories that contain the low-level JSON data:")
-            pprint(folders)
+            print("{}".format(folders))
 
     def count_json_low_level_files(self):
         """
@@ -141,7 +147,7 @@ class GroundTruthLoad:
                 if file.endswith(".json"):
                     # print(os.path.join(root, file))
                     counter += 1
-        print("counted json files:", counter)
+        print("counted json files: {}".format(counter))
 
 
 class DatasetExporter:
@@ -230,7 +236,10 @@ class DatasetExporter:
 
             self.df_feats = FeaturesDf(df_tracks=self.df_tracks,
                                        train_class=self.train_class,
-                                       path_low_level=path_low_level, config=self.config
+                                       path_low_level=path_low_level,
+                                       config=self.config,
+                                       exports_path=self.exports_path,
+                                       log_level=self.log_level,
                                        ).create_low_level_df()
 
             self.y = self.df_tracks[self.train_class].values

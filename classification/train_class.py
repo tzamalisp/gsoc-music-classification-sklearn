@@ -9,7 +9,7 @@ from logging_tool import LoggerSetup
 
 def train_class(config, gt_file, log_level):
     exports_path = config["exports_path"]
-    gt_data = GroundTruthLoad(config, gt_file)
+    gt_data = GroundTruthLoad(config, gt_file, exports_path, log_level)
     # tracks shuffled and exported
     tracks_listed_shuffled = gt_data.export_gt_tracks()
 
@@ -61,7 +61,8 @@ def train_class(config, gt_file, log_level):
                                              X=features,
                                              y=labels,
                                              tracks=tracks,
-                                             exports_path=exports_path)
+                                             exports_path=exports_path,
+                                             log_level=log_level)
     classification_time = model_manage.apply_processing()
     print(colored("Classification ended in {} minutes.".format(classification_time), "green"))
     logger.info("Classification ended in {} minutes.".format(classification_time))

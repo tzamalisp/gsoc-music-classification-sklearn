@@ -6,6 +6,7 @@ from termcolor import colored
 import random
 from utils import load_yaml, FindCreateDirectory
 from transformation.load_low_level import FeaturesDf
+from logging_tool import LoggerSetup
 
 
 class ListGroundTruthFiles:
@@ -144,11 +145,13 @@ class GroundTruthLoad:
 
 
 class DatasetExporter:
-    def __init__(self, config, tracks_list, train_class, exports_path):
+    def __init__(self, config, tracks_list, train_class, exports_path, log_level):
         self.config = config
         self.tracks_list = tracks_list
         self.train_class = train_class
         self.exports_path = exports_path
+        self.log_level = log_level
+
         self.dataset_dir = ""
         self.class_dir = ""
         self.df_tracks = pd.DataFrame()
@@ -163,6 +166,13 @@ class DatasetExporter:
         DataFrame or None: a DataFrame with the tracks included in the ground truth yaml file containing the track name,
         the path to load the JSON low-level data, the label, etc. Else, it returns None.
         """
+        logger = LoggerSetup(config=self.config,
+                             exports_path=self.exports_path,
+                             name="train_class_{}".format(self.train_class),
+                             train_class=self.train_class,
+                             mode="a+",
+                             level=self.log_level).setup_logger()
+        logger.info("---- EXPORTING FEATURES - LABELS - TRACKS ----")
         # the class name from the ground truth data that is the target
         self.dataset_dir = self.config.get("ground_truth_directory")
         self.class_dir = self.config.get("class_dir")
@@ -174,8 +184,10 @@ class DatasetExporter:
         low_level_dir = ""
         if len(os.listdir(path_features)) == 0:
             print("Directory is empty")
+            logger.warning("Directory is empty.")
         else:
             print("Directory is not empty")
+            logger.info("Directory is not empty")
             directory_contents = os.listdir(path_features)
             if "mp3" in directory_contents:
                 low_level_dir = "mp3"
@@ -184,36 +196,37 @@ class DatasetExporter:
             else:
                 low_level_dir = ""
                 print("There is no valid low-level data inside the features directory")
+                logger.warning("There is no valid low-level data inside the features directory")
         # print which directory contains the low-level sub-directories (if exist)
-        print("Low-level directory name that contains the data:", low_level_dir)
+        logger.info("Low-level directory name that contains the data: {}".format(low_level_dir))
         # path to the low-level data sub-directories
         path_low_level = os.path.join(os.getcwd(), self.dataset_dir, self.class_dir, "features", low_level_dir)
-        print("Path of low level data: {}".format(path_low_level))
+        logger.info("Path of low level data: {}".format(path_low_level))
         # create a list with dictionaries that contain the information from each track in
         if low_level_dir != "":
             self.df_tracks = pd.DataFrame(data=self.tracks_list, columns=["track", self.train_class])
-            print("Shape of tracks DF created before cleaning:", self.df_tracks.shape)
-            print("Check the shape of a temporary DF that includes if there are any NULL values:")
-            print(self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape)
+            logger.debug("Shape of tracks DF created before cleaning: {}".format(self.df_tracks.shape))
+            logger.debug("Check the shape of a temporary DF that includes if there are any NULL values:")
+            logger.debug("{}".format(self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape))
 
-            print("Drop rows with NULL values if they exist..")
+            logger.debug("Drop rows with NULL values if they exist..")
             if self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape[0] != 0:
                 self.df_tracks.dropna(inplace=True)
-                print("Check if there are NULL values after the cleaning process:")
-                print(self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape)
-                print("Re-index the tracks DF..")
+                logger.debug("Check if there are NULL values after the cleaning process:")
+                logger.debug("{}".format(self.df_tracks[self.df_tracks.isnull().any(axis=1)].shape))
+                logger.debug("Re-index the tracks DF..")
                 self.df_tracks = self.df_tracks.reset_index(drop=True)
             else:
-                print("There are no NULL values found.")
+                logger.info("There are no NULL values found.")
 
             # export shuffled tracks to CSV format
             exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
             tracks_path = FindCreateDirectory(self.exports_path,
                                               os.path.join(exports_dir, "tracks_csv_format")).inspect_directory()
             self.df_tracks.to_csv(os.path.join(tracks_path, "tracks_{}_shuffled.csv".format(self.train_class)))
-            print("DF INFO:")
-            print(self.df_tracks.info())
-            print("COLUMNS CONTAIN OBJECTS", self.df_tracks.select_dtypes(include=['object']).columns)
+            logger.debug("DF INFO:")
+            logger.debug("{}".format(self.df_tracks.info()))
+            logger.debug("COLUMNS CONTAIN OBJECTS: {}".format(self.df_tracks.select_dtypes(include=['object']).columns))
 
             self.df_feats = FeaturesDf(df_tracks=self.df_tracks,
                                        train_class=self.train_class,
@@ -221,9 +234,7 @@ class DatasetExporter:
                                        ).create_low_level_df()
 
             self.y = self.df_tracks[self.train_class].values
-
+            logger.info("Features, Labels, and Tracks are exported successfully..")
             return self.df_feats, self.y, self.df_tracks["track"].values
         else:
             return None, None, None
-
-

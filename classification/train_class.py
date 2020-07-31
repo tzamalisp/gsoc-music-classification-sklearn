@@ -19,10 +19,12 @@ def train_class(config, gt_file, log_level):
 
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,
-                         name="train_class",
+                         name="train_class_{}".format(class_name),
                          train_class=class_name,
                          mode="w",
                          level=log_level).setup_logger()
+    
+    logger.info("---- TRAINING FOR THE {} MODEL HAS JUST STARTED ----".format(class_name))
 
     logger.debug("Type of exported GT data exported: {}".format(type(tracks_listed_shuffled)))
 
@@ -38,7 +40,8 @@ def train_class(config, gt_file, log_level):
     features, labels, tracks = DatasetExporter(config=config,
                                                tracks_list=tracks_listed_shuffled,
                                                train_class=class_name,
-                                               exports_path=exports_path
+                                               exports_path=exports_path,
+                                               log_level=log_level
                                                ).create_df_tracks()
     logger.debug("Types of exported files from GT:")
     logger.debug("Type of features: {}".format(type(features)))

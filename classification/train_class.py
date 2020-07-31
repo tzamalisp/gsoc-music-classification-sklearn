@@ -12,7 +12,6 @@ def train_class(config, gt_file, log_level):
     gt_data = GroundTruthLoad(config, gt_file)
     # tracks shuffled and exported
     tracks_listed_shuffled = gt_data.export_gt_tracks()
-    print(colored("Type of exported GT data exported: {}".format(type(tracks_listed_shuffled)), "green"))
 
     # class to train
     class_name = gt_data.export_train_class()
@@ -22,7 +21,10 @@ def train_class(config, gt_file, log_level):
                          exports_path=exports_path,
                          name="train_class",
                          train_class=class_name,
+                         mode="w",
                          level=log_level).setup_logger()
+
+    logger.debug("Type of exported GT data exported: {}".format(type(tracks_listed_shuffled)))
 
     # save project file
     project_file_name_save = "{}_{}.yaml".format(config["project_file"], class_name)

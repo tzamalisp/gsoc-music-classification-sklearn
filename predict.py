@@ -99,19 +99,17 @@ class Predict:
 
             predict_list.append(predict_dict)
 
-        self.logger.info("")
+        self.logger.info("Predictions for the track:")
         self.logger.info("{}".format(predict_list))
-        self.logger.info("predict_list")
+        self.logger.debug("Output (Return) predict_list")
 
         return predict_list
 
 
 def prediction(exports_path, project_file, track_api, log_level):
     # if empty, path is declared as the app's main directory
-
     if exports_path is None:
         exports_path = os.getcwd()
-
     try:
         project_data = load_yaml("{}.yaml".format(project_file))
     except Exception as e:
@@ -124,6 +122,8 @@ def prediction(exports_path, project_file, track_api, log_level):
     if track["metadata"]["tags"]["artist"][0]:
         print("Artist:", track["metadata"]["tags"]["artist"][0])
     if track["metadata"]["tags"]["album"][0]:
+        print("Track:", track["metadata"]["tags"]["album"][0])
+    if track["metadata"]["tags"]["title"][0]:
         print("Track:", track["metadata"]["tags"]["album"][0])
 
     prediction_track = Predict(config=project_data,
@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-p', '--path',
                         dest="exports_path",
-                        help='Path where the project results are stored.')
+                        help='Path where the project file is stored if not in the same file where the app is.')
 
     parser.add_argument('-f', '--file',
                         dest="project_file",

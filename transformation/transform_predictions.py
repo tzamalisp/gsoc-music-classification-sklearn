@@ -156,7 +156,7 @@ class TransformPredictions:
             new_feats_columns = select_rename_list + select_no_rename_list
             self.df_feats.columns = new_feats_columns
             self.logger.debug("Normalized Features DF:")
-            self.logger.debug("{}".fomrat(self.df_feats))
+            self.logger.debug("\n{}".format(self.df_feats))
             self.logger.debug("Shape: {}".format(self.df_feats.shape))
             # feats_no_gauss_list = [x for x in new_feats_columns if x not in feats_num_gauss_list]
 

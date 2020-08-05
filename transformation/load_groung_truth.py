@@ -99,6 +99,7 @@ class GroundTruthLoad:
         print(colored("SEED is set to: {}".format(self.config.get("seed"), "cyan")))
         random.seed(a=self.config.get("seed"))
         random.shuffle(tracks_list)
+        print("Listed tracks in GT file: {}".format(len(tracks_list)))
         return tracks_list
 
     def check_ground_truth_data(self):
@@ -217,6 +218,15 @@ class DatasetExporter:
         self.logger.info("Path of low level data: {}".format(path_low_level))
         # create a list with dictionaries that contain the information from each track in
         if low_level_dir != "":
+            self.logger.debug("Cleaning no found tracks in the path directory of the low-level.")
+            tracks_existing_list = []
+            for track in self.tracks_list:
+                path_low_data = os.path.join(path_low_level, "{}.json".format(track[0]))
+                # print(path_low_data)
+                if os.path.isfile(path_low_data):
+                    tracks_existing_list.append(track)
+            self.logger.debug("The founded tracks tracks listed successfully.")
+            self.tracks_list = tracks_existing_list
             self.df_tracks = pd.DataFrame(data=self.tracks_list, columns=["track", self.train_class])
             self.logger.debug("Shape of tracks DF created before cleaning: {}".format(self.df_tracks.shape))
             self.logger.debug("Check the shape of a temporary DF that includes if there are any NULL values:")

@@ -106,7 +106,7 @@ class Predict:
         return predict_list
 
 
-def prediction(exports_path, project_file, track_api, log_level):
+def prediction(exports_path, project_file, mbid, log_level):
     # if empty, path is declared as the app's main directory
     if exports_path is None:
         exports_path = os.getcwd()
@@ -116,18 +116,18 @@ def prediction(exports_path, project_file, track_api, log_level):
         print('Unable to open project configuration file:', e)
         raise
 
-    response = requests.get(track_api)
-
-    track = response.json()
-    if track["metadata"]["tags"]["artist"][0]:
-        print("Artist:", track["metadata"]["tags"]["artist"][0])
-    if track["metadata"]["tags"]["album"][0]:
-        print("Track:", track["metadata"]["tags"]["album"][0])
-    if track["metadata"]["tags"]["title"][0]:
-        print("Track:", track["metadata"]["tags"]["album"][0])
+    url_api = "https://acousticbrainz.org/api/v1/{}/low-level".format(mbid)
+    response = requests.get(url=url_api)
+    track_low_level_data = response.json()
+    if track_low_level_data["metadata"]["tags"]["artist"][0]:
+        print("Artist:", track_low_level_data["metadata"]["tags"]["artist"][0])
+    if track_low_level_data["metadata"]["tags"]["album"][0]:
+        print("Album:", track_low_level_data["metadata"]["tags"]["album"][0])
+    if track_low_level_data["metadata"]["tags"]["title"][0]:
+        print("Title:", track_low_level_data["metadata"]["tags"]["title"][0])
 
     prediction_track = Predict(config=project_data,
-                               track_low_level=track,
+                               track_low_level=track_low_level_data,
                                log_level=log_level
                                )
     prediction_track.preprocessing()
@@ -136,7 +136,7 @@ def prediction(exports_path, project_file, track_api, log_level):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-        description='Predictions.')
+        description='Prediction of a track.')
 
     parser.add_argument('-p', '--path',
                         dest="exports_path",
@@ -148,8 +148,8 @@ if __name__ == '__main__':
                         required=True)
 
     parser.add_argument('-t', '--track',
-                        dest="track_api",
-                        help='Low-level data link from the AcousticBrainz API.',
+                        dest="mbid",
+                        help='MBID of the the low-level data from the AcousticBrainz API.',
                         required=True)
 
     parser.add_argument('-l', '--logging',
@@ -162,5 +162,5 @@ if __name__ == '__main__':
 
     prediction(exports_path=args.exports_path,
                project_file=args.project_file,
-               track_api=args.track_api,
+               mbid=args.mbid,
                log_level=args.log_level)

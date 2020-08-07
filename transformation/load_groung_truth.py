@@ -189,9 +189,6 @@ class DatasetExporter:
         # self.class_dir = self.config.get("class_dir")
         print('DATASET-DIR', self.dataset_dir)
         # print('CLASS NAME PATH', self.class_dir)
-        traaaacks = []
-        for item in self.tracks_list:
-            traaaacks.append(item[0])
         dirpath = os.path.join(os.getcwd(), self.dataset_dir)
         low_level_list = list()
         for (dirpath, dirnames, filenames) in os.walk(dirpath):

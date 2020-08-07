@@ -12,10 +12,10 @@ class FeaturesDf:
             df_tracks (Pandas DataFrame): The tracks DataFrame that contains the track name, track low-level path,
                                         label, etc.
     """
-    def __init__(self, df_tracks, train_class, path_low_level, config, exports_path, log_level):
+    def __init__(self, df_tracks, train_class, list_path_tracks, config, exports_path, log_level):
         self.df_tracks = df_tracks
         self.train_class = train_class
-        self.path_low_level = path_low_level
+        self.list_path_tracks = list_path_tracks
         self.config = config
         self.exports_path = exports_path
         self.log_level = log_level
@@ -48,10 +48,9 @@ class FeaturesDf:
         self.logger.info("---- CREATE LOW LEVEL DATAFRAME ----")
         # clear the list if it not empty
         self.list_feats_tracks.clear()
-        for index, row in self.df_tracks.iterrows():
-            path_low_data = os.path.join(self.path_low_level, "{}.json".format(row["track"]))
+        for track_low_level_path in self.list_path_tracks:
             try:
-                f = open(path_low_data)
+                f = open(track_low_level_path)
                 data_feats_item = json.load(f, strict=False)
             except Exception as e:
                 print("Exception occurred in loading file:", e)

@@ -20,7 +20,7 @@ class ListGroundTruthFiles:
         """
         self.config = config
         self.dataset_dir = ""
-        self.class_dir = ""
+        # self.class_dir = ""
 
     def list_gt_filenames(self):
         """
@@ -28,12 +28,11 @@ class ListGroundTruthFiles:
         :return:
         """
         self.dataset_dir = self.config.get("ground_truth_directory")
-        self.class_dir = self.config.get("class_dir")
-        path = os.path.join(os.getcwd(), self.dataset_dir, self.class_dir, "metadata")
-        ground_truth_list = [filename for filename in os.listdir(os.path.join(path))
-                             if filename.startswith("groundtruth")]
+        ground_truth_list = list()
+        dirpath = os.path.join(os.getcwd(), self.dataset_dir)
+        for (dirpath, dirnames, filenames) in os.walk(dirpath):
+            ground_truth_list += [os.path.join(dirpath, file) for file in filenames if file.startswith("groundtruth")]
         return ground_truth_list
-
 
 class GroundTruthLoad:
     """
@@ -71,10 +70,8 @@ class GroundTruthLoad:
         :return:
         """
 
-        self.dataset_dir = self.config.get("ground_truth_directory")
-        self.class_dir = self.config.get("class_dir")
-        with open(os.path.join(os.getcwd(), "{}/{}/metadata/{}".format(
-                self.dataset_dir, self.class_dir, self.gt_filename)), "r") as stream:
+        self.dataset_dir = self.config.get("dataset_dir")
+        with open(self.gt_filename, "r") as stream:
             try:
                 self.ground_truth_data = yaml.safe_load(stream)
                 print("Ground truth file loaded.")
@@ -189,42 +186,24 @@ class DatasetExporter:
         self.logger.info("---- EXPORTING FEATURES - LABELS - TRACKS ----")
         # the class name from the ground truth data that is the target
         self.dataset_dir = self.config.get("ground_truth_directory")
-        self.class_dir = self.config.get("class_dir")
+        # self.class_dir = self.config.get("class_dir")
         print('DATASET-DIR', self.dataset_dir)
-        print('CLASS NAME PATH', self.class_dir)
-        # the path to the "features" directory that contains the rest of the low-level data sub-directories
-        path_features = os.path.join(os.getcwd(), self.dataset_dir, self.class_dir, "features")
-        # check if the "features" directory is empty or contains the "mp3" or the "orig" sub-directory
-        low_level_dir = ""
-        if len(os.listdir(path_features)) == 0:
-            print("Directory is empty")
-            self.logger.warning("Directory is empty.")
-        else:
-            print("Directory is not empty")
-            self.logger.info("Directory is not empty")
-            directory_contents = os.listdir(path_features)
-            if "mp3" in directory_contents:
-                low_level_dir = "mp3"
-            elif "orig" in directory_contents:
-                low_level_dir = "orig"
-            else:
-                low_level_dir = ""
-                print("There is no valid low-level data inside the features directory")
-                self.logger.warning("There is no valid low-level data inside the features directory")
-        # print which directory contains the low-level sub-directories (if exist)
-        self.logger.info("Low-level directory name that contains the data: {}".format(low_level_dir))
-        # path to the low-level data sub-directories
-        path_low_level = os.path.join(os.getcwd(), self.dataset_dir, self.class_dir, "features", low_level_dir)
-        self.logger.info("Path of low level data: {}".format(path_low_level))
-        # create a list with dictionaries that contain the information from each track in
-        if low_level_dir != "":
-            self.logger.debug("Cleaning no found tracks in the path directory of the low-level.")
-            tracks_existing_list = []
-            for track in self.tracks_list:
-                path_low_data = os.path.join(path_low_level, "{}.json".format(track[0]))
-                # print(path_low_data)
-                if os.path.isfile(path_low_data):
-                    tracks_existing_list.append(track)
+        # print('CLASS NAME PATH', self.class_dir)
+        traaaacks = []
+        for item in self.tracks_list:
+            traaaacks.append(item[0])
+        dirpath = os.path.join(os.getcwd(), self.dataset_dir)
+        low_level_list = list()
+        for (dirpath, dirnames, filenames) in os.walk(dirpath):
+            low_level_list += [os.path.join(dirpath, file) for file in filenames if file.endswith(".json")]
+        if len(low_level_list) != 0:
+            self.logger.info("Low-level features for the tracks found.")
+            tracks_existing_list = [e for e in self.tracks_list for i in low_level_list if e[0] in i]
+            tracks_existing_path_list = [i for e in self.tracks_list for i in low_level_list if e[0] in i]
+            self.logger.debug("tracks existed found: {}".format(len(tracks_existing_list)))
+            self.logger.debug("tracks_path existed found: {}".format(len(tracks_existing_path_list)))
+            self.logger.debug("{}".format(tracks_existing_list[:4]))
+            self.logger.debug("{}".format(tracks_existing_path_list[:4]))
             self.logger.debug("The founded tracks tracks listed successfully.")
             self.tracks_list = tracks_existing_list
             self.df_tracks = pd.DataFrame(data=self.tracks_list, columns=["track", self.train_class])
@@ -254,7 +233,7 @@ class DatasetExporter:
 
             self.df_feats = FeaturesDf(df_tracks=self.df_tracks,
                                        train_class=self.train_class,
-                                       path_low_level=path_low_level,
+                                       list_path_tracks=tracks_existing_path_list,
                                        config=self.config,
                                        exports_path=self.exports_path,
                                        log_level=self.log_level,
@@ -264,4 +243,5 @@ class DatasetExporter:
             self.logger.info("Features, Labels, and Tracks are exported successfully..")
             return self.df_feats, self.y, self.df_tracks["track"].values
         else:
+            self.logger.error("No low-level data found.")
             return None, None, None

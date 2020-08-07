@@ -8,7 +8,7 @@ from transformation.load_groung_truth import ListGroundTruthFiles
 from classification.train_class import train_class
 
 
-def create_classification_project(ground_truth_directory, class_dir, project_file, exports_directory, logging, seed, jobs, verbose, exports_path):
+def create_classification_project(ground_truth_directory, project_file, exports_directory, logging, seed, jobs, verbose, exports_path):
     """
 
     :param ground_truth_directory:
@@ -38,7 +38,6 @@ def create_classification_project(ground_truth_directory, class_dir, project_fil
     print("Seed argument: {}".format(seed))
 
     project_template["ground_truth_directory"] = ground_truth_directory
-    project_template["class_dir"] = class_dir
     project_template["project_file"] = project_file
     project_template["exports_directory"] = exports_directory
     project_template["logging_level"] = logging
@@ -77,12 +76,9 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--groundtruth',
                         dest="ground_truth_directory",
                         default="datasets",
-                        help='Name of the directory containing the datasets.')
-
-    parser.add_argument('-c', '--classdir',
-                        dest="class_dir",
-                        help='Name of the directory containing the class or classes to train.',
+                        help='Path of the dataset directory containing the groundtruth file/s.',
                         required=True)
+
 
     parser.add_argument('-f', '--file',
                         dest="project_file",
@@ -124,6 +120,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    create_classification_project(args.ground_truth_directory, args.class_dir, args.project_file,
+    create_classification_project(args.ground_truth_directory, args.project_file,
                                   args.exports_directory, logging=args.logging, seed=args.seed, jobs=args.jobs,
                                   verbose=args.verbose, exports_path=args.exports_path)

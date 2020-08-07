@@ -7,7 +7,7 @@ import yaml
 from logging_tool import LoggerSetup
 
 
-def train_class(config, gt_file, log_level):
+def train_class(config, gt_file, exports_directory, log_level):
     exports_path = config["exports_path"]
     gt_data = GroundTruthLoad(config, gt_file, exports_path, log_level)
     # tracks shuffled and exported
@@ -18,9 +18,10 @@ def train_class(config, gt_file, log_level):
     config["class_name"] = class_name
 
     # project directory where the models and outputs will be saved
-    if config["exports_directory"] is None:
+    if exports_directory is None:
         prefix = "exports"
         config["exports_directory"] = "{}_{}".format(prefix, class_name)
+        print()
 
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,

@@ -198,7 +198,10 @@ class DatasetExporter:
             low_level_list += [os.path.join(dirpath, file) for file in filenames if file.endswith(".json")]
         if len(low_level_list) != 0:
             self.logger.info("Low-level features for the tracks found.")
+            # processing the names of the tracks that are inside both the GT file and the low-level json files
+            # list with the tracks that are included in the low-level json files
             tracks_existing_list = [e for e in self.tracks_list for i in low_level_list if e[0] in i]
+            # list with the low-level json tracks' paths that are included in tracks list
             tracks_existing_path_list = [i for e in self.tracks_list for i in low_level_list if e[0] in i]
             self.logger.debug("tracks existed found: {}".format(len(tracks_existing_list)))
             self.logger.debug("tracks_path existed found: {}".format(len(tracks_existing_path_list)))
@@ -206,6 +209,7 @@ class DatasetExporter:
             self.logger.debug("{}".format(tracks_existing_path_list[:4]))
             self.logger.debug("The founded tracks tracks listed successfully.")
             self.tracks_list = tracks_existing_list
+            # create the dataframe with tracks that are bothe in low-level files and the GT file
             self.df_tracks = pd.DataFrame(data=self.tracks_list, columns=["track", self.train_class])
             self.logger.debug("Shape of tracks DF created before cleaning: {}".format(self.df_tracks.shape))
             self.logger.debug("Check the shape of a temporary DF that includes if there are any NULL values:")

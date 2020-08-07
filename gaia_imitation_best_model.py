@@ -53,7 +53,7 @@ def evaluate_gaia_imitation_model(config, class_name, X, y):
     # pre-processing: data cleaning/enumerating/selecting descriptors
     # pre-processing: scaling
     print("Exports path for the training:")
-    exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
+    exports_dir = config.get("exports_directory")
     exports_path = FindCreateDirectory(exports_dir).inspect_directory()
     print(exports_path)
     # transformation of the data

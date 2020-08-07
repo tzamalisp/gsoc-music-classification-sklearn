@@ -33,7 +33,7 @@ class Predict:
     def load_best_model(self):
         self.class_name = self.config["class_name"]
         self.exports_path = self.config["exports_path"]
-        self.exports_dir = "{}_{}".format(self.config["exports_directory"], self.class_name)
+        self.exports_dir = self.config["exports_directory"]
 
         # self.exports_path = os.path.join(self.exports_path, "{}_{}".format(self.exports_dir, self.class_name))
         best_model_path = os.path.join(self.exports_path,
@@ -111,7 +111,7 @@ def prediction(exports_path, project_file, mbid, log_level):
     if exports_path is None:
         exports_path = os.getcwd()
     try:
-        project_data = load_yaml("{}.yaml".format(project_file))
+        project_data = load_yaml(os.path.join(exports_path, "{}.yaml".format(project_file)))
     except Exception as e:
         print('Unable to open project configuration file:', e)
         raise

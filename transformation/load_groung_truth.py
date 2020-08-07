@@ -223,7 +223,7 @@ class DatasetExporter:
                 self.logger.info("There are no NULL values found.")
 
             # export shuffled tracks to CSV format
-            exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+            exports_dir = self.config.get("exports_directory")
             tracks_path = FindCreateDirectory(self.exports_path,
                                               os.path.join(exports_dir, "tracks_csv_format")).inspect_directory()
             self.df_tracks.to_csv(os.path.join(tracks_path, "tracks_{}_shuffled.csv".format(self.train_class)))

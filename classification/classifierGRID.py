@@ -99,7 +99,7 @@ class TrainGridClassifier:
             self.logger.info("Counted evaluations in this GridSearch process: {}".format(len(gsvc.cv_results_["params"])))
 
             # save best results for each train process
-            exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)
+            exports_dir = self.config.get("exports_directory")
             results_path = FindCreateDirectory(self.exports_path,
                                                os.path.join(exports_dir, "results")).inspect_directory()
             results_best_dict_name = "result_{}_{}_best_{}.json"\
@@ -147,7 +147,7 @@ class TrainGridClassifier:
                 # model["params"]["gamma"] = math.log2(model["params"]["gamma"])
                 self.logger.info("{}".format(model))
                 best_model_name = "best_model_{}.json".format(self.class_name)
-                exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.class_name)
+                exports_dir = self.config.get("exports_directory")
                 with open(os.path.join(self.exports_path, exports_dir, best_model_name), "w") as best_model:
                     json.dump(model, best_model, indent=4)
                     self.logger.info("Best {} model parameters saved successfully to disk.".format(self.class_name))

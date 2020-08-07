@@ -57,7 +57,7 @@ class Transform:
 
         self.list_features = list(self.df_feats.columns)
 
-        exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+        exports_dir = self.config.get("exports_directory")
         models_path = FindCreateDirectory(self.exports_path,
                                           os.path.join(exports_dir, "models")).inspect_directory()
 

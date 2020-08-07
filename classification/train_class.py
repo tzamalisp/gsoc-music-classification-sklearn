@@ -17,6 +17,11 @@ def train_class(config, gt_file, log_level):
     class_name = gt_data.export_train_class()
     config["class_name"] = class_name
 
+    # project directory where the models and outputs will be saved
+    if config["exports_directory"] is None:
+        prefix = "exports"
+        config["exports_directory"] = "{}_{}".format(prefix, class_name)
+
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,
                          name="train_class_{}".format(class_name),

@@ -58,7 +58,7 @@ class LoggerSetup:
 
         :return:
         """
-        self.exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+        self.exports_dir = self.config.get("exports_directory")
         self.logs_path = FindCreateDirectory(self.exports_path,
                                              os.path.join(self.exports_dir, "logs")).inspect_directory()
 

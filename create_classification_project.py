@@ -39,7 +39,6 @@ def create_classification_project(ground_truth_directory, project_file, exports_
 
     project_template["ground_truth_directory"] = ground_truth_directory
     project_template["project_file"] = project_file
-    project_template["exports_directory"] = exports_directory
     project_template["logging_level"] = logging
     project_template["seed"] = seed
     project_template["parallel_jobs"] = jobs
@@ -79,7 +78,6 @@ if __name__ == '__main__':
                         help='Path of the dataset directory containing the groundtruth file/s.',
                         required=True)
 
-
     parser.add_argument('-f', '--file',
                         dest="project_file",
                         default="project",
@@ -89,6 +87,11 @@ if __name__ == '__main__':
                         dest="exports_directory",
                         default="exports",
                         help='Path the exports of the project will be stored.')
+
+    parser.add_argument('-p', '--path',
+                        dest='exports_path',
+                        help='Path where the project results will be stored. If empty, the results will be saved in '
+                             'app directory')
 
     parser.add_argument('-l', '--logging',
                         default=1,
@@ -108,10 +111,6 @@ if __name__ == '__main__':
                         default=1,
                         help="Controls the verbosity: the higher, the more messages.",
                         type=int)
-    parser.add_argument('-p', '--path',
-                        dest='exports_path',
-                        help='Path where the project results will be stored. If empty, the results will be saved in '
-                             'app directory')
 
     # parser.add_argument('-t', '--template',
     #                     default=None,

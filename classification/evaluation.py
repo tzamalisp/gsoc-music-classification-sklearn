@@ -36,7 +36,7 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
     logger.debug("{}".format(tracks[:5]))
     logger.debug("Tracks list length: {}".format(len(tracks)))
 
-    exports_dir = "{}_{}".format(config.get("exports_directory"), class_name)
+    exports_dir = config.get("exports_directory")
 
     # load best model
     load_model_params_path = os.path.join(exports_path, exports_dir, "best_model_{}.json".format(class_name))

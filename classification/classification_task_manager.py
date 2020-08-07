@@ -59,7 +59,7 @@ class ClassificationTaskManager:
         :return:
         """
         # main exports
-        self.exports_dir = "{}_{}".format(self.config.get("exports_directory"), self.train_class)
+        self.exports_dir = self.config.get("exports_directory")
         # train results exports
         self.results_path = FindCreateDirectory(self.exports_path,
                                                 os.path.join(self.exports_dir, "results")).inspect_directory()

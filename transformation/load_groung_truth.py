@@ -205,6 +205,13 @@ class DatasetExporter:
             self.logger.debug("{}".format(tracks_existing_list[:4]))
             self.logger.debug("{}".format(tracks_existing_path_list[:4]))
             self.logger.debug("The founded tracks tracks listed successfully.")
+            self.logger.debug("Generate random number within a given range of listed tracks:")
+            # Random number between 0 and length of listed tracks
+            random_num = random.randrange(len(tracks_existing_list))
+            self.logger.debug("Check if the tracks are the same in the same random index in both lists")
+            self.logger.debug("{}".format(tracks_existing_list[random_num]))
+            self.logger.debug("{}".format(tracks_existing_path_list[random_num]))
+
             self.tracks_list = tracks_existing_list
             # create the dataframe with tracks that are bothe in low-level files and the GT file
             self.df_tracks = pd.DataFrame(data=self.tracks_list, columns=["track", self.train_class])

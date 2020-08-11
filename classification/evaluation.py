@@ -226,4 +226,3 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
                   train_class=class_name,
                   exports_path=exports_path)
     logger.info("The whole dataset has been evaluated successfully..")
-

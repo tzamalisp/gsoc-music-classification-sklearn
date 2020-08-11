@@ -29,7 +29,6 @@ class FeaturesDf:
         self.setting_logger()
 
     def setting_logger(self):
-        # set up logger
         self.logger = LoggerSetup(config=self.config,
                                   exports_path=self.exports_path,
                                   name="dataset_exports_transformations_{}".format(self.train_class),
@@ -72,9 +71,9 @@ class FeaturesDf:
 
         # The dictionary's keys list is transformed to type <class 'list'>
         self.df_feats_tracks = pd.DataFrame(self.list_feats_tracks, columns=list(self.list_feats_tracks[0].keys()))
-        self.logger.info("COLUMNS CONTAIN OBJECTS: \n{}".format(
+        self.logger.debug("COLUMNS CONTAIN OBJECTS: \n{}".format(
             self.df_feats_tracks.select_dtypes(include=['object']).columns))
-        self.logger.info("Exporting low-level data (dataframe)")
+        self.logger.info("Exporting low-level data (DataFrame)..")
         return self.df_feats_tracks
 
     def check_processing_info(self):

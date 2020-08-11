@@ -1,5 +1,5 @@
 import os
-from pprint import pprint
+
 
 def load_yaml(path_file):
     """
@@ -157,10 +157,3 @@ class TrainingProcesses:
         print("Trainings to be applied: {}".format(trainings_counted))
 
         return processes
-
-
-if __name__ == '__main__':
-    conf_data = load_yaml()
-    print(conf_data)
-
-    test = FindCreateDirectory('exports').inspect_directory()

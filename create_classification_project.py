@@ -111,11 +111,6 @@ if __name__ == '__main__':
                         help="Controls the verbosity: the higher, the more messages.",
                         type=int)
 
-    # parser.add_argument('-t', '--template',
-    #                     default=None,
-    #                     help='classification project template file to use. '
-    #                          'If not specified, the script will try to detect it from the descriptors metadata.')
-
     args = parser.parse_args()
 
     create_classification_project(args.ground_truth_directory, args.project_file,

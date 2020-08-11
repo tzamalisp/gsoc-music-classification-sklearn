@@ -44,7 +44,6 @@ class Predict:
             self.best_model = json.load(json_file)
 
     def preprocessing(self):
-        # set up logger
         self.logger = LoggerSetup(config=self.config,
                                   exports_path=self.exports_path,
                                   name="predict_{}".format(self.class_name),

@@ -18,7 +18,6 @@ from logging_tool import LoggerSetup
 
 def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_path, log_level):
     print(colored("------ EVALUATION and FOLDING ------", "yellow"))
-    # logger setup
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,
                          name="evaluation_{}".format(class_name),

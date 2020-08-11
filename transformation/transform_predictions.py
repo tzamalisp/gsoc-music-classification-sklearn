@@ -36,7 +36,6 @@ class TransformPredictions:
         self.setting_logger()
 
     def setting_logger(self):
-        # set up logger
         self.logger = LoggerSetup(config=self.config,
                                   exports_path=self.exports_path,
                                   name="predict_{}".format(self.train_class),

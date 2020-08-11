@@ -41,7 +41,6 @@ class Transform:
         self.setting_logger()
 
     def setting_logger(self):
-        # set up logger
         self.logger = LoggerSetup(config=self.config,
                                   exports_path=self.exports_path,
                                   name="dataset_exports_transformations_{}".format(self.train_class),

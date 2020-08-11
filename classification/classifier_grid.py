@@ -112,7 +112,7 @@ class TrainGridClassifier:
             with open(os.path.join(results_path, results_best_dict_name), 'w') as grid_best_json:
                 json.dump(results_dict, grid_best_json, indent=4)
 
-            # export parameters that the
+            # export the parameters that the best model has from each training step
             results_params_dict_name = "result_{}_{}_params_{}.json"\
                 .format(self.class_name, tr_process["preprocess"], gsvc.best_score_)
             with open(os.path.join(results_path, results_params_dict_name), 'w') as grid_params_json:

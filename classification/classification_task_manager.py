@@ -7,21 +7,26 @@ from datetime import datetime
 from logging_tool import LoggerSetup
 
 
-validClassifiers = ['NN', 'svm']
+validClassifiers = ['svm', 'NN']
 validEvaluations = ['nfoldcrossvalidation']
 
 
 class ClassificationTaskManager:
     """
-
+    It manages the tasks to be done based on the configuration file. It checks if the
+    config keys exist in the template and are specified correctly, as well as it creates
+    the relevant directories (if not exist) where the classification results will be
+    stored to. Then, it extracts a list with the evaluation steps that will be followed
+    with their corresponding preprocessing steps and parameters declaration for the
+    classifier, and executes the classification task for each step.
     """
     def __init__(self, config, train_class, X, y, tracks, exports_path, log_level):
         """
-
-        :param config: The configuration file name
-        :param train_class: The class that will be trained
-        :param X: The already shuffled data that contain the features
-        :param y: The already shuffled data that contain the labels
+        Args:
+            config: The configuration file name.
+            train_class: The class that will be trained.
+            X: The already shuffled data that contain the features.
+            y: The already shuffled data that contain the labels.
         """
         self.config = config
         self.train_class = train_class
@@ -55,8 +60,7 @@ class ClassificationTaskManager:
 
     def files_existence(self):
         """
-        Ensure that all the folders will exist before the training process starts
-        :return:
+        Ensure that all the folders will exist before the training process starts.
         """
         # main exports
         self.exports_dir = self.config.get("exports_directory")
@@ -83,6 +87,9 @@ class ClassificationTaskManager:
                                                os.path.join(self.exports_dir, "reports")).inspect_directory()
 
     def config_file_analysis(self):
+        """
+        Check the keys of the configuration template file if they are set up correctly.
+        """
         self.logger.info("---- CHECK FOR INAPPROPRIATE CONFIG FILE FORMAT ----")
         if 'processing' not in self.config:
             self.logger.error('No preprocessing defined in config.')
@@ -104,6 +111,9 @@ class ClassificationTaskManager:
         self.logger.info("No errors in config file format found.")
 
     def apply_processing(self):
+        """
+        Evaluation steps extraction and classification task execution for each step.
+        """
         start_time = time()
         training_processes = TrainingProcesses(self.config).training_processes()
         self.logger.info("Classifiers detected: {}".format(self.config["classifiers"].keys()))

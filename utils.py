@@ -1,17 +1,16 @@
 import os
+import yaml
 
 
 def load_yaml(path_file):
     """
     Todo: add comments, docstring info, etc.
-    :return:
+    Returns:
+        The configuration data loaded from the template.
     """
     try:
-        import yaml
         with open(os.path.join(os.path.abspath(os.getcwd()), path_file)) as file:
             config_data = yaml.load(file, Loader=yaml.FullLoader)
-            # print(type(config_data))
-            # print(config_data)
             if isinstance(config_data, dict):
                 return config_data
             else:
@@ -27,15 +26,14 @@ class DfChecker:
     """
     def __init__(self, df_check):
         """
-
-        :param df_check:
+        Args:
+            df_check:
         """
         self.df_check = df_check
 
     def check_df_info(self):
         """
         Prints information about the Pandas DataFrame that is generated from the relevant process.
-        :return:
         """
         print('Features DataFrame head:')
         print(self.df_check.head())
@@ -52,29 +50,17 @@ class DfChecker:
 
 
 class FindCreateDirectory:
-    """
-
-    """
     def __init__(self, exports_path, directory):
-        """
-
-        :param directory:
-        """
         self.exports_path = exports_path
         self.directory = directory
 
     def inspect_directory(self):
-        """
-
-        :return:
-        """
         # find dynamically the current script directory
         # path_app = os.path.join(os.path.abspath(os.getcwd()))
         full_path = os.path.join(self.exports_path, self.directory)
         # create path directories if not exist --> else return the path
         if not os.path.exists(full_path):
             os.makedirs(full_path)
-        # print('Path {}:'.format(self.directory), full_path)
         return full_path
 
 
@@ -113,7 +99,7 @@ class TrainingProcesses:
     def training_processes(self):
         """
         Returns:
-            A list of the processes that have been identified with the corresponding parameter grid
+            A list of the processes that have been identified with the corresponding parameter grid.
         """
         evaluations = self.config["evaluations"]["nfoldcrossvalidation"]
         print("Evaluations countered: {}".format(len(evaluations)))

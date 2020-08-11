@@ -112,9 +112,8 @@ class TrainingProcesses:
 
     def training_processes(self):
         """
-
-        :return:
-        processes: A list of the processes that have been identified with the corresponding parameter grid
+        Returns:
+            A list of the processes that have been identified with the corresponding parameter grid
         """
         evaluations = self.config["evaluations"]["nfoldcrossvalidation"]
         print("Evaluations countered: {}".format(len(evaluations)))

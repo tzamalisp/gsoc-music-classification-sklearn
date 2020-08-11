@@ -18,7 +18,7 @@ class ClassificationTaskManager:
     def __init__(self, config, train_class, X, y, tracks, exports_path, log_level):
         """
 
-        :param yaml_file: The configuration file name
+        :param config: The configuration file name
         :param train_class: The class that will be trained
         :param X: The already shuffled data that contain the features
         :param y: The already shuffled data that contain the labels

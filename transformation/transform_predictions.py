@@ -3,6 +3,7 @@ from termcolor import colored
 import collections
 import joblib
 import os
+import six
 
 from utils import FindCreateDirectory
 from transformation.utils_preprocessing import list_descr_handler
@@ -12,7 +13,7 @@ from logging_tool import LoggerSetup
 
 # avoid the module's method call deprecation
 try:
-    collectionsAbc = collections.abc
+    collectionsAbc = six.moves.collections_abc
 except AttributeError:
     collectionsAbc = collections
 

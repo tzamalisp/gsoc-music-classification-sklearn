@@ -63,7 +63,7 @@ class TrainGridClassifier:
             parameters_grid = {'kernel': tr_process["kernel"],
                                'C': tr_process["C"],
                                'gamma': tr_process["gamma"],
-                               'class_weight': tr_process["balanceClasses"]
+                               'class_weight': tr_process["balance_classes"]
                                }
 
             # inner with K-Fold cross-validation declaration

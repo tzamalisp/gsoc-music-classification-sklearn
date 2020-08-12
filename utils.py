@@ -113,7 +113,7 @@ class TrainingProcesses:
                         for clf_type in classifier["type"]:
                             if clf_type == "C-SVC":
                                 process_dict = dict()
-                                process_dict["Evaluation"] = evaluation_counter
+                                process_dict["evaluation"] = evaluation_counter
                                 # classifier
                                 process_dict["classifier"] = clf_type
                                 # pre-processing
@@ -128,8 +128,8 @@ class TrainingProcesses:
                                 gamma = classifier["gamma"]
                                 process_dict["gamma"] = [2 ** x for x in gamma]  # 2 ** gamma
                                 # class weights
-                                balance_classes = classifier["balanceClasses"]
-                                process_dict["balanceClasses"] = [change_weights_values(i) for i in balance_classes]
+                                balance_classes = classifier["balance_classes"]
+                                process_dict["balance_classes"] = [change_weights_values(i) for i in balance_classes]
                                 processes.append(process_dict)
                                 # n_fold
                                 process_dict["n_fold"] = nfold_number
@@ -139,5 +139,11 @@ class TrainingProcesses:
             evaluation_counter += 1
 
         print("Trainings to be applied: {}".format(trainings_counted))
+        print("Processes of trainings:")
+        process_count = 0
+        for process in processes:
+            print("Process {}:".format(process_count))
+            print(process)
+            process_count += 1
 
         return processes

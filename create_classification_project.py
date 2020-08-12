@@ -4,7 +4,7 @@ from pprint import pprint
 from utils import load_yaml
 import yaml
 import time
-from transformation.load_groung_truth import ListGroundTruthFiles
+from transformation.load_ground_truth import ListGroundTruthFiles
 from classification.train_class import train_class
 
 

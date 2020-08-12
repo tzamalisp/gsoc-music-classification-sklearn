@@ -1,8 +1,8 @@
 import os
 from termcolor import colored
-from transformation.load_groung_truth import GroundTruthLoad
+from transformation.load_ground_truth import GroundTruthLoad
 from classification.classification_task_manager import ClassificationTaskManager
-from transformation.load_groung_truth import DatasetExporter
+from transformation.load_ground_truth import DatasetExporter
 import yaml
 from logging_tool import LoggerSetup
 
@@ -70,5 +70,5 @@ def train_class(config, gt_file, exports_directory, log_level):
                                              exports_path=exports_path,
                                              log_level=log_level)
     classification_time = model_manage.apply_processing()
-    print(colored("Classification ended in {} minutes.".format(classification_time), "green"))
-    logger.info("Classification ended in {} minutes.".format(classification_time))
+    print(colored("Classification ended successfully in {} minutes.".format(classification_time), "green"))
+    logger.info("Classification ended successfully in {} minutes.".format(classification_time))

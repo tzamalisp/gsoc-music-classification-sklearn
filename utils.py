@@ -56,7 +56,6 @@ class FindCreateDirectory:
 
     def inspect_directory(self):
         # find dynamically the current script directory
-        # path_app = os.path.join(os.path.abspath(os.getcwd()))
         full_path = os.path.join(self.exports_path, self.directory)
         # create path directories if not exist --> else return the path
         os.makedirs(full_path, exist_ok=True)
@@ -83,7 +82,17 @@ class LogsDeleter:
             print("Evaluation logs deletion is turned to OFF.")
 
 
-def change_weights_values(i):
+def change_weights_val(i):
+    """
+    Is is used in the TrainingProcesses class. It is used to transform each value of
+    the balanced classes list in the configuration file Grid parameters of the classifier:
+        * True --> balanced
+        * False --> None
+    Args:
+        i: The value inserted
+    Returns:
+        "balanced" in case the value of the list is True, else None if it is set to False.
+    """
     if i is True:
         return "balanced"
     elif i is False:
@@ -92,7 +101,16 @@ def change_weights_values(i):
 
 
 class TrainingProcesses:
+    """
+    Extracts the pre-processing steps that are specified in "List of classifiers
+    to be trained" section of the configuration template. These are the amount
+    of the prep-processing steps with the relevant training that will be executed.
+    """
     def __init__(self, config):
+        """
+        Args:
+            config: The configuration data.
+        """
         self.config = config
 
     def training_processes(self):
@@ -112,38 +130,23 @@ class TrainingProcesses:
                     for pre_processing in classifier["preprocessing"]:
                         for clf_type in classifier["type"]:
                             if clf_type == "C-SVC":
-                                process_dict = dict()
-                                process_dict["evaluation"] = evaluation_counter
-                                # classifier
-                                process_dict["classifier"] = clf_type
-                                # pre-processing
-                                process_dict["preprocess"] = pre_processing
-                                # kernel
-                                kernel = classifier["kernel"]
-                                process_dict["kernel"] = [i.lower() for i in kernel]
-                                # C
-                                c = classifier["C"]
-                                process_dict["C"] = [2 ** x for x in c]  # 2 ** c
-                                # gamma
-                                gamma = classifier["gamma"]
-                                process_dict["gamma"] = [2 ** x for x in gamma]  # 2 ** gamma
-                                # class weights
-                                balance_classes = classifier["balance_classes"]
-                                process_dict["balance_classes"] = [change_weights_values(i) for i in balance_classes]
+                                process_dict = {
+                                    "evaluation": evaluation_counter,
+                                    "classifier": clf_type,
+                                    "preprocess": pre_processing,
+                                    "kernel": [i.lower() for i in classifier["kernel"]],  # lowercase the values
+                                    "C": [2 ** x for x in classifier["C"]],  # 2 ** c
+                                    "gamma": [2 ** x for x in classifier["gamma"]],  # 2 ** gamma
+                                    "balance_classes": [change_weights_val(i) for i in classifier["balance_classes"]],
+                                    "n_fold": nfold_number
+                                }
+                                # append the pre-processing steps list
                                 processes.append(process_dict)
-                                # n_fold
-                                process_dict["n_fold"] = nfold_number
                                 # increase counter by 1
                                 trainings_counted += 1
             # increase evaluation counter by 1
             evaluation_counter += 1
 
         print("Trainings to be applied: {}".format(trainings_counted))
-        print("Processes of trainings:")
-        process_count = 0
-        for process in processes:
-            print("Process {}:".format(process_count))
-            print(process)
-            process_count += 1
 
         return processes

@@ -104,11 +104,12 @@ class TrainGridClassifier:
             results_best_dict_name = "result_{}_{}_best_{}.json"\
                 .format(self.class_name, tr_process["preprocess"], gsvc.best_score_)
 
-            results_dict = dict()
-            results_dict["score"] = gsvc.best_score_
-            results_dict["params"] = gsvc.best_params_
-            results_dict["n_fold"] = tr_process['n_fold']
-            results_dict["preprocessing"] = tr_process["preprocess"]
+            results_dict = {
+                "score": gsvc.best_score_,
+                "params": gsvc.best_params_,
+                "n_fold": tr_process['n_fold'],
+                "preprocessing": tr_process["preprocess"]
+            }
             with open(os.path.join(results_path, results_best_dict_name), 'w') as grid_best_json:
                 json.dump(results_dict, grid_best_json, indent=4)
 

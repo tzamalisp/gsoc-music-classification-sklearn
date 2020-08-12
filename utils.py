@@ -16,7 +16,7 @@ def load_yaml(path_file):
             else:
                 return None
     except ImportError:
-        print('WARNING: could not import yaml module')
+        print("WARNING: could not import yaml module")
         return None
 
 
@@ -35,18 +35,18 @@ class DfChecker:
         """
         Prints information about the Pandas DataFrame that is generated from the relevant process.
         """
-        print('Features DataFrame head:')
+        print("Features DataFrame head:")
         print(self.df_check.head())
         print()
-        print('Information:')
+        print("Information:")
         print(self.df_check.info())
         print()
-        print('Shape:', self.df_check.shape)
-        print('Number of columns:', len(list(self.df_check.columns)))
+        print("Shape:", self.df_check.shape)
+        print("Number of columns:", len(list(self.df_check.columns)))
 
-        if 'category' in self.df_check.columns:
-            print('Track categories distribution:')
-            print(self.df_check['category'].value_counts())
+        if "category" in self.df_check.columns:
+            print("Track categories distribution:")
+            print(self.df_check["category"].value_counts())
 
 
 class FindCreateDirectory:

@@ -59,8 +59,7 @@ class FindCreateDirectory:
         # path_app = os.path.join(os.path.abspath(os.getcwd()))
         full_path = os.path.join(self.exports_path, self.directory)
         # create path directories if not exist --> else return the path
-        if not os.path.exists(full_path):
-            os.makedirs(full_path)
+        os.makedirs(full_path, exist_ok=True)
         return full_path
 
 

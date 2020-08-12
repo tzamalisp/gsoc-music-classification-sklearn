@@ -10,17 +10,16 @@ from classification.train_class import train_class
 
 def create_classification_project(ground_truth_directory, project_file, exports_directory, logging, seed, jobs, verbose, exports_path):
     """
+    Args:
+        ground_truth_directory:
+        project_file:
+        exports_directory:
+        logging:
+        seed:
+        jobs:
+        verbose:
+        exports_path:
 
-    :param ground_truth_directory:
-    :param class_dir:
-    :param project_file:
-    :param exports_directory:
-    :param logging:
-    :param seed:
-    :param jobs:
-    :param verbose:
-    :param exports_path:
-    :return:
     """
     try:
         project_template = load_yaml("configuration_template.yaml")

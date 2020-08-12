@@ -11,21 +11,22 @@ from logging_tool import LoggerSetup
 
 class ListGroundTruthFiles:
     """
-
+    Lists the groundtruth yaml files that are detected in a folder specified in
+    the configuration file. The yaml files contain the target class and the tracks
+    to be analyzed.
     """
     def __init__(self, config):
         """
-
-        :param config:
+        Args:
+            config: The configuration data
         """
         self.config = config
         self.dataset_dir = ""
-        # self.class_dir = ""
 
     def list_gt_filenames(self):
         """
-
-        :return:
+        Returns:
+            A list of the groundtruth detected yaml files.
         """
         self.dataset_dir = self.config.get("ground_truth_directory")
         ground_truth_list = list()
@@ -34,19 +35,20 @@ class ListGroundTruthFiles:
             ground_truth_list += [os.path.join(dirpath, file) for file in filenames if file.startswith("groundtruth")]
         return ground_truth_list
 
+
 class GroundTruthLoad:
     """
-        The Ground Truth data object which contains features to:
-         * counter the JSON low-level data
-         * Todo: create logger object
-
-         Attributes:
+        The Ground Truth data which contains the tracks and the corresponding
+        labels they belong to. The path to the related tracks' low-level data
+        (features in JSON format) can be extracted from this file too.
         """
     def __init__(self, config, gt_filename, exports_path, log_level):
         """
-
-        :param config:
-        :param gt_filename:
+        Args:
+            config:
+            gt_filename:
+            exports_path:
+            log_level:
         """
         self.config = config
         self.gt_filename = gt_filename
@@ -65,11 +67,9 @@ class GroundTruthLoad:
 
     def load_local_ground_truth(self):
         """
-        Loads the the ground truth file.
-        * The directory with the dataset should be located inside the app folder location.
-        :return:
+        Loads the the ground truth file. The dataset directory is specified through
+        the parsing arguments of the create_classification_project method.
         """
-
         self.dataset_dir = self.config.get("dataset_dir")
         with open(self.gt_filename, "r") as stream:
             try:
@@ -81,14 +81,21 @@ class GroundTruthLoad:
 
     def export_train_class(self):
         """
-
-        :return:
+        Returns:
+            The target class to be modeled.
         """
         self.train_class = self.ground_truth_data["className"]
         print("EXPORT CLASS NAME: {}".format(self.train_class))
         return self.train_class
 
     def export_gt_tracks(self):
+        """
+        It takes a dictionary of the tracks from the groundtruth and it transforms it
+        to a list of tuples (track, label). Then it shuffles the list based on the seed
+        specified in the configuration file, and returns that shuffled list.
+        Returns:
+            A list of tuples with the tracks and their corresponding labels.
+        """
         self.labeled_tracks = self.ground_truth_data["groundTruth"]
         tracks_list = []
         for track, label in self.labeled_tracks.items():
@@ -101,15 +108,17 @@ class GroundTruthLoad:
 
     def check_ground_truth_data(self):
         """
-        Todo: description
-        :return:
+        Prints a dictionary of the groundtruth data in the corresponding yaml file.
+        It contains the target class and the tracks.
         """
         pprint(self.ground_truth_data)
 
     def check_ground_truth_info(self):
         """
-        Todo: description
-        :return:
+        Prints information about the groundtruth data that is loaded in a dictionary:
+            * The target class
+            * The tracks with their labels
+            * The tracks themselves
         """
         len(self.ground_truth_data["groundTruth"].keys())
         print("Ground truth data class/target: {}".format(self.ground_truth_data["className"]))
@@ -118,8 +127,7 @@ class GroundTruthLoad:
 
     def check_tracks_folders(self):
         """
-        Todo: function explanation docstring
-        :return:
+        Prints the directories that contain the low-level data.
         """
         if len(self.labeled_tracks.keys()) is not 0:
             folders = []
@@ -137,7 +145,6 @@ class GroundTruthLoad:
         """
         Prints the JSON low-level data that is contained inside the dataset directory (the dataset
         directory is declared in configuration file).
-        :return:
         """
         counter = 0
         for root, dirs, files in os.walk(os.path.join(os.getcwd(), self.dataset_dir)):
@@ -149,6 +156,9 @@ class GroundTruthLoad:
 
 
 class DatasetExporter:
+    """
+    TODO: Description
+    """
     def __init__(self, config, tracks_list, train_class, exports_path, log_level):
         self.config = config
         self.tracks_list = tracks_list
@@ -175,11 +185,9 @@ class DatasetExporter:
 
     def create_df_tracks(self):
         """
-        Creates the pandas DataFrame with the tracks.
-        Todo: more comments
-        :return:
-        DataFrame or None: a DataFrame with the tracks included in the ground truth yaml file containing the track name,
-        the path to load the JSON low-level data, the label, etc. Else, it returns None.
+        TODO: Description
+        Returns:
+            TODO: Description
         """
 
         self.logger.info("---- EXPORTING FEATURES - LABELS - TRACKS ----")

@@ -9,9 +9,8 @@ from sklearn.svm import SVC
 
 def display_scores(scores):
     """
-
-    :param scores:
-    :return:
+    Args:
+        scores:
     """
     print("Display scores:")
     print("Scores: {}".format(scores))
@@ -21,12 +20,11 @@ def display_scores(scores):
 
 def evaluate_gaia_imitation_model(config, class_name, X, y):
     """
-
-    :param config:
-    :param class_name:
-    :param X:
-    :param y:
-    :return:
+    Args:
+        config:
+        class_name:
+        X:
+        y:
     """
     gaia_params = load_yaml("gaia_best_models/jmp_results_{}.param".format(class_name))
     print("Gaia best model params: {}".format(gaia_params))

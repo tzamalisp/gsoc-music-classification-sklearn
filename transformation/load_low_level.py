@@ -40,9 +40,8 @@ class FeaturesDf:
         """
         Creates the low-level DataFrame. Cleans also the low-level data from the unnecessary features before creating
         the DF.
-
-        :return:
-        DataFrame: low-level features Daa=taFrame from all the tracks in the collection.
+        Returns:
+            The low-level features (pandas DataFrame) from all the tracks in the collection.
         """
         self.logger.info("---- CREATE LOW LEVEL DATAFRAME ----")
         # clear the list if it not empty
@@ -79,7 +78,6 @@ class FeaturesDf:
     def check_processing_info(self):
         """
         Prints some information about the low-level data to DataFrame transformation step and its middle processes.
-        :return:
         """
         self.logger.info('Items parsed and transformed: {}'.format(self.counter_items_transformed))
         # The type of the dictionary's keys list is: <class 'dict_keys'>
@@ -90,8 +88,9 @@ class FeaturesDf:
 
     def export_tracks_feats_df(self):
         """
-        :return:
-        DataFrame: The tracks with all the ground truth data and the corresponding low-level data flattened.
+        Returns:
+            The tracks (pandas DataFrame) with all the ground truth data and the
+            corresponding low-level data flattened.
         """
         self.logger.info("Concatenating the tracks/labels data DataFrame with the features DataFrame.")
         self.logger.info("TRACKS SHAPE: {}".format(self.df_tracks.shape))

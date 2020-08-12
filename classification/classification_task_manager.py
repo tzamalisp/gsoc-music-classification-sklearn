@@ -7,8 +7,8 @@ from datetime import datetime
 from logging_tool import LoggerSetup
 
 
-validClassifiers = ['svm', 'NN']
-validEvaluations = ['nfoldcrossvalidation']
+validClassifiers = ["svm", "NN"]
+validEvaluations = ["nfoldcrossvalidation"]
 
 
 class ClassificationTaskManager:
@@ -91,22 +91,22 @@ class ClassificationTaskManager:
         Check the keys of the configuration template file if they are set up correctly.
         """
         self.logger.info("---- CHECK FOR INAPPROPRIATE CONFIG FILE FORMAT ----")
-        if 'processing' not in self.config:
-            self.logger.error('No preprocessing defined in config.')
+        if "processing" not in self.config:
+            self.logger.error("No preprocessing defined in config.")
 
-        if 'evaluations' not in self.config:
-            self.logger.error('No evaluations defined in config.')
-            self.logger.error('Setting default evaluation to 10-fold cross-validation')
-            self.config['evaluations'] = {'nfoldcrossvalidation': [{'nfold': [10]}]}
+        if "evaluations" not in self.config:
+            self.logger.error("No evaluations defined in config.")
+            self.logger.error("Setting default evaluation to 10-fold cross-validation")
+            self.config["evaluations"] = {"nfoldcrossvalidation": [{"nfold": [10]}]}
 
         for classifier in self.config['classifiers'].keys():
             if classifier not in validClassifiers:
-                self.logger.error('Not a valid classifier: {}'.format(classifier))
-                raise ValueError('The classifier name must be valid.')
+                self.logger.error("Not a valid classifier: {}".format(classifier))
+                raise ValueError("The classifier name must be valid.")
 
         for evaluation in self.config['evaluations'].keys():
             if evaluation not in validEvaluations:
-                self.logger.error('Not a valid evaluation: {}'.format(evaluation))
+                self.logger.error("Not a valid evaluation: {}".format(evaluation))
                 raise ValueError("The evaluation must be valid.")
         self.logger.info("No errors in config file format found.")
 

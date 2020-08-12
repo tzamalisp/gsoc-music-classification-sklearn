@@ -37,9 +37,12 @@ class LoggerSetup:
         Inits the logger object with the corresponding parameters.
 
         Args:
-            name (str): The name of the logger.
-            log_file (str): The path the logging exports will be exported.
-            level (int): The level of the logging. Defaults to 1.
+            config: The configuration data (dict).
+            exports_path: The path (str) the logging exports will be exported.
+            name: The name (str) of the logger.
+            train_class: The name of the target class (str)
+            level: The level (int) of the logging. Defaults to 1.
+            mode: The mode (str) translated in write, append. Valid values ("w", "a")
         """
         self.config = config
         self.exports_path = exports_path
@@ -56,7 +59,8 @@ class LoggerSetup:
         Function to set up as many loggers as you want. It exports the logging results to a file
         in the relevant path that is determined by the configuration file.
 
-        :return:
+        Returns:
+            The logger object.
         """
         self.exports_dir = self.config.get("exports_directory")
         self.logs_path = FindCreateDirectory(self.exports_path,

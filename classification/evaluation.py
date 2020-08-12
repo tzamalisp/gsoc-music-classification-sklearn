@@ -225,4 +225,10 @@ def fold_evaluation(config, n_fold, X, y, class_name, tracks, process, exports_p
                   filename="classification_report_all_dataset",
                   train_class=class_name,
                   exports_path=exports_path)
+
+    # save the model that is trained to the whole dataset
+    best_model_path = os.path.join(exports_path, exports_dir, "best_clf_model.pkl")
+    joblib.dump(clf, best_model_path)
+    logger.info("Best model saved.")
+
     logger.info("The whole dataset has been evaluated successfully..")

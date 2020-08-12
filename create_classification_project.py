@@ -71,41 +71,42 @@ if __name__ == '__main__':
                     'If it is not specified, it will try to guess the appropriated one from the '
                     'essentia version found on the descriptor files.')
 
-    parser.add_argument('-g', '--groundtruth',
+    parser.add_argument("-g", "--groundtruth",
                         dest="ground_truth_directory",
                         default="datasets",
-                        help='Path of the dataset directory containing the groundtruth file/s.',
+                        help="Path of the main dataset directory containing the groundtruth file/s.",
                         required=True)
 
-    parser.add_argument('-f', '--file',
+    parser.add_argument("-f", "--file",
                         dest="project_file",
                         default="project",
-                        help='Name prefix of the project configuration file (.yaml) will be stored.')
+                        help="Name prefix of the project configuration file (.yaml) will be stored.")
 
-    parser.add_argument('-e', '--exportsdir',
+    parser.add_argument("-d", "--exportsdir",
                         dest="exports_directory",
-                        help='Path the exports of the project will be stored.')
+                        help="Name of the exports directory that the project's results will be stored.")
 
-    parser.add_argument('-p', '--path',
-                        dest='exports_path',
-                        help='Path where the project results will be stored. If empty, the results will be saved in '
-                             'app directory')
+    parser.add_argument("-p", "--path",
+                        dest="exports_path",
+                        help="Path where the project results will be stored. If empty, the results will be saved in "
+                             "the main app directory.")
 
-    parser.add_argument('-l', '--logging',
+    parser.add_argument("-l", "--logging",
                         default=1,
-                        help='Path where the result files will be stored.',
+                        help="The logging level that will be printed (0: DEBUG, 1: INFO, 2: WARNING, 3: ERROR, "
+                             "4: CRITICAL).",
                         type=int)
 
-    parser.add_argument('-s', '--seed',
+    parser.add_argument("-s", "--seed",
                         default=None,
-                        help='Seed used to generate the shuffled dataset applied later to folding.',
+                        help="Seed is used to generate the random shuffled dataset applied later to folding.",
                         type=int)
 
-    parser.add_argument('-j', '--jobs',
+    parser.add_argument("-j", "--jobs",
                         default=-1,
-                        help='Parallel jobs. Set to -1 to use all the available cores',
+                        help="Parallel jobs. Set to -1 to use all the available cores",
                         type=int)
-    parser.add_argument('-v', '--verbose',
+    parser.add_argument("-v", "--verbose",
                         default=1,
                         help="Controls the verbosity: the higher, the more messages.",
                         type=int)

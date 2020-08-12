@@ -80,9 +80,15 @@ class Predict:
                                                  log_level=self.log_level
                                                  ).post_processing()
         self.logger.debug("Features shape after preparation: {}".format(features_prepared.shape))
-        models_path = FindCreateDirectory(self.exports_path,
-                                          os.path.join(self.exports_dir, "models")).inspect_directory()
-        best_model_path = os.path.join(models_path, "model_grid_{}.pkl".format(self.best_model["preprocessing"]))
+
+        # load the best grid model that is trained with a k-fold cross validation
+        # models_path = FindCreateDirectory(self.exports_path,
+        #                                   os.path.join(self.exports_dir, "models")).inspect_directory()
+        # best_model_path = os.path.join(models_path, "model_grid_{}.pkl".format(self.best_model["preprocessing"]))
+
+        # load the best model that is trained to the whole dataset
+        models_path = FindCreateDirectory(self.exports_path, self.exports_dir).inspect_directory()
+        best_model_path = os.path.join(models_path, "best_clf_model.pkl")
         clf_loaded = joblib.load(best_model_path)
         predicted = clf_loaded.predict(features_prepared)
         predicted_prob = clf_loaded.predict_proba(features_prepared)
@@ -137,24 +143,24 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Prediction of a track.')
 
-    parser.add_argument('-p', '--path',
+    parser.add_argument("-p", "--path",
                         dest="exports_path",
-                        help='Path where the project file is stored if not in the same file where the app is.')
+                        help="Path where the project file is stored if not in the same file where the app is.")
 
-    parser.add_argument('-f', '--file',
+    parser.add_argument("-f", "--file",
                         dest="project_file",
-                        help='Name prefix of the project configuration file (.yaml) that is stored.',
+                        help="Name prefix of the project configuration file (.yaml) that is stored.",
                         required=True)
 
-    parser.add_argument('-t', '--track',
+    parser.add_argument("-t", "--track",
                         dest="mbid",
-                        help='MBID of the the low-level data from the AcousticBrainz API.',
+                        help="MBID of the the low-level data from the AcousticBrainz API.",
                         required=True)
 
-    parser.add_argument('-l', '--logging',
-                        dest='log_level',
+    parser.add_argument("-l", "--logging",
+                        dest="log_level",
                         default=1,
-                        help='Path where the result files will be stored.',
+                        help="Path where the result files will be stored.",
                         type=int)
 
     args = parser.parse_args()

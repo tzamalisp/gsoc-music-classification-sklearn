@@ -90,22 +90,22 @@ class LoggerSetup:
 
         if self.level is None:
             logger_object.setLevel(logging.INFO)
-        elif self.level is 0:
+        elif self.level == "logging.DEBUG":
             logger_object.setLevel(logging.DEBUG)
-        elif self.level is 1:
+        elif self.level == "logging.INFO":
             logger_object.setLevel(logging.INFO)
-        elif self.level is 2:
+        elif self.level == "logging.WARNING":
             logger_object.setLevel(logging.WARNING)
-        elif self.level is 3:
+        elif self.level == "logging.ERROR":
             logger_object.setLevel(logging.ERROR)
-        elif self.level is 4:
+        elif self.level == "logging.CRITICAL":
             logger_object.setLevel(logging.CRITICAL)
         else:
-            print('Please define correct one of the Debug Levels:\n'
-                  '0: DEBUG\n'
-                  '1: INFO\n'
-                  '2: WARNING\n'
-                  '3: ERROR\n'
-                  '4: CRITICAL')
+            print("Please define correct one of the Debug Levels:\n"
+                  "logging.DEBUG: DEBUG\n"
+                  "logging.INFO: INFO\n"
+                  "logging.WARNING: WARNING\n"
+                  "logging.ERROR: ERROR\n"
+                  "logging.CRITICAL: CRITICAL")
 
         return logger_object

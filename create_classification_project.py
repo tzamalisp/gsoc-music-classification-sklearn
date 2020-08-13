@@ -92,10 +92,10 @@ if __name__ == '__main__':
                              "the main app directory.")
 
     parser.add_argument("-l", "--logging",
-                        default=1,
-                        help="The logging level that will be printed (0: DEBUG, 1: INFO, 2: WARNING, 3: ERROR, "
-                             "4: CRITICAL).",
-                        type=int)
+                        default="logging.INFO",
+                        help="The logging level that will be printed logging.DEBUG, logging.INFO, logging.WARNING, "
+                             "logging.ERROR, logging.CRITICAL).",
+                        type=str)
 
     parser.add_argument("-s", "--seed",
                         default=None,

@@ -159,9 +159,10 @@ if __name__ == '__main__':
 
     parser.add_argument("-l", "--logging",
                         dest="log_level",
-                        default=1,
-                        help="Path where the result files will be stored.",
-                        type=int)
+                        default="logging.INFO",
+                        help="The logging level that will be printed logging.DEBUG, logging.INFO, logging.WARNING, "
+                             "logging.ERROR, logging.CRITICAL).",
+                        type=str)
 
     args = parser.parse_args()
 

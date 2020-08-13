@@ -1,4 +1,4 @@
-# Classification scripts
+# Machine Learning Infrastructure with scikit-learn (GSoC 2020)
 
 This repository contains the tool that is built for training SVM models of 
 AcousticBrainz's datasets, as well as predicting where a single AcousticBrainz 

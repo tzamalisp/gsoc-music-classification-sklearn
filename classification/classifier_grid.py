@@ -33,7 +33,7 @@ class TrainGridClassifier:
     def setting_logger(self):
         self.logger = LoggerSetup(config=self.config,
                                   exports_path=self.exports_path,
-                                  name="train_class_{}".format(self.class_name),
+                                  name="train_model_{}".format(self.class_name),
                                   train_class=self.class_name,
                                   mode="a",
                                   level=self.log_level).setup_logger()

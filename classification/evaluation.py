@@ -20,9 +20,9 @@ def evaluation(config, n_fold, X, y, class_name, tracks, process, exports_path, 
     print(colored("------ EVALUATION and FOLDING ------", "yellow"))
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,
-                         name="evaluation_{}".format(class_name),
+                         name="train_model_{}".format(class_name),
                          train_class=class_name,
-                         mode="w",
+                         mode="a",
                          level=log_level).setup_logger()
 
     logger.info("---- Folded evaluation of the model in the dataset ----")

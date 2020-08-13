@@ -25,7 +25,7 @@ def train_class(config, gt_file, exports_directory, log_level):
 
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,
-                         name="train_class_{}".format(class_name),
+                         name="train_model_{}".format(class_name),
                          train_class=class_name,
                          mode="w",
                          level=log_level).setup_logger()
@@ -53,14 +53,6 @@ def train_class(config, gt_file, exports_directory, log_level):
     logger.debug("Type of features: {}".format(type(features)))
     logger.debug("Type of labels: {}".format(type(labels)))
     logger.debug("Type of Tracks: {}".format(type(tracks)))
-
-    print(colored("Small previews:", "cyan"))
-    print(colored("FEATURES", "magenta"))
-    print(features.head(3))
-    print(colored("LABELS", "magenta"))
-    print(labels[:10])
-    print(colored("TRACKS:", "magenta"))
-    print(tracks[:10])
 
     model_manage = ClassificationTaskManager(config=config,
                                              train_class=class_name,

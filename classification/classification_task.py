@@ -1,8 +1,7 @@
 import os
 from classification.classifier_grid import TrainGridClassifier
 import json
-from termcolor import colored
-from classification.evaluation import fold_evaluation
+from classification.evaluation import evaluation
 from logging_tool import LoggerSetup
 
 
@@ -81,12 +80,12 @@ class ClassificationTask:
         self.logger.debug("BEST MODEL: {}".format(best_model))
 
         # evaluation
-        fold_evaluation(config=self.config,
-                        n_fold=best_model["n_fold"],
-                        X=self.X, y=self.y,
-                        class_name=self.train_class,
-                        tracks=self.tracks,
-                        process=best_model["preprocessing"],
-                        exports_path=self.exports_path,
-                        log_level=self.log_level
-                        )
+        evaluation(config=self.config,
+                   n_fold=best_model["n_fold"],
+                   X=self.X, y=self.y,
+                   class_name=self.train_class,
+                   tracks=self.tracks,
+                   process=best_model["preprocessing"],
+                   exports_path=self.exports_path,
+                   log_level=self.log_level
+                   )

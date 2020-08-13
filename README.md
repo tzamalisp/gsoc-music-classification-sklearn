@@ -12,6 +12,9 @@ for an exhaustive search over specified parameter values for an estimator.
 A final model is trained with all the data (without a validation set) featuring 
 the best parameter combination in terms of accuracy.
 
+Finally, a prediction functionality is part of the tool, which gives the user the 
+capability of predicting where a track instance is classified based on a trained model.
+
 
 ## Functionalities
 
@@ -24,8 +27,8 @@ the features (low-level data) in JSON format.
 
 ```
 $ python create_classification_project.py --help
-usage: train_model.py [-h] [--seed SEED] [--cluster_mode]
-                      groundtruth file exportsdir path
+usage: create_classification_project.py [-h] [--groundtruth] [--file] [--exportsdir] [--path]
+                                        [--seed logging] [--seed] [--jobs] [--verbose]
 
 Generates a model trained using descriptor files specified in the groundtruth yaml file.
 
@@ -33,8 +36,8 @@ positional arguments:
   -g, --groundtruth      Path of the main dataset directory containing the 
                         groundtruth yaml file/s. (required)
 
-  -f, --file             Name prefix of the project configuration file (.yaml) 
-                        that will be stored. (default: project)
+  -f, --file            Name of the project configuration file (.yaml) will be stored. 
+                        If not specified it takes automatically the name <project_CLASS_NAME>."
 
   -d, --exportsdir      Name of the exports directory that the project's results 
                         will be stored (best model, grid models, transformation 
@@ -99,6 +102,32 @@ cross-validation evaluation method and to whole dataset.
 in JSON format.
 * Best model saved in `.pkl` format after the fitting to the whole dataset.
 
+### Train Process
+
+
+
 ### Predict
 
-*TODO: Add how it works...*
+
+
+```
+$ python predict.py --help
+usage: predict.py [-h] [--path] [--file] [--track] [--logging]
+
+positional arguments:
+  -p --path             Path where the project file (.yaml) is stored if not in the 
+                        same file where the app is.
+
+  -f, --file            Name of the project configuration file (.yaml) that 
+                        is to be loaded. (required)
+
+  -t --track            MBID of the the low-level data from the AcousticBrainz API.
+                        (required)
+
+optional arguments:
+  -h, --help            show the help message about the arguments and exit
+
+  -l, --logging         The logging level (int) that will be printed (0: DEBUG, 1: INFO, 
+                        2: WARNING, 3: ERROR, 4: CRITICAL). Can be set only in the
+                        prescribed integer values (0, 1, 2, 3, 4)
+```

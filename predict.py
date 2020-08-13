@@ -145,11 +145,11 @@ if __name__ == '__main__':
 
     parser.add_argument("-p", "--path",
                         dest="exports_path",
-                        help="Path where the project file is stored if not in the same file where the app is.")
+                        help="Path where the project file (.yaml) is stored if not in the same file where the app is.")
 
     parser.add_argument("-f", "--file",
                         dest="project_file",
-                        help="Name prefix of the project configuration file (.yaml) that is stored.",
+                        help="Name of the project configuration file (.yaml) that is to be loaded.",
                         required=True)
 
     parser.add_argument("-t", "--track",

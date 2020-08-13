@@ -19,9 +19,8 @@ def train_class(config, gt_file, exports_directory, log_level):
 
     # project directory where the models and outputs will be saved
     if exports_directory is None:
-        prefix = "exports"
-        config["exports_directory"] = "{}_{}".format(prefix, class_name)
-        print()
+        prefix_exports_dir = "exports"
+        config["exports_directory"] = "{}_{}".format(prefix_exports_dir, class_name)
 
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,
@@ -34,8 +33,14 @@ def train_class(config, gt_file, exports_directory, log_level):
 
     logger.debug("Type of exported GT data exported: {}".format(type(tracks_listed_shuffled)))
 
-    # save project file
-    project_file_name_save = "{}_{}.yaml".format(config["project_file"], class_name)
+    # name the project file
+    if config["project_file"] is None:
+        prefix_project_file = "project"
+        project_file_name_save = "{}_{}.yaml".format(prefix_project_file, class_name)
+    else:
+        project_file_name_save = "{}.yaml".format(config["project_file"])
+    logger.info("Project yaml file name: {}".format(project_file_name_save))
+    # save the project file
     project_file_save_path = os.path.join(exports_path, project_file_name_save)
     with open(os.path.join(project_file_save_path), "w") as template_file:
         template_data_write = yaml.dump(config, template_file)

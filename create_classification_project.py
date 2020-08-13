@@ -79,8 +79,8 @@ if __name__ == '__main__':
 
     parser.add_argument("-f", "--file",
                         dest="project_file",
-                        default="project",
-                        help="Name prefix of the project configuration file (.yaml) will be stored.")
+                        help="Name of the project configuration file (.yaml) will be stored. If not specified "
+                             "it takes automatically the name <project_CLASS_NAME>.")
 
     parser.add_argument("-d", "--exportsdir",
                         dest="exports_directory",

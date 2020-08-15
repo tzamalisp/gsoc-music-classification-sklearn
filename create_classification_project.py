@@ -8,18 +8,32 @@ from transformation.load_ground_truth import ListGroundTruthFiles
 from classification.train_class import train_class
 
 
-def create_classification_project(ground_truth_directory, project_file, exports_directory, logging, seed, jobs, verbose, exports_path):
+def create_classification_project(ground_truth_directory, project_file=None, exports_directory=None, exports_path=None,
+                                  seed=None, jobs=-1, verbose=1, logging="logging.INFO"):
     """
     Args:
-        ground_truth_directory:
-        project_file:
-        exports_directory:
-        logging:
-        seed:
-        jobs:
-        verbose:
-        exports_path:
-
+        ground_truth_directory: The path (str) to the dataset directory where the
+         groundtruth yaml file is located. It is required.
+        project_file: The name (str) of the project configuration yaml file that
+            will be created. Default: None. If None, the tool will create
+            automatically a project file name in form of "project_CLASS_NAME",
+            where CLASS_NAME is the target class as referred to the groundtruth data.
+        exports_directory: The name (str) of the directory that the results
+            of the classification project will be save to. Default: None. If None,
+            the tool will automatically create a directory with the name
+            "exports_CLASS_NAME", where CLASS_NAME is the target class as referred
+            to the groundtruth data.
+        exports_path: The path (str) to the exports directory. Default: None. If
+            None, the exports directory will be saved inside the app folder.
+        seed: The seed (int) of the random shuffle generator. Default: 1
+        jobs: The cores (int) that will be exploited during the training phase.
+            Default: -1. If -1, all the available cores will be used.
+        verbose: The verbosity (int) of the printed messages where this function
+            is available (for example in sklearn's GridSearch algorithm). Default: 1.
+            The higher the number the higher the verbosity.
+        logging: The level (str) of the logging prints. Default: "logging.INFO".
+            Available values: logging.DEBUG, logging.INFO, logging.WARNING,
+            logging.ERROR, logging.CRITICAL.
     """
     try:
         project_template = load_yaml("configuration_template.yaml")
@@ -27,8 +41,6 @@ def create_classification_project(ground_truth_directory, project_file, exports_
         print('Unable to open project configuration template:', e)
         raise
 
-    # print("BEFORE:")
-    # print("Type of congig template:", type(project_template))
     print("-------------------------------------------------------")
     print()
     if seed is None:
@@ -57,6 +69,7 @@ def create_classification_project(ground_truth_directory, project_file, exports_
     # pprint(project_template)
 
     gt_files_list = ListGroundTruthFiles(project_template).list_gt_filenames()
+    print("List GroundTruth yaml files found:")
     print(gt_files_list)
     print("LOAD GROUND TRUTH")
     for gt_file in gt_files_list:
@@ -91,12 +104,6 @@ if __name__ == '__main__':
                         help="Path where the project results will be stored. If empty, the results will be saved in "
                              "the main app directory.")
 
-    parser.add_argument("-l", "--logging",
-                        default="logging.INFO",
-                        help="The logging level that will be printed logging.DEBUG, logging.INFO, logging.WARNING, "
-                             "logging.ERROR, logging.CRITICAL).",
-                        type=str)
-
     parser.add_argument("-s", "--seed",
                         default=None,
                         help="Seed is used to generate the random shuffled dataset applied later to folding.",
@@ -106,13 +113,25 @@ if __name__ == '__main__':
                         default=-1,
                         help="Parallel jobs. Set to -1 to use all the available cores",
                         type=int)
+
     parser.add_argument("-v", "--verbose",
                         default=1,
                         help="Controls the verbosity: the higher, the more messages.",
                         type=int)
 
+    parser.add_argument("-l", "--logging",
+                        default="logging.INFO",
+                        help="The logging level that will be printed logging.DEBUG, logging.INFO, logging.WARNING, "
+                             "logging.ERROR, logging.CRITICAL).",
+                        type=str)
+
     args = parser.parse_args()
 
-    create_classification_project(args.ground_truth_directory, args.project_file,
-                                  args.exports_directory, logging=args.logging, seed=args.seed, jobs=args.jobs,
-                                  verbose=args.verbose, exports_path=args.exports_path)
+    create_classification_project(ground_truth_directory=args.ground_truth_directory,
+                                  project_file=args.project_file,
+                                  exports_directory=args.exports_directory,
+                                  exports_path=args.exports_path,
+                                  seed=args.seed,
+                                  jobs=args.jobs,
+                                  verbose=args.verbose,
+                                  logging=args.logging)

@@ -1,8 +1,8 @@
 import os
-from classification.classifier_grid import TrainGridClassifier
 import json
-from classification.evaluation import evaluation
-from logging_tool import LoggerSetup
+from ..classification.classifier_grid import TrainGridClassifier
+from ..classification.evaluation import evaluation
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 class ClassificationTask:

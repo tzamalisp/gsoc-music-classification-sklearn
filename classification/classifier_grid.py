@@ -1,16 +1,14 @@
 import os
 import json
-import math
-from pprint import pprint
 from termcolor import colored
 import joblib
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
 
-from transformation.transform import Transform
-from utils import load_yaml, FindCreateDirectory, TrainingProcesses
-from logging_tool import LoggerSetup
+from ..transformation.transform import Transform
+from ..helper_functions.utils import FindCreateDirectory
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 class TrainGridClassifier:

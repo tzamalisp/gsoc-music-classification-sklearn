@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
 from termcolor import colored
-from utils import load_yaml, FindCreateDirectory, TrainingProcesses
+
+from ..helper_functions.utils import FindCreateDirectory
 
 
 def export_report(config, name, report, filename, train_class, exports_path):

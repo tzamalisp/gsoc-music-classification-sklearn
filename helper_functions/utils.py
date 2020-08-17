@@ -2,15 +2,17 @@ import os
 import yaml
 
 
-def load_yaml(path_file):
+def load_yaml(path_to_file, file):
     """
-    Todo: add comments, docstring info, etc.
+    Args:
+        path_file:
+
     Returns:
         The configuration data loaded from the template.
     """
     try:
-        with open(os.path.join(os.path.abspath(os.getcwd()), path_file)) as file:
-            config_data = yaml.load(file, Loader=yaml.FullLoader)
+        with open(os.path.join(path_to_file, file)) as fp:
+            config_data = yaml.load(fp, Loader=yaml.FullLoader)
             if isinstance(config_data, dict):
                 return config_data
             else:

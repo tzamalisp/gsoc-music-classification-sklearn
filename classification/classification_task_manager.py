@@ -1,10 +1,11 @@
 import os
 from time import time
 from termcolor import colored
-from utils import load_yaml, FindCreateDirectory, TrainingProcesses
-from classification.classification_task import ClassificationTask
 from datetime import datetime
-from logging_tool import LoggerSetup
+
+from ..helper_functions.utils import FindCreateDirectory, TrainingProcesses
+from ..classification.classification_task import ClassificationTask
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 validClassifiers = ["svm", "NN"]

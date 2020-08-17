@@ -1,10 +1,11 @@
 import os
 from termcolor import colored
-from transformation.load_ground_truth import GroundTruthLoad
-from classification.classification_task_manager import ClassificationTaskManager
-from transformation.load_ground_truth import DatasetExporter
 import yaml
-from logging_tool import LoggerSetup
+
+from ..transformation.load_ground_truth import GroundTruthLoad
+from ..classification.classification_task_manager import ClassificationTaskManager
+from ..transformation.load_ground_truth import DatasetExporter
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 def train_class(config, gt_file, exports_directory, log_level):

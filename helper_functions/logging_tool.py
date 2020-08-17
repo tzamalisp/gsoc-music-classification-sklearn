@@ -10,7 +10,7 @@ Here, the LoggerSetup and its embedded setup_logger() method set up a new logger
 """
 import logging
 import os
-from utils import load_yaml, FindCreateDirectory
+from ..helper_functions.utils import FindCreateDirectory
 
 # # load yaml configuration file to a dict
 # config_data = load_yaml()

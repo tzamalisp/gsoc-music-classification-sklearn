@@ -5,10 +5,10 @@ from pprint import pprint
 import joblib
 import json
 import pandas as pd
-from utils import load_yaml, FindCreateDirectory
-from transformation.utils_preprocessing import flatten_dict_full
-from transformation.transform_predictions import TransformPredictions
-from logging_tool import LoggerSetup
+from ..helper_functions.utils import load_yaml, FindCreateDirectory
+from ..transformation.utils_preprocessing import flatten_dict_full
+from ..transformation.transform_predictions import TransformPredictions
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 class Predict:
@@ -111,12 +111,10 @@ class Predict:
         return predict_list
 
 
-def prediction(exports_path, project_file, mbid, log_level):
+def prediction(exports_path, project_file, mbid, log_level="logging.INFO"):
     # if empty, path is declared as the app's main directory
-    if exports_path is None:
-        exports_path = os.getcwd()
     try:
-        project_data = load_yaml(os.path.join(exports_path, "{}.yaml".format(project_file)))
+        project_data = load_yaml(exports_path, "{}.yaml".format(project_file))
     except Exception as e:
         print('Unable to open project configuration file:', e)
         raise
@@ -145,7 +143,8 @@ if __name__ == '__main__':
 
     parser.add_argument("-p", "--path",
                         dest="exports_path",
-                        help="Path where the project file (.yaml) is stored if not in the same file where the app is.")
+                        help="Path where the project file (.yaml) is stored if not in the same file where the app is.",
+                        required=True)
 
     parser.add_argument("-f", "--file",
                         dest="project_file",

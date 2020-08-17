@@ -1,11 +1,9 @@
 import os
 import argparse
-from pprint import pprint
-from utils import load_yaml
-import yaml
+from ..helper_functions.utils import load_yaml
 import time
-from transformation.load_ground_truth import ListGroundTruthFiles
-from classification.train_class import train_class
+from ..transformation.load_ground_truth import ListGroundTruthFiles
+from ..classification.train_class import train_class
 
 
 def create_classification_project(ground_truth_directory, project_file=None, exports_directory=None, exports_path=None,
@@ -36,7 +34,8 @@ def create_classification_project(ground_truth_directory, project_file=None, exp
             logging.ERROR, logging.CRITICAL.
     """
     try:
-        project_template = load_yaml("configuration_template.yaml")
+        path_template = os.path.dirname(os.path.realpath(__file__))
+        project_template = load_yaml(path_template, "configuration_template.yaml")
     except Exception as e:
         print('Unable to open project configuration template:', e)
         raise

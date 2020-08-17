@@ -10,10 +10,11 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix, classification_report
 import joblib
-from utils import load_yaml, FindCreateDirectory, TrainingProcesses
-from transformation.transform import Transform
-from classification.report_files_export import export_report
-from logging_tool import LoggerSetup
+
+from ..helper_functions.utils import FindCreateDirectory
+from ..transformation.transform import Transform
+from ..classification.report_files_export import export_report
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 def evaluation(config, n_fold, X, y, class_name, tracks, process, exports_path, log_level):

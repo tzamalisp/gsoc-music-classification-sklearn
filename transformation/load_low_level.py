@@ -1,8 +1,8 @@
 import os
 import json
 import pandas as pd
-from transformation.utils_preprocessing import flatten_dict_full
-from logging_tool import LoggerSetup
+from ..transformation.utils_preprocessing import flatten_dict_full
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 class FeaturesDf:

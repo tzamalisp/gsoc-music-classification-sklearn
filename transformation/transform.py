@@ -5,14 +5,14 @@ import joblib
 import os
 import six
 
-from utils import FindCreateDirectory
-from transformation.utils_preprocessing import list_descr_handler
-from transformation.utils_preprocessing import feats_selector_list
+from ..helper_functions.utils import FindCreateDirectory
+from ..transformation.utils_preprocessing import list_descr_handler
+from ..transformation.utils_preprocessing import feats_selector_list
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, QuantileTransformer
 from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
-from logging_tool import LoggerSetup
+from ..helper_functions.logging_tool import LoggerSetup
 
 
 # avoid the module's method call deprecation

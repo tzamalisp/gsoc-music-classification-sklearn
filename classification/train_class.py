@@ -22,6 +22,8 @@ def train_class(config, gt_file, exports_directory, log_level):
     if exports_directory is None:
         prefix_exports_dir = "exports"
         config["exports_directory"] = "{}_{}".format(prefix_exports_dir, class_name)
+    else:
+        config["exports_directory"] = exports_directory
 
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,

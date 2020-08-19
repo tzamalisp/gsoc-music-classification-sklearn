@@ -102,6 +102,7 @@ def evaluation(config, n_fold, X, y, class_name, tracks, process, exports_path, 
                             class_name=class_name,
                             dataset_path=dataset_path,
                             logger=logger)
+
     # Evaluation to the folded Dataset
     export_evaluation_results(config=config,
                               set_name="Folded",

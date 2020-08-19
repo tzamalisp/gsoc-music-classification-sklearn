@@ -61,6 +61,8 @@ def create_classification_project(ground_truth_directory, project_file=None, exp
     print("Exports path: {}".format(exports_path))
     project_template["exports_path"] = exports_path
 
+    print("Exports directory: {}".format(exports_directory))
+
     print()
     print()
     print("-------------------------------------------------------")

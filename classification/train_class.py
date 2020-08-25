@@ -25,6 +25,11 @@ def train_class(config, gt_file, exports_directory, c_values, gamma_values, prep
     else:
         config["exports_directory"] = exports_directory
 
+    config = update_parameters(config=config,
+                               c_values=c_values,
+                               gamma_values=gamma_values,
+                               preprocessing_values=preprocessing_values)
+
     logger = LoggerSetup(config=config,
                          exports_path=exports_path,
                          name="train_model_{}".format(class_name),

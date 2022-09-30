@@ -8,6 +8,6 @@ seaborn==0.10.0
 dask==2.11.0
 dotty-dict==1.2.1
 termcolor==1.1.0
-joblib==0.15.1
+joblib==1.2.0
 six==1.15.0
 requests==2.23.0
